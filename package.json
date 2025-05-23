@@ -1,0 +1,23 @@
+{
+  "name": "wk-bot",
+  "version": "0.0.1",
+  "description": "Chatbot open-source",
+  "main": "src",
+  "private": true,
+  "author": {
+    "name": "Kaikygr",
+    "url": "https://github.com/Kaikygr"
+  },
+  "license": "MIT",
+  "funding": {
+    "type": "individual",
+    "url": "https://bit.ly/m/Kaally"
+  },
+  "dependencies": {
+    "@adiwajshing/keyed-db": "^0.2.4",
+    "baileys": "^6.7.17",
+    "path": "^0.12.7",
+    "pino": "^9.7.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
