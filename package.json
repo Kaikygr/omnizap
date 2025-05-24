@@ -24,9 +24,7 @@
   "homepage": "https://github.com/Kaikygr/OmniZap#readme",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "lint": "eslint .",
-    "format": "prettier --write ."
+    "dev": "nodemon src/index.js"
   },
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
