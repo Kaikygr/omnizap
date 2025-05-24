@@ -16,8 +16,13 @@
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "baileys": "^6.7.17",
+    "dotenv": "^16.5.0",
+    "envalid": "^8.0.0",
     "path": "^0.12.7",
     "pino": "^9.7.0",
-    "qrcode-terminal": "^0.12.0"
+    "qrcode-terminal": "^0.12.0",
+    "util": "^0.12.5",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
   }
 }

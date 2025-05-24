@@ -9,13 +9,17 @@ const path = require("path");
 const qrcode = require("qrcode-terminal");
 const fs = require("fs");
 
+const logger = require("../utils/logs/logger");
+
 const AUTH_STATE_PATH = path.join(__dirname, "temp", "auth_state_minimal");
-const logger = pino({ level: "silent" });
+const loggerB = pino({ level: "silent" });
 
 let clientInstance = null;
 
 async function connectToWhatsApp() {
-  console.log("Tentando conectar ao WhatsApp...");
+  logger.error("Tentando conectar ao WhatsApp...", {
+    label: "connectToWhatsApp",
+  });
 
   if (!fs.existsSync(AUTH_STATE_PATH)) {
     console.log(
@@ -35,7 +39,7 @@ async function connectToWhatsApp() {
 
   const socketConfig = {
     auth: state,
-    logger: pino({ level: "silent" }),
+    loggerB: pino({ level: "silent" }),
     browser: Browsers.macOS("Desktop"),
     syncFullHistory: false,
     printQRInTerminal: false,
