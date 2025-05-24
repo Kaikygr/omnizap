@@ -1,8 +1,9 @@
 {
-  "name": "wk-bot",
+  "name": "omnizap",
   "version": "0.0.1",
-  "description": "Chatbot open-source",
+  "description": "OmniZap — Bot de WhatsApp open-source e educacional, desenvolvido em JavaScript para automações, gerenciamento de grupos, downloads de mídias e mais.",
   "main": "src",
+  "type": "module",
   "private": true,
   "author": {
     "name": "Kaikygr",
@@ -12,6 +13,20 @@
   "funding": {
     "type": "individual",
     "url": "https://bit.ly/m/Kaally"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaikygr/OmniZap.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Kaikygr/OmniZap/issues"
+  },
+  "homepage": "https://github.com/Kaikygr/OmniZap#readme",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
@@ -24,5 +39,10 @@
     "util": "^0.12.5",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5"
   }
 }
