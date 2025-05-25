@@ -23,7 +23,8 @@
   "homepage": "https://github.com/Kaikygr/OmniZap#readme",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "docs": "jsdoc -c jsdoc.json"
   },
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
@@ -40,6 +41,7 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
+    "jsdoc": "^4.0.4",
     "prettier": "^3.5.3"
   }
 }

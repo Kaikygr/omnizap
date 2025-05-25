@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/logs/logger.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/logs/logger.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>require('dotenv').config();
+const winston = require('winston');
+const DailyRotateFile = require('winston-daily-rotate-file');
+const { cleanEnv, str } = require('envalid');
+const util = require('util');
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * @constant {Object&lt;string, number>} LOG_LEVELS
+ * @description Mapeamento dos níveis de log para seus valores numéricos correspondentes.
+ * Utilizado pelo Winston para definir a prioridade dos logs.
+ * Níveis mais baixos indicam maior prioridade (ex: 'error' é mais prioritário que 'debug').
+ */
+
+const LOG_LEVELS = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  verbose: 4,
+  debug: 5,
+  silly: 6,
+};
+/**
+ * @constant {string[]} LOG_LEVEL_NAMES
+ * @description Array contendo os nomes dos níveis de log disponíveis.
+ * Derivado das chaves do objeto `LOG_LEVELS`.
+ * Utilizado para validação da variável de ambiente `LOG_LEVEL`.
+ */
+const LOG_LEVEL_NAMES = Object.keys(LOG_LEVELS);
+
+/**
+ * @constant {object} env
+ * @description Objeto contendo as variáveis de ambiente validadas e processadas pelo `envalid`.
+ * Este objeto fornece acesso seguro e tipado às configurações do ambiente.
+ * @property {string} NODE_ENV - O ambiente atual da aplicação (development, production, test).
+ * @property {string} LOG_LEVEL - O nível de log configurado para a aplicação.
+ * @property {string} ECOSYSTEM_NAME - Nome do serviço ou aplicação, usado para identificar a origem dos logs.
+ */
+const env = cleanEnv(process.env, {
+  NODE_ENV: str({
+    choices: ['development', 'production', 'test'],
+    default: 'development',
+    desc: 'Node environment',
+  }),
+  LOG_LEVEL: str({
+    choices: LOG_LEVEL_NAMES,
+    default: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+    desc: 'Logging level',
+  }),
+  ECOSYSTEM_NAME: str({
+    default: 'system',
+    desc: 'Service or application name for logs',
+  }),
+});
+
+const IS_PRODUCTION = env.NODE_ENV === 'production';
+const DEFAULT_LOG_LEVEL = env.LOG_LEVEL;
+const INSTANCE_ID = env.ECOSYSTEM_NAME !== 'system' ? env.ECOSYSTEM_NAME : 'local';
+const ECOSYSTEM_NAME = env.ECOSYSTEM_NAME;
+const NODE_ENV = env.NODE_ENV;
+
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
+const LOG_DIR_PATH = path.join(PROJECT_ROOT, 'logs');
+
+/**
+ * @constant {Object} LOG_DEFAULTS
+ * @description Define as configurações padrão para os arquivos de log.
+ * Estas configurações são usadas ao criar os transportes de arquivo do Winston,
+ * a menos que sejam sobrescritas.
+ * @property {string} LOG_DIR - Caminho absoluto para o diretório onde os arquivos de log serão armazenados.
+ * @property {string} APP_LOG_FILENAME - Padrão de nome para os arquivos de log da aplicação. Inclui `%DATE%` para rotação diária.
+ * @property {string} ERROR_LOG_FILENAME - Padrão de nome para os arquivos de log de erros. Inclui `%DATE%`.
+ * @property {string} WARN_LOG_FILENAME - Padrão de nome para os arquivos de log de avisos. Inclui `%DATE%`.
+ * @property {string} DATE_PATTERN - Padrão de data usado para a rotação dos arquivos de log (ex: 'YYYY-MM-DD').
+ * @property {boolean} ZIPPED_ARCHIVE - Define se os arquivos de log arquivados devem ser compactados (gzip).
+ * @property {string} MAX_SIZE_APP - Tamanho máximo para os arquivos de log da aplicação antes da rotação (ex: '20m' para 20MB).
+ * @property {string} MAX_FILES_APP - Número máximo de dias para manter os arquivos de log da aplicação (ex: '14d' para 14 dias).
+ * @property {string} MAX_SIZE_ERROR - Tamanho máximo para os arquivos de log de erros.
+ * @property {string} MAX_FILES_ERROR - Número máximo de dias para manter os arquivos de log de erros.
+ * @property {string} MAX_SIZE_WARN - Tamanho máximo para os arquivos de log de avisos.
+ * @property {string} MAX_FILES_WARN - Número máximo de dias para manter os arquivos de log de avisos.
+ * @property {number} FILE_PERMISSIONS - Permissões (em octal) para os arquivos de log criados.
+ * @property {number} DIR_PERMISSIONS - Permissões (em octal) para o diretório de log, se for criado.
+ */
+const LOG_DEFAULTS = {
+  LOG_DIR: LOG_DIR_PATH,
+  APP_LOG_FILENAME: 'application-%DATE%.log',
+  ERROR_LOG_FILENAME: 'error-%DATE%.log',
+  WARN_LOG_FILENAME: 'warn-%DATE%.log',
+  DATE_PATTERN: 'YYYY-MM-DD',
+  ZIPPED_ARCHIVE: true,
+  MAX_SIZE_APP: '20m',
+  MAX_FILES_APP: '14d',
+  MAX_SIZE_ERROR: '10m',
+  MAX_FILES_ERROR: '30d',
+  MAX_SIZE_WARN: '10m',
+  MAX_FILES_WARN: '14d',
+  FILE_PERMISSIONS: 0o777,
+  DIR_PERMISSIONS: 0o777,
+};
+
+/**
+ * @constant {Object&lt;string, string>} LOG_COLORS
+ * @description Mapeamento de níveis de log para cores, usado pelo Winston para colorir a saída no console.
+ * Facilita a visualização e distinção dos níveis de log durante o desenvolvimento.
+ */
+const LOG_COLORS = {
+  error: 'red',
+  warn: 'yellow',
+  info: 'green',
+  http: 'magenta',
+  verbose: 'cyan',
+  debug: 'blue',
+  silly: 'grey',
+};
+winston.addColors(LOG_COLORS);
+
+/**
+ * @constant {winston.Logform.Format} consoleFormat
+ * @description Formato customizado para logs exibidos no console.
+ * Inclui timestamp, colorização, tratamento de `splat` (interpolação de strings),
+ * extração de metadados e formatação customizada da string de log.
+ * A formatação visa clareza e legibilidade, incluindo informações como serviço, instância e label.
+ */
+const consoleFormat = winston.format.combine(
+  winston.format.timestamp({ format: () => new Date().toISOString() }),
+  winston.format.colorize({ all: true }),
+  winston.format.splat(),
+  winston.format.metadata({
+    fillExcept: ['message', 'level', 'timestamp', 'label', 'service', 'instanceId', 'environment', 'stack'],
+  }),
+  winston.format.printf((info) => {
+    const { timestamp, level, message, metadata, stack } = info;
+    const label = metadata?.label;
+    const labelPart = label ? ` [${label}]` : '';
+    const metaToPrint = { ...metadata };
+    if (label) {
+      delete metaToPrint.label;
+    }
+
+    const metaPart = Object.keys(metaToPrint).length > 0 ? ` ${util.inspect(metaToPrint, { colors: true, depth: 2 })}` : '';
+
+    const servicePart = info.service ? ` [${info.service}]` : '';
+    const instancePart = info.instanceId ? ` [${info.instanceId}]` : '';
+
+    const stackPart = stack ? `\n${stack}` : '';
+
+    return `[${timestamp}] [${level}]${servicePart}${instancePart}${labelPart} - ${message}${metaPart}${stackPart}`;
+  }),
+);
+
+/**
+ * @constant {winston.Logform.Format} fileFormat
+ * @description Formato customizado para logs armazenados em arquivos.
+ * Inclui timestamp, tratamento de `splat`, serialização de erros (incluindo stack trace),
+ * extração de metadados e formatação final em JSON para fácil parseamento e análise posterior.
+ * O JSON é indentado para melhor legibilidade humana quando inspecionado diretamente.
+ */
+const fileFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.splat(),
+  winston.format.errors({ stack: true }),
+  winston.format.metadata({
+    fillExcept: ['message', 'level', 'timestamp', 'service', 'instanceId', 'environment', 'stack'],
+  }),
+  winston.format.json({
+    space: 2,
+  }),
+);
+
+/**
+ * @function getDefaultTransportDefinitions
+ * @description Retorna um array com as definições padrão dos transportes do Winston.
+ * Estas definições são usadas para criar instâncias de transporte para console e arquivos de log rotacionados.
+ * Inclui um transporte para console e três transportes de arquivo: um para todos os logs (nível configurado),
+ * um específico para erros e outro específico para avisos.
+ *
+ * @param {string} level - O nível de log mínimo para o transporte principal da aplicação (console e arquivo geral).
+ *                         Os transportes de erro e aviso terão seus níveis fixos ('error' e 'warn', respectivamente).
+ * @returns {Array&lt;Object>} Um array de objetos, onde cada objeto representa a definição de um transporte.
+ *   Cada definição contém:
+ *   - `type`: {string} O tipo de transporte ('console' ou 'dailyRotateFile').
+ *   - `options`: {Object} As opções de configuração para o respectivo transporte.
+ */
+const getDefaultTransportDefinitions = (level) => [
+  {
+    type: 'console',
+    options: {
+      level: level,
+      format: consoleFormat,
+      handleExceptions: true,
+      handleRejections: true,
+    },
+  },
+  {
+    type: 'dailyRotateFile',
+    options: {
+      filename: path.join(LOG_DEFAULTS.LOG_DIR, LOG_DEFAULTS.APP_LOG_FILENAME),
+      datePattern: LOG_DEFAULTS.DATE_PATTERN,
+      zippedArchive: LOG_DEFAULTS.ZIPPED_ARCHIVE,
+      maxSize: LOG_DEFAULTS.MAX_SIZE_APP,
+      maxFiles: LOG_DEFAULTS.MAX_FILES_APP,
+      level: level,
+      format: fileFormat,
+      mode: LOG_DEFAULTS.FILE_PERMISSIONS,
+    },
+  },
+  {
+    type: 'dailyRotateFile',
+    options: {
+      filename: path.join(LOG_DEFAULTS.LOG_DIR, LOG_DEFAULTS.ERROR_LOG_FILENAME),
+      level: 'error',
+      datePattern: LOG_DEFAULTS.DATE_PATTERN,
+      zippedArchive: LOG_DEFAULTS.ZIPPED_ARCHIVE,
+      maxSize: LOG_DEFAULTS.MAX_SIZE_ERROR,
+      maxFiles: LOG_DEFAULTS.MAX_FILES_ERROR,
+      format: fileFormat,
+      mode: LOG_DEFAULTS.FILE_PERMISSIONS,
+      handleExceptions: true,
+      handleRejections: true,
+    },
+  },
+  {
+    type: 'dailyRotateFile',
+    options: {
+      filename: path.join(LOG_DEFAULTS.LOG_DIR, LOG_DEFAULTS.WARN_LOG_FILENAME),
+      level: 'warn',
+      datePattern: LOG_DEFAULTS.DATE_PATTERN,
+      zippedArchive: LOG_DEFAULTS.ZIPPED_ARCHIVE,
+      maxSize: LOG_DEFAULTS.MAX_SIZE_WARN,
+      maxFiles: LOG_DEFAULTS.MAX_FILES_WARN,
+      format: fileFormat,
+      mode: LOG_DEFAULTS.FILE_PERMISSIONS,
+    },
+  },
+];
+
+/**
+ * @function ensureLogDirectoryExists
+ * @private
+ * @description Garante que o diretório de logs, conforme definido em `LOG_DEFAULTS.LOG_DIR`, exista.
+ * Se o diretório não existir, ele será criado recursivamente com as permissões especificadas
+ * em `LOG_DEFAULTS.DIR_PERMISSIONS`.
+ * Emite logs para o console sobre o status da operação.
+ *
+ * @throws {Error} Se houver falha ao criar o diretório de log ou se não for possível
+ *                 garantir acesso de escrita ao diretório. Esta é uma condição crítica
+ *                 que impede a configuração correta do logger.
+ */
+function ensureLogDirectoryExists() {
+  const logDir = LOG_DEFAULTS.LOG_DIR;
+  const dirMode = LOG_DEFAULTS.DIR_PERMISSIONS;
+
+  try {
+    fs.mkdirSync(logDir, { recursive: true, mode: dirMode });
+
+    console.log(`[ LoggerSetup ] Diretório de log garantido: '${logDir}' (modo ${dirMode.toString(8)})`);
+  } catch (error) {
+    console.error(`\n[ LoggerSetup ] !!! ERRO CRÍTICO !!!`);
+    console.error(`Falha ao criar ou garantir acesso de escrita ao diretório de log: '${logDir}'`);
+    throw new Error(`Falha na configuração do Logger: Não foi possível acessar/criar o diretório de log '${logDir}'. Erro original: ${error.message}`);
+  }
+}
+
+/**
+ * @function createLoggerInstance
+ * @description Cria e configura uma nova instância do logger Winston.
+ * Esta função é o núcleo da configuração do sistema de logging.
+ *
+ * @param {Object} [overrideOptions={}] - Um objeto opcional para sobrescrever as configurações padrão do logger.
+ * @param {string} [overrideOptions.level] - Nível de log a ser usado. Se não fornecido, usa `DEFAULT_LOG_LEVEL`.
+ * @param {Array&lt;winston.transport>} [overrideOptions.transports] - Um array de transportes Winston já instanciados.
+ *                                                                  Se fornecido, ignora `transportDefinitions`.
+ * @param {Array&lt;Object>} [overrideOptions.transportDefinitions] - Um array de definições de transporte, similar ao
+ *                                                                 retornado por `getDefaultTransportDefinitions`.
+ *                                                                 Usado se `overrideOptions.transports` não for fornecido.
+ * @param {Object} [overrideOptions.defaultMeta] - Metadados padrão a serem adicionados a todas as mensagens de log
+ *                                                 desta instância. Estes são mesclados com os metadados base
+ *                                                 (service, instanceId, environment).
+ *
+ * @returns {winston.Logger} Uma instância configurada do logger Winston.
+ *
+ * @example
+ * // Criar logger com configurações padrão
+ * const defaultLogger = createLoggerInstance();
+ * defaultLogger.info("Mensagem de log padrão.");
+ *
+ * // Criar logger com nível 'error' e metadados customizados
+ * const errorOnlyLogger = createLoggerInstance({
+ *   level: 'error',
+ *   defaultMeta: { component: 'payment-gateway' }
+ * });
+ * errorOnlyLogger.error("Falha crítica no gateway.", { transactionId: '123' });
+ *
+ * @throws {Error} Propaga erros de `ensureLogDirectoryExists` se o diretório de log não puder ser acessado/criado.
+ */
+const createLoggerInstance = (overrideOptions = {}) => {
+  ensureLogDirectoryExists();
+
+  const effectiveLevel = overrideOptions.level || DEFAULT_LOG_LEVEL;
+
+  let configuredTransports;
+  if (overrideOptions.transports) {
+    configuredTransports = overrideOptions.transports;
+  } else {
+    const transportDefinitions = overrideOptions.transportDefinitions || getDefaultTransportDefinitions(effectiveLevel);
+    configuredTransports = transportDefinitions
+      .map((def) => {
+        try {
+          switch (def.type) {
+            case 'console':
+              return new winston.transports.Console(def.options);
+            case 'dailyRotateFile':
+              return new DailyRotateFile(def.options);
+            default:
+              console.warn(`[ LoggerSetup ] Tipo de transporte desconhecido: ${def.type}. Pulando.`);
+              return null;
+          }
+        } catch (error) {
+          console.error(`[ LoggerSetup ] Falha ao criar transporte tipo ${def.type}: ${error.message}`, error);
+          return null;
+        }
+      })
+      .filter(Boolean);
+  }
+
+  const baseDefaultMeta = {
+    service: ECOSYSTEM_NAME,
+    instanceId: INSTANCE_ID,
+    environment: NODE_ENV,
+  };
+
+  const defaultMeta = {
+    ...baseDefaultMeta,
+    ...(overrideOptions.defaultMeta || {}),
+  };
+
+  const loggerInstance = winston.createLogger({
+    level: effectiveLevel,
+    levels: LOG_LEVELS,
+    format: winston.format.combine(winston.format.errors({ stack: true })),
+    defaultMeta: defaultMeta,
+    transports: configuredTransports,
+    exitOnError: false,
+  });
+
+  loggerInstance.on('error', (error) => {
+    console.error('Erro ocorrido dentro do Winston Logger:', error);
+  });
+
+  console.log(`[ LoggerSetup ] Instância do Logger criada. Nível: ${effectiveLevel}, Env: ${NODE_ENV}, Instância: ${INSTANCE_ID}, Serviço: ${ECOSYSTEM_NAME}`);
+
+  return loggerInstance;
+};
+
+/**
+ * @constant {winston.Logger} logger
+ * @description Instância principal do logger Winston, configurada com as definições padrão.
+ * Este é o logger exportado e deve ser usado em toda a aplicação para registrar mensagens.
+ * Ele é inicializado chamando `createLoggerInstance()` sem argumentos,
+ * utilizando assim as configurações derivadas das variáveis de ambiente e dos `LOG_DEFAULTS`.
+ *
+ * @example
+ * const logger = require('./logger'); // Supondo que este arquivo seja logger.js
+ * logger.info('Aplicação iniciada com sucesso.', { port: 3000 });
+ * logger.error('Falha ao conectar ao banco de dados.', { error: new Error('DB Timeout') });
+ */
+const logger = createLoggerInstance();
+
+module.exports = logger;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConnectionManager.html">ConnectionManager</a></li><li><a href="MySQLDBManager.html">MySQLDBManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#LOG_COLORS">LOG_COLORS</a></li><li><a href="global.html#LOG_DEFAULTS">LOG_DEFAULTS</a></li><li><a href="global.html#LOG_LEVELS">LOG_LEVELS</a></li><li><a href="global.html#LOG_LEVEL_NAMES">LOG_LEVEL_NAMES</a></li><li><a href="global.html#closePool">closePool</a></li><li><a href="global.html#consoleFormat">consoleFormat</a></li><li><a href="global.html#createLoggerInstance">createLoggerInstance</a></li><li><a href="global.html#deleteChatData">deleteChatData</a></li><li><a href="global.html#env">env</a></li><li><a href="global.html#executeQuery">executeQuery</a></li><li><a href="global.html#fileFormat">fileFormat</a></li><li><a href="global.html#getDefaultTransportDefinitions">getDefaultTransportDefinitions</a></li><li><a href="global.html#getInstance">getInstance</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#logger">logger</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#syncFromRedis">syncFromRedis</a></li><li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li><li><a href="global.html#upsertChat">upsertChat</a></li><li><a href="global.html#upsertGroup">upsertGroup</a></li><li><a href="global.html#upsertMessage">upsertMessage</a></li><li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 03:03:29 GMT-0400 (Horário Padrão do Amazonas)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
