@@ -1,0 +1,22 @@
+OmniZap é um bot multifuncional para WhatsApp, desenvolvido em JavaScript, como um projeto open-source e de estudo, voltado para aprendizado, desenvolvimento e colaboração da comunidade.
+
+Projetado para ser versátil, o OmniZap atende tanto usuários pessoais, quanto administradores de grupos e até pequenas automações empresariais. Ele oferece uma ampla variedade de funcionalidades — desde gerenciamento de grupos e automações administrativas até ferramentas como download de mídias, integrações com APIs externas, comandos utilitários e muito mais.
+
+⚙️ Principais funcionalidades:
+
+Gerenciamento de grupos e automações administrativas
+
+Recursos de download de mídias (áudios, vídeos, imagens, links)
+
+Integração com APIs externas e webhooks
+
+Comandos de utilidade, produtividade e entretenimento
+
+Sistema modular, fácil de expandir com novos plugins e comandos
+
+Possível uso para automação de respostas, notificações e fluxos básicos no WhatsApp
+
+🔓 Projeto de código aberto e com fins educacionais.
+O objetivo do OmniZap é promover aprendizado, desenvolvimento de habilidades com JavaScript, Node.js e integração com a API do WhatsApp via Baileys. Não se destina a fins comerciais ou spam.
+
+🚀 OmniZap — Seu WhatsApp sem limites, para aprender, criar e evoluir.
