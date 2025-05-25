@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/Kaikygr/OmniZap#readme",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "bash start.sh",
     "dev": "nodemon src/index.js",
     "docs": "jsdoc -c jsdoc.json"
   },
