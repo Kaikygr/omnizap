@@ -18,6 +18,19 @@ const env = cleanEnv(process.env, {
 });
 
 /**
+ * JSDoc type definitions for external types used within MySQLDBManager.
+ * NOTE: The 'import(...)' type syntax is standard for JSDoc but may cause errors with some parsers.
+ * These types are often simplified to 'Object' or a more generic JSDoc type as a workaround.
+ * For more precise type information in documentation, the JSDoc parser/environment should be configured
+ * to support 'import()' type expressions or TypeScript definition files.
+ *
+ * @typedef {Object} MySQLPool - Represents the mysql2/promise Pool object.
+ * @typedef {Object} BaileysWAMessage - Represents the WAMessage object from Baileys.
+ * @typedef {Object} BaileysWAMessageKey - Represents the WAMessageKey object from Baileys.
+ * @typedef {Object} BaileysWAMessageContent - Represents the WAMessageContent object from Baileys.
+ * @typedef {Object} IORedisClient - Represents the ioredis Redis client object.
+ * @typedef {Object} LongJsObject - Represents a Long.js object, often used for timestamps.
+ * @typedef {{id: string, admin: (('admin'|'superadmin')|null)=}} GroupParticipant
  * @class MySQLDBManager
  * @description
  * Gerencia todas as interações com o banco de dados MySQL. É responsável por
@@ -30,7 +43,7 @@ const env = cleanEnv(process.env, {
  * As configurações de conexão com o MySQL (host, porta, usuário, senha, nome do banco)
  * são obtidas a partir de variáveis de ambiente, validadas por `envalid`.
  *
- * @property {import('mysql2/promise').Pool | null} pool - O pool de conexões MySQL. Inicializado como `null` e
+ * @property {(MySQLPool | null)} pool - O pool de conexões MySQL. Inicializado como `null` e
  * populado após a conexão bem-sucedida no método `initialize`.
  * @property {{host: string, port: number, user: string, password: string}} dbConfig - Objeto contendo as configurações de conexão com o MySQL
  * (host, porta, usuário, senha), excluindo o nome do banco de dados.
@@ -373,7 +386,7 @@ class MySQLDBManager {
    * @param {boolean} [groupMetadata.restrict=false] - `true` se apenas administradores podem enviar mensagens.
    * @param {boolean} [groupMetadata.announce=false] - `true` se apenas administradores podem alterar informações do grupo (modo anúncio).
    * @param {string} [groupMetadata.profilePictureUrl] - URL da imagem de perfil do grupo.
-   * @param {Array<{id: string, admin?: 'admin' | 'superadmin' | null}>} [groupMetadata.participants] - Array de objetos de participantes.
+   * @param {Array<GroupParticipant>} [groupMetadata.participants] - Array de objetos de participantes.
    *   Cada participante deve ter `id` (JID) e `admin` (pode ser 'admin', 'superadmin', ou `null`/`undefined`).
    *
    * @returns {Promise<void>} Uma promessa que resolve quando a operação de upsert do grupo
@@ -476,7 +489,7 @@ class MySQLDBManager {
    * 5. Se ocorrer qualquer erro, a transação é revertida (rollback).
    *
    * @param {string} groupJid - O JID do grupo cujos participantes serão atualizados.
-   * @param {Array<{id: string, admin?: 'admin' | 'superadmin' | null}>} participants - Um array de objetos de participantes.
+   * @param {Array<GroupParticipant>} participants - Um array de objetos de participantes.
    *   Cada objeto deve ter `id` (o JID do participante) e `admin` (o status de administrador,
    *   que pode ser 'admin', 'superadmin', ou `null`/`undefined` se não for admin).
    *
@@ -544,15 +557,15 @@ class MySQLDBManager {
    * O conteúdo textual da mensagem (`textContent`) é extraído para fins de logging, mas o
    * conteúdo completo da mensagem Baileys (`msg.message`) é armazenado como JSON na coluna `raw_message_content`.
    *
-   * @param {import('@WhiskeySockets/Baileys').WAMessage} msg - O objeto da mensagem, geralmente da biblioteca Baileys.
-   * @param {import('@WhiskeySockets/Baileys').WAMessageKey} msg.key - Chave da mensagem, contendo `id`, `remoteJid`, `fromMe`, `participant` (opcional).
+   * @param {BaileysWAMessage} msg - O objeto da mensagem, geralmente da biblioteca Baileys.
+   * @param {BaileysWAMessageKey} msg.key - Chave da mensagem, contendo `id`, `remoteJid`, `fromMe`, `participant` (opcional).
    * @param {string} msg.key.id - ID único da mensagem (ex: 'ABCDEF123456').
    * @param {string} msg.key.remoteJid - JID do chat ao qual a mensagem pertence (ex: 'xxxxxxxxxxx@s.whatsapp.net' ou 'xxxxxxxxxxxx-xxxx@g.us').
    * @param {string} [msg.key.participant] - JID do remetente em um chat de grupo (ex: 'yyyyyyyyyyy@s.whatsapp.net').
    * @param {boolean} msg.key.fromMe - `true` se a mensagem foi enviada pelo usuário da sessão atual.
-   * @param {number | import('long')} msg.messageTimestamp - Timestamp UNIX da mensagem (pode ser um número ou um objeto Long.js).
+   * @param {(number | LongJsObject)} msg.messageTimestamp - Timestamp UNIX da mensagem (pode ser um número ou um objeto Long.js).
    * @param {string} [msg.pushName] - Nome de exibição (push name) do remetente da mensagem.
-   * @param {import('@WhiskeySockets/Baileys').WAMessageContent} [msg.message] - O conteúdo real da mensagem (ex: `conversation`, `extendedTextMessage`, `imageMessage`).
+   * @param {BaileysWAMessageContent} [msg.message] - O conteúdo real da mensagem (ex: `conversation`, `extendedTextMessage`, `imageMessage`).
    * @param {Object} [msg.message.extendedTextMessage.contextInfo] - Informações de contexto, como mensagem citada.
    * @param {string} [msg.message.extendedTextMessage.contextInfo.stanzaId] - ID da mensagem citada.
    * @param {string} [msg.message.extendedTextMessage.contextInfo.participant] - JID do remetente da mensagem citada.
@@ -716,7 +729,7 @@ class MySQLDBManager {
    * Se `receiptType` for nulo ou indefinido, ele é padronizado para 'delivered'.
    * O `receiptTimestamp` é normalizado para um número. Se não puder ser normalizado,
    * `UNIX_TIMESTAMP()` (timestamp atual do servidor MySQL) é usado como fallback na query.
-   *
+   * @param {BaileysWAMessageKey} messageKey - A chave da mensagem à qual o recibo se refere.
    * @param {{id: string, remoteJid: string}} messageKey - A chave da mensagem à qual o recibo se refere.
    * Deve conter `id` (ID da mensagem) e `remoteJid` (JID do chat).
    * @param {string} recipientJid - O JID do usuário/participante que gerou o recibo.
@@ -836,7 +849,7 @@ class MySQLDBManager {
    * `Promise.allSettled` é usado para processar lotes de upserts, permitindo que a
    * sincronização continue mesmo que algumas entradas individuais falhem. Erros são registrados.
    *
-   * @param {import('ioredis').Redis} redisClient - Uma instância do cliente ioredis conectada
+   * @param {IORedisClient} redisClient - Uma instância do cliente ioredis conectada
    * ao servidor Redis de onde os dados serão lidos.
    *
    * @returns {Promise<void>} Uma promessa que resolve quando todas as etapas de sincronização
@@ -1058,7 +1071,7 @@ module.exports = {
    * No entanto, para uso geral na aplicação, `getInstance()` é o método recomendado
    * para garantir o padrão singleton.
    *
-   * @type {typeof MySQLDBManager}
+   * @type {Class<MySQLDBManager>}
    * @example
    * // Uso menos comum, preferir getInstance()
    * const manualInstance = new MySQLDBManager.MySQLDBManagerClass();

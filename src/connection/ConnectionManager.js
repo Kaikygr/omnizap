@@ -8,6 +8,39 @@ const Redis = require('ioredis');
 
 const logger = require('../utils/logs/logger');
 
+/**
+ * JSDoc type definitions for Baileys and other external types.
+ * NOTE: The 'import(...)' type syntax is standard for JSDoc but causes errors with the current parser.
+ * These types have been changed to 'Object' as a workaround to allow JSDoc to pass.
+ * For more precise type information in documentation, the JSDoc parser/environment should be configured
+ * to support 'import()' type expressions.
+ * @typedef {Object} WASocket
+ * @typedef {Object} RedisClient
+ * @typedef {Object} AuthenticationState
+ * @typedef {{ state: AuthenticationState, saveCreds: function(): Promise<void> }} AuthObject
+ * @typedef {Object} ConnectionState
+ * @typedef {Object} Boom
+ * @typedef {{ error: Boom<any>=, date: Date }} LastDisconnectInfo
+ * @typedef {Object} MessagesUpsertEvent
+ * @typedef {Object} WAMessage
+ * @typedef {Object} MessageUpsertType
+ * @typedef {Object} GroupMetadata
+ * @typedef {Object} GroupParticipantsUpdateData
+ * @typedef {Object} ParticipantAction
+ * @typedef {Object} MessagingHistorySet
+ * @typedef {Object} Chat
+ * @typedef {Object} Contact
+ * @typedef {Object} WAMessageUpdate
+ * @typedef {Object} WAMessageKey
+ * @typedef {Object} MessageReaction
+ * @typedef {Object} MessageReceipt
+ * @typedef {Object} MessageReceiptUpdate
+ * @typedef {Object} CallEvent // Renamed to avoid conflict with method 'handleCall'
+ * @typedef {Object} PresenceEntry
+ * @typedef {Object<string, PresenceEntry>} PresencesMap
+ * @typedef {Object} PresenceUpdateData
+ */
+
 const env = cleanEnv(process.env, {
   BACKOFF_INITIAL_DELAY_MS: num({ default: 5000 }),
   BACKOFF_MAX_DELAY_MS: num({ default: 60000 }),
@@ -70,13 +103,13 @@ const REDIS_TTL_RECEIPT = 7 * 24 * 3600;
  * Implementa uma lógica de reconexão com backoff exponencial para lidar com
  * desconexões temporárias.
  *
- * @property {import('@WhiskeySockets/Baileys').WASocket | null} client - A instância do cliente Baileys (socket) para interagir com o WhatsApp.
+ * @property {WASocket | null} client - A instância do cliente Baileys (socket) para interagir com o WhatsApp.
  * Inicializado como `null` e populado após a conexão bem-sucedida.
- * @property {import('ioredis').Redis} redisClient - Cliente para interagir com o servidor Redis,
+ * @property {RedisClient} redisClient - Cliente para interagir com o servidor Redis,
  * utilizado para cache de metadados, mensagens, chats e contatos.
  * @property {Object} mysqlDbManager - Instância do gerenciador do banco de dados MySQL,
  * responsável pela persistência dos dados.
- * @property {{ state: import('@WhiskeySockets/Baileys').AuthenticationState, saveCreds: () => Promise<void> }} auth - Objeto contendo o estado de autenticação (`state`) e o método `saveCreds`
+ * @property {AuthObject} auth - Objeto contendo o estado de autenticação (`state`) e o método `saveCreds`
  * fornecido por `useMultiFileAuthState` para gerenciar as credenciais de login.
  * @property {string} authStatePath - Caminho no sistema de arquivos onde os dados de autenticação
  * são armazenados.
@@ -254,10 +287,10 @@ class ConnectionManager {
    * @async
    * @private
    * Manipula atualizações de conexão do cliente WhatsApp.
-   * Este método é chamado quando o estado da conexão com o WhatsApp muda (evento 'connection.update').
-   * @param {Partial<import('@WhiskeySockets/Baileys').ConnectionState>} update - O objeto de atualização da conexão fornecido por Baileys.
+   * Este método é chamado quando o estado da conexão com o WhatsApp muda (evento `connection.update`).
+   * @param {Partial<ConnectionState>} update - O objeto de atualização da conexão fornecido por Baileys.
    * @param {string} [update.connection] - O estado atual da conexão ('open', 'close', 'connecting').
-   * @param {{ error?: import('@hapi/boom').Boom<any>, date: Date }} [update.lastDisconnect] - Informações sobre a última desconexão, contendo o erro (do tipo Boom) e a data.
+   * @param {LastDisconnectInfo} [update.lastDisconnect] - Informações sobre a última desconexão, contendo o erro (do tipo Boom) e a data.
    * @param {string} [update.qr] - O código QR para autenticação, se aplicável.
    *
    * @description
@@ -385,9 +418,9 @@ class ConnectionManager {
    * @private
    * Manipula mensagens novas/atualizadas.
    * Este método é chamado quando novas mensagens são recebidas ou mensagens existentes são atualizadas (evento 'messages.upsert').
-   * @param {import('@WhiskeySockets/Baileys').MessagesUpsertEvent} data - Os dados do evento 'messages.upsert' de Baileys.
-   * @param {Array<import('@WhiskeySockets/Baileys').WAMessage>} data.messages - Array de mensagens recebidas/atualizadas.
-   * @param {import('@WhiskeySockets/Baileys').MessageUpsertType} data.type - O tipo de "upsert" (ex: 'notify', 'append').
+   * @param {MessagesUpsertEvent} data - Os dados do evento 'messages.upsert' de Baileys.
+   * @param {WAMessage[]} data.messages - Array de mensagens recebidas/atualizadas.
+   * @param {MessageUpsertType} data.type - O tipo de "upsert" (ex: 'notify', 'append').
    *
    * @description
    * Para cada mensagem:
@@ -435,7 +468,7 @@ class ConnectionManager {
    * @private
    * Manipula atualizações de grupos.
    * Este método é chamado quando há atualizações nos metadados de grupos existentes (ex: mudança de nome, descrição) (evento 'groups.update').
-   * @param {Array<Partial<import('@WhiskeySockets/Baileys').GroupMetadata>>} updates - Array de objetos contendo atualizações parciais dos metadados do grupo. Cada objeto deve ter pelo menos a propriedade `id` (JID do grupo).
+   * @param {Array<Partial<GroupMetadata>>} updates - Array de objetos contendo atualizações parciais dos metadados do grupo. Cada objeto deve ter pelo menos a propriedade `id` (JID do grupo).
    *
    * @description
    * Para cada atualização de grupo:
@@ -476,10 +509,10 @@ class ConnectionManager {
    * @private
    * Manipula atualizações de participantes de grupos.
    * Chamado quando participantes entram, saem, são promovidos ou rebaixados em um grupo (evento 'group-participants.update').
-   * @param {import('@WhiskeySockets/Baileys').GroupParticipantsUpdateData} event - Os dados do evento 'group-participants.update' de Baileys.
+   * @param {GroupParticipantsUpdateData} event - Os dados do evento 'group-participants.update' de Baileys.
    * @param {string} event.id - O JID do grupo afetado.
-   * @param {Array<string>} event.participants - Array de JIDs dos participantes afetados.
-   * @param {import('@WhiskeySockets/Baileys').ParticipantAction} event.action - Ação realizada ('add', 'remove', 'promote', 'demote').
+   * @param {string[]} event.participants - Array de JIDs dos participantes afetados.
+   * @param {ParticipantAction} event.action - Ação realizada ('add', 'remove', 'promote', 'demote').
    *
    * @description
    * 1. Após uma atualização de participante, busca os metadados atualizados do grupo usando `this.client.groupMetadata(jid)`.
@@ -515,7 +548,7 @@ class ConnectionManager {
    * Manipula a inserção/atualização de grupos (quando o usuário entra em um novo grupo ou sincronização inicial).
    * Este evento é geralmente disparado quando o cliente se conecta e sincroniza a lista de grupos,
    * ou quando o usuário entra em um novo grupo (evento 'groups.upsert').
-   * @param {Array<import('@WhiskeySockets/Baileys').GroupMetadata>} groups - Array de objetos completos de metadados de grupo.
+   * @param {GroupMetadata[]} groups - Array de objetos completos de metadados de grupo.
    *
    * @description
    * Para cada metadado de grupo recebido:
@@ -550,10 +583,10 @@ class ConnectionManager {
    * Manipula o evento de conjunto de histórico de mensagens.
    * Este evento é disparado durante a sincronização inicial do histórico (evento 'messaging-history.set'),
    * fornecendo um conjunto de chats, contatos e mensagens.
-   * @param {import('@WhiskeySockets/Baileys').MessagingHistorySet} data - Os dados do evento 'messaging-history.set' de Baileys.
-   * @param {Array<import('@WhiskeySockets/Baileys').Chat>} data.chats - Array de objetos de chat do histórico.
-   * @param {Array<import('@WhiskeySockets/Baileys').Contact>} data.contacts - Array de objetos de contato do histórico.
-   * @param {Array<import('@WhiskeySockets/Baileys').WAMessage>} data.messages - Array de mensagens do histórico.
+   * @param {MessagingHistorySet} data - Os dados do evento 'messaging-history.set' de Baileys.
+   * @param {Chat[]} data.chats - Array de objetos de chat do histórico.
+   * @param {Contact[]} data.contacts - Array de objetos de contato do histórico.
+   * @param {WAMessage[]} data.messages - Array de mensagens do histórico.
    *
    * @description
    * - Para cada chat: Salva no Redis (chave `chat:<id>`, TTL `REDIS_TTL_METADATA_SHORT`) e no MySQL (via `this.mysqlDbManager.upsertChat`).
@@ -619,7 +652,7 @@ class ConnectionManager {
    * @private
    * Manipula atualizações de mensagens.
    * Este evento é disparado para atualizações em mensagens existentes (ex: status de entrega, edição - se suportado) (evento 'messages.update').
-   * @param {Array<import('@WhiskeySockets/Baileys').WAMessageUpdate>} updates - Array de objetos de atualização de mensagem.
+   * @param {WAMessageUpdate[]} updates - Array de objetos de atualização de mensagem.
    * Cada objeto contém a `key` da mensagem e o `update` com os campos alterados.
    * @description Atualmente, este método apenas registra as atualizações recebidas. Nenhuma ação de persistência ou cache é realizada aqui.
    */
@@ -635,7 +668,7 @@ class ConnectionManager {
    * @private
    * Manipula exclusão de mensagens.
    * Este evento é disparado quando mensagens são deletadas (evento 'messages.delete').
-   * @param {Object|Array<import('@WhiskeySockets/Baileys').WAMessageKey>} deletion - Informações sobre as mensagens deletadas.
+   * @param {Object|WAMessageKey[]} deletion - Informações sobre as mensagens deletadas.
    * Pode ser um objeto se for `deleteAll`, ou um array de `WAMessageKey` para mensagens específicas.
    * @description Atualmente, este método apenas registra o evento de exclusão. Nenhuma ação de remoção do cache ou banco de dados é realizada aqui.
    */
@@ -648,7 +681,7 @@ class ConnectionManager {
    * @private
    * Manipula reações a mensagens.
    * Este evento é disparado quando uma reação é adicionada ou removida de uma mensagem (evento 'messages.reaction').
-   * @param {Array<import('@WhiskeySockets/Baileys').MessageReaction>} reactions - Array de objetos de reação.
+   * @param {MessageReaction[]} reactions - Array de objetos de reação.
    * Cada objeto contém a `key` da mensagem original e a `reaction` (com texto, etc.).
    * @description Atualmente, este método apenas registra as reações recebidas. Nenhuma ação de persistência ou cache é realizada aqui.
    */
@@ -666,10 +699,10 @@ class ConnectionManager {
    * Manipula atualizações de recibo de mensagem.
    * Este evento é disparado quando o status de entrega/leitura de uma mensagem é atualizado
    * (ex: 'delivered', 'read', 'played') (evento 'message-receipt.update').
-   * @param {Array<import('@WhiskeySockets/Baileys').MessageReceiptUpdate>} receipts - Array de atualizações de recibo.
+   * @param {MessageReceiptUpdate[]} receipts - Array de atualizações de recibo.
    * Cada objeto contém:
-   *  - `key`: {@link import('@WhiskeySockets/Baileys').WAMessageKey} A chave da mensagem original.
-   *  - `receipt`: {@link import('@WhiskeySockets/Baileys').MessageReceipt} O objeto de recibo, contendo:
+   *  - `key`: {@link WAMessageKey} A chave da mensagem original.
+   *  - `receipt`: {@link MessageReceipt} O objeto de recibo, contendo:
    *    - `userJid`: JID do usuário cujo recibo foi atualizado.
    *    - `type`: Tipo do recibo (e.g., 'read', 'delivered').
    *    - `receiptTimestamp`, `readTimestamp`, `playedTimestamp`: Timestamps relevantes.
@@ -729,7 +762,7 @@ class ConnectionManager {
    * @private
    * Manipula inserção/atualização de chats.
    * Este evento é disparado quando novos chats são criados ou chats existentes são sincronizados (evento 'chats.upsert').
-   * @param {Array<import('@WhiskeySockets/Baileys').Chat>} chats - Array de objetos de chat.
+   * @param {Chat[]} chats - Array de objetos de chat.
    *
    * @description
    * Para cada chat:
@@ -762,7 +795,7 @@ class ConnectionManager {
    * @private
    * Manipula atualizações de chats.
    * Este evento é disparado quando propriedades de um chat existente são alteradas (ex: `unreadCount`, `mute`) (evento 'chats.update').
-   * @param {Array<Partial<import('@WhiskeySockets/Baileys').Chat>>} updates - Array de atualizações parciais de chat. Cada objeto deve ter pelo menos a propriedade `id`.
+   * @param {Array<Partial<Chat>>} updates - Array de atualizações parciais de chat. Cada objeto deve ter pelo menos a propriedade `id`.
    *
    * @description
    * Para cada atualização de chat:
@@ -826,7 +859,7 @@ class ConnectionManager {
    * @private
    * Manipula inserção/atualização de contatos.
    * Este evento é disparado quando novos contatos são adicionados ou contatos existentes são sincronizados (evento 'contacts.upsert').
-   * @param {Array<import('@WhiskeySockets/Baileys').Contact>} contacts - Array de objetos de contato.
+   * @param {Contact[]} contacts - Array de objetos de contato.
    *
    * @description
    * Para cada contato:
@@ -855,7 +888,7 @@ class ConnectionManager {
    * Manipula a atualização de contatos no sistema.
    * Responsável por atualizar as informações de contato no cache Redis.
    * Este evento é disparado quando propriedades de um contato existente são alteradas (ex: nome, notificação push) (evento 'contacts.update').
-   * @param {Array<Partial<import('@WhiskeySockets/Baileys').Contact>>} updates - Array de atualizações parciais de contatos. Cada objeto deve ter pelo menos a propriedade `id`.
+   * @param {Array<Partial<Contact>>} updates - Array de atualizações parciais de contatos. Cada objeto deve ter pelo menos a propriedade `id`.
    *
    * @description
    * Para cada atualização de contato:
@@ -928,7 +961,7 @@ class ConnectionManager {
    * Processa eventos de chamadas recebidas ou realizadas.
    * Registra informações sobre chamadas de voz/vídeo no WhatsApp.
    * Este evento é disparado para vários estágios de uma chamada (oferta, aceitação, rejeição, término) (evento 'call').
-   * @param {Array<import('@WhiskeySockets/Baileys').Call>} call - Array de objetos de chamada. (Nota: Baileys geralmente emite um array com um único evento de chamada por vez).
+   * @param {CallEvent[]} call - Array de objetos de chamada. (Nota: Baileys geralmente emite um array com um único evento de chamada por vez).
    * Cada objeto de chamada pode conter:
    *  - `id`: ID único da chamada.
    *  - `from`: JID de quem iniciou a chamada.
@@ -953,9 +986,9 @@ class ConnectionManager {
    * @private
    * Processa atualizações de presença dos contatos.
    * Registra e monitora alterações no status de presença (online, offline, digitando, gravando áudio) e última visualização (evento 'presence.update').
-   * @param {import('@WhiskeySockets/Baileys').PresenceUpdateData} data - Dados da atualização de presença.
+   * @param {PresenceUpdateData} data - Dados da atualização de presença.
    * @param {string} data.id - JID do chat (usuário ou grupo) onde a atualização de presença ocorreu.
-   * @param {Object<string, { lastKnownPresence?: import('@WhiskeySockets/Baileys').PresenceUpdate['presences'][string]['lastKnownPresence'], lastSeen?: number }>} data.presences - Um objeto onde as chaves são os JIDs dos participantes (ou o JID do chat, se for individual) e os valores são objetos contendo `lastKnownPresence` e, opcionalmente, `lastSeen`.
+   * @param {PresencesMap} data.presences - Um objeto onde as chaves são os JIDs dos participantes (ou o JID do chat, se for individual) e os valores são objetos contendo `lastKnownPresence` e, opcionalmente, `lastSeen`.
    *   - `lastKnownPresence`: O status de presença mais recente (ex: 'unavailable', 'available', 'composing', 'recording', 'paused').
    *   - `lastSeen`: Timestamp (em segundos) da última vez que o contato esteve online (disponível apenas se o contato compartilhar essa informação).
    * @example

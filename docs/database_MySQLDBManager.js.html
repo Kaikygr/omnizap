@@ -1,32 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>JSDoc: Source: database/MySQLDBManager.js</title>
 
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
-</head>
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css" />
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css" />
+  </head>
 
-<body>
+  <body>
+    <div id="main">
+      <h1 class="page-title">Source: database/MySQLDBManager.js</h1>
 
-<div id="main">
-
-    <h1 class="page-title">Source: database/MySQLDBManager.js</h1>
-
-    
-
-
-
-    
-    <section>
+      <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const mysql = require('mysql2/promise');
+          <pre class="prettyprint source linenums"><code>const mysql = require('mysql2/promise');
 const path = require('path');
 const { cleanEnv, num, str, host, port } = require('envalid');
 const { getContentType } = require('baileys');
@@ -46,6 +39,19 @@ const env = cleanEnv(process.env, {
 });
 
 /**
+ * JSDoc type definitions for external types used within MySQLDBManager.
+ * NOTE: The 'import(...)' type syntax is standard for JSDoc but may cause errors with some parsers.
+ * These types are often simplified to 'Object' or a more generic JSDoc type as a workaround.
+ * For more precise type information in documentation, the JSDoc parser/environment should be configured
+ * to support 'import()' type expressions or TypeScript definition files.
+ *
+ * @typedef {Object} MySQLPool - Represents the mysql2/promise Pool object.
+ * @typedef {Object} BaileysWAMessage - Represents the WAMessage object from Baileys.
+ * @typedef {Object} BaileysWAMessageKey - Represents the WAMessageKey object from Baileys.
+ * @typedef {Object} BaileysWAMessageContent - Represents the WAMessageContent object from Baileys.
+ * @typedef {Object} IORedisClient - Represents the ioredis Redis client object.
+ * @typedef {Object} LongJsObject - Represents a Long.js object, often used for timestamps.
+ * @typedef {{id: string, admin: (('admin'|'superadmin')|null)=}} GroupParticipant
  * @class MySQLDBManager
  * @description
  * Gerencia todas as interações com o banco de dados MySQL. É responsável por
@@ -58,7 +64,7 @@ const env = cleanEnv(process.env, {
  * As configurações de conexão com o MySQL (host, porta, usuário, senha, nome do banco)
  * são obtidas a partir de variáveis de ambiente, validadas por `envalid`.
  *
- * @property {import('mysql2/promise').Pool | null} pool - O pool de conexões MySQL. Inicializado como `null` e
+ * @property {(MySQLPool | null)} pool - O pool de conexões MySQL. Inicializado como `null` e
  * populado após a conexão bem-sucedida no método `initialize`.
  * @property {{host: string, port: number, user: string, password: string}} dbConfig - Objeto contendo as configurações de conexão com o MySQL
  * (host, porta, usuário, senha), excluindo o nome do banco de dados.
@@ -401,7 +407,7 @@ class MySQLDBManager {
    * @param {boolean} [groupMetadata.restrict=false] - `true` se apenas administradores podem enviar mensagens.
    * @param {boolean} [groupMetadata.announce=false] - `true` se apenas administradores podem alterar informações do grupo (modo anúncio).
    * @param {string} [groupMetadata.profilePictureUrl] - URL da imagem de perfil do grupo.
-   * @param {Array&lt;{id: string, admin?: 'admin' | 'superadmin' | null}>} [groupMetadata.participants] - Array de objetos de participantes.
+   * @param {Array&lt;GroupParticipant>} [groupMetadata.participants] - Array de objetos de participantes.
    *   Cada participante deve ter `id` (JID) e `admin` (pode ser 'admin', 'superadmin', ou `null`/`undefined`).
    *
    * @returns {Promise&lt;void>} Uma promessa que resolve quando a operação de upsert do grupo
@@ -504,7 +510,7 @@ class MySQLDBManager {
    * 5. Se ocorrer qualquer erro, a transação é revertida (rollback).
    *
    * @param {string} groupJid - O JID do grupo cujos participantes serão atualizados.
-   * @param {Array&lt;{id: string, admin?: 'admin' | 'superadmin' | null}>} participants - Um array de objetos de participantes.
+   * @param {Array&lt;GroupParticipant>} participants - Um array de objetos de participantes.
    *   Cada objeto deve ter `id` (o JID do participante) e `admin` (o status de administrador,
    *   que pode ser 'admin', 'superadmin', ou `null`/`undefined` se não for admin).
    *
@@ -572,15 +578,15 @@ class MySQLDBManager {
    * O conteúdo textual da mensagem (`textContent`) é extraído para fins de logging, mas o
    * conteúdo completo da mensagem Baileys (`msg.message`) é armazenado como JSON na coluna `raw_message_content`.
    *
-   * @param {import('@WhiskeySockets/Baileys').WAMessage} msg - O objeto da mensagem, geralmente da biblioteca Baileys.
-   * @param {import('@WhiskeySockets/Baileys').WAMessageKey} msg.key - Chave da mensagem, contendo `id`, `remoteJid`, `fromMe`, `participant` (opcional).
+   * @param {BaileysWAMessage} msg - O objeto da mensagem, geralmente da biblioteca Baileys.
+   * @param {BaileysWAMessageKey} msg.key - Chave da mensagem, contendo `id`, `remoteJid`, `fromMe`, `participant` (opcional).
    * @param {string} msg.key.id - ID único da mensagem (ex: 'ABCDEF123456').
    * @param {string} msg.key.remoteJid - JID do chat ao qual a mensagem pertence (ex: 'xxxxxxxxxxx@s.whatsapp.net' ou 'xxxxxxxxxxxx-xxxx@g.us').
    * @param {string} [msg.key.participant] - JID do remetente em um chat de grupo (ex: 'yyyyyyyyyyy@s.whatsapp.net').
    * @param {boolean} msg.key.fromMe - `true` se a mensagem foi enviada pelo usuário da sessão atual.
-   * @param {number | import('long')} msg.messageTimestamp - Timestamp UNIX da mensagem (pode ser um número ou um objeto Long.js).
+   * @param {(number | LongJsObject)} msg.messageTimestamp - Timestamp UNIX da mensagem (pode ser um número ou um objeto Long.js).
    * @param {string} [msg.pushName] - Nome de exibição (push name) do remetente da mensagem.
-   * @param {import('@WhiskeySockets/Baileys').WAMessageContent} [msg.message] - O conteúdo real da mensagem (ex: `conversation`, `extendedTextMessage`, `imageMessage`).
+   * @param {BaileysWAMessageContent} [msg.message] - O conteúdo real da mensagem (ex: `conversation`, `extendedTextMessage`, `imageMessage`).
    * @param {Object} [msg.message.extendedTextMessage.contextInfo] - Informações de contexto, como mensagem citada.
    * @param {string} [msg.message.extendedTextMessage.contextInfo.stanzaId] - ID da mensagem citada.
    * @param {string} [msg.message.extendedTextMessage.contextInfo.participant] - JID do remetente da mensagem citada.
@@ -744,7 +750,7 @@ class MySQLDBManager {
    * Se `receiptType` for nulo ou indefinido, ele é padronizado para 'delivered'.
    * O `receiptTimestamp` é normalizado para um número. Se não puder ser normalizado,
    * `UNIX_TIMESTAMP()` (timestamp atual do servidor MySQL) é usado como fallback na query.
-   *
+   * @param {BaileysWAMessageKey} messageKey - A chave da mensagem à qual o recibo se refere.
    * @param {{id: string, remoteJid: string}} messageKey - A chave da mensagem à qual o recibo se refere.
    * Deve conter `id` (ID da mensagem) e `remoteJid` (JID do chat).
    * @param {string} recipientJid - O JID do usuário/participante que gerou o recibo.
@@ -864,7 +870,7 @@ class MySQLDBManager {
    * `Promise.allSettled` é usado para processar lotes de upserts, permitindo que a
    * sincronização continue mesmo que algumas entradas individuais falhem. Erros são registrados.
    *
-   * @param {import('ioredis').Redis} redisClient - Uma instância do cliente ioredis conectada
+   * @param {IORedisClient} redisClient - Uma instância do cliente ioredis conectada
    * ao servidor Redis de onde os dados serão lidos.
    *
    * @returns {Promise&lt;void>} Uma promessa que resolve quando todas as etapas de sincronização
@@ -1086,7 +1092,7 @@ module.exports = {
    * No entanto, para uso geral na aplicação, `getInstance()` é o método recomendado
    * para garantir o padrão singleton.
    *
-   * @type {typeof MySQLDBManager}
+   * @type {Class&lt;MySQLDBManager>}
    * @example
    * // Uso menos comum, preferir getInstance()
    * const manualInstance = new MySQLDBManager.MySQLDBManagerClass();
@@ -1098,24 +1104,65 @@ module.exports = {
 };
 </code></pre>
         </article>
-    </section>
+      </section>
+    </div>
 
+    <nav>
+      <h2><a href="index.html">Home</a></h2>
+      <h3>Classes</h3>
+      <ul>
+        <li><a href="ConnectionManager.html">ConnectionManager</a></li>
+        <li><a href="MySQLDBManager.html">MySQLDBManager</a></li>
+      </ul>
+      <h3>Global</h3>
+      <ul>
+        <li><a href="global.html#DEFAULT_LOG_LEVEL">DEFAULT_LOG_LEVEL</a></li>
+        <li><a href="global.html#ECOSYSTEM_NAME">ECOSYSTEM_NAME</a></li>
+        <li><a href="global.html#INSTANCE_ID">INSTANCE_ID</a></li>
+        <li><a href="global.html#IS_PRODUCTION">IS_PRODUCTION</a></li>
+        <li><a href="global.html#LOG_COLORS">LOG_COLORS</a></li>
+        <li><a href="global.html#LOG_DEFAULTS">LOG_DEFAULTS</a></li>
+        <li><a href="global.html#LOG_DIR_PATH">LOG_DIR_PATH</a></li>
+        <li><a href="global.html#LOG_LEVELS">LOG_LEVELS</a></li>
+        <li><a href="global.html#LOG_LEVEL_NAMES">LOG_LEVEL_NAMES</a></li>
+        <li><a href="global.html#NODE_ENV">NODE_ENV</a></li>
+        <li><a href="global.html#PROJECT_ROOT">PROJECT_ROOT</a></li>
+        <li><a href="global.html#REDIS_PREFIX_CHAT">REDIS_PREFIX_CHAT</a></li>
+        <li><a href="global.html#REDIS_PREFIX_CONTACT">REDIS_PREFIX_CONTACT</a></li>
+        <li><a href="global.html#REDIS_PREFIX_GROUP">REDIS_PREFIX_GROUP</a></li>
+        <li><a href="global.html#REDIS_PREFIX_MESSAGE">REDIS_PREFIX_MESSAGE</a></li>
+        <li><a href="global.html#REDIS_TTL_MESSAGE">REDIS_TTL_MESSAGE</a></li>
+        <li><a href="global.html#REDIS_TTL_METADATA_LONG">REDIS_TTL_METADATA_LONG</a></li>
+        <li><a href="global.html#REDIS_TTL_METADATA_SHORT">REDIS_TTL_METADATA_SHORT</a></li>
+        <li><a href="global.html#REDIS_TTL_RECEIPT">REDIS_TTL_RECEIPT</a></li>
+        <li><a href="global.html#closePool">closePool</a></li>
+        <li><a href="global.html#consoleFormat">consoleFormat</a></li>
+        <li><a href="global.html#createLoggerInstance">createLoggerInstance</a></li>
+        <li><a href="global.html#deleteChatData">deleteChatData</a></li>
+        <li><a href="global.html#env">env</a></li>
+        <li><a href="global.html#executeQuery">executeQuery</a></li>
+        <li><a href="global.html#fileFormat">fileFormat</a></li>
+        <li><a href="global.html#getDefaultTransportDefinitions">getDefaultTransportDefinitions</a></li>
+        <li><a href="global.html#getInstance">getInstance</a></li>
+        <li><a href="global.html#initialize">initialize</a></li>
+        <li><a href="global.html#logger">logger</a></li>
+        <li><a href="global.html#start">start</a></li>
+        <li><a href="global.html#syncFromRedis">syncFromRedis</a></li>
+        <li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li>
+        <li><a href="global.html#upsertChat">upsertChat</a></li>
+        <li><a href="global.html#upsertGroup">upsertGroup</a></li>
+        <li><a href="global.html#upsertMessage">upsertMessage</a></li>
+        <li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li>
+      </ul>
+    </nav>
 
+    <br class="clear" />
 
+    <footer>Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 14:40:27 GMT-0400 (Horário Padrão do Amazonas)</footer>
 
-</div>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConnectionManager.html">ConnectionManager</a></li><li><a href="MySQLDBManager.html">MySQLDBManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#LOG_COLORS">LOG_COLORS</a></li><li><a href="global.html#LOG_DEFAULTS">LOG_DEFAULTS</a></li><li><a href="global.html#LOG_LEVELS">LOG_LEVELS</a></li><li><a href="global.html#LOG_LEVEL_NAMES">LOG_LEVEL_NAMES</a></li><li><a href="global.html#REDIS_PREFIX_CHAT">REDIS_PREFIX_CHAT</a></li><li><a href="global.html#REDIS_PREFIX_CONTACT">REDIS_PREFIX_CONTACT</a></li><li><a href="global.html#REDIS_PREFIX_GROUP">REDIS_PREFIX_GROUP</a></li><li><a href="global.html#REDIS_PREFIX_MESSAGE">REDIS_PREFIX_MESSAGE</a></li><li><a href="global.html#REDIS_TTL_MESSAGE">REDIS_TTL_MESSAGE</a></li><li><a href="global.html#REDIS_TTL_METADATA_LONG">REDIS_TTL_METADATA_LONG</a></li><li><a href="global.html#REDIS_TTL_METADATA_SHORT">REDIS_TTL_METADATA_SHORT</a></li><li><a href="global.html#REDIS_TTL_RECEIPT">REDIS_TTL_RECEIPT</a></li><li><a href="global.html#closePool">closePool</a></li><li><a href="global.html#consoleFormat">consoleFormat</a></li><li><a href="global.html#createLoggerInstance">createLoggerInstance</a></li><li><a href="global.html#deleteChatData">deleteChatData</a></li><li><a href="global.html#env">env</a></li><li><a href="global.html#executeQuery">executeQuery</a></li><li><a href="global.html#fileFormat">fileFormat</a></li><li><a href="global.html#getDefaultTransportDefinitions">getDefaultTransportDefinitions</a></li><li><a href="global.html#getInstance">getInstance</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#logger">logger</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#syncFromRedis">syncFromRedis</a></li><li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li><li><a href="global.html#upsertChat">upsertChat</a></li><li><a href="global.html#upsertGroup">upsertGroup</a></li><li><a href="global.html#upsertMessage">upsertMessage</a></li><li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li></ul>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 13:33:33 GMT-0400 (Horário Padrão do Amazonas)
-</footer>
-
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
-</body>
+    <script>
+      prettyPrint();
+    </script>
+    <script src="scripts/linenumber.js"></script>
+  </body>
 </html>

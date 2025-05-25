@@ -1,2258 +1,900 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>JSDoc: Global</title>
 
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
-</head>
-
-<body>
-
-<div id="main">
-
-    <h1 class="page-title">Global</h1>
-
-    
-
-
-
-
-<section>
-
-<header>
-    
-        <h2></h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="LOG_COLORS"><span class="type-signature">(constant) </span>LOG_COLORS<span class="type-signature"> :Object.&lt;string, string></span></h4>
-
-
-
-
-<div class="description">
-    Mapeamento de níveis de log para cores, usado pelo Winston para colorir a saída no console.
-Facilita a visualização e distinção dos níveis de log durante o desenvolvimento.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object.&lt;string, string></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line104">line 104</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="LOG_DEFAULTS"><span class="type-signature">(constant) </span>LOG_DEFAULTS<span class="type-signature"> :Object</span></h4>
-
-
-
-
-<div class="description">
-    Define as configurações padrão para os arquivos de log.
-Estas configurações são usadas ao criar os transportes de arquivo do Winston,
-a menos que sejam sobrescritas.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css" />
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css" />
+  </head>
+
+  <body>
+    <div id="main">
+      <h1 class="page-title">Global</h1>
+
+      <section>
+        <header>
+          <h2></h2>
+        </header>
+
+        <article>
+          <div class="container-overview">
+            <dl class="details"></dl>
+          </div>
+
+          <h3 class="subsection-title">Members</h3>
+
+          <h4 class="name" id="DEFAULT_LOG_LEVEL"><span class="type-signature">(constant) </span>DEFAULT_LOG_LEVEL<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Nível de log padrão para a aplicação, determinado pela configuração de ambiente. Obtido diretamente de `env.LOG_LEVEL` após validação. Este valor é usado como o nível de log para novas instâncias de logger, a menos que seja sobrescrito.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line66">line 66</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="ECOSYSTEM_NAME"><span class="type-signature">(constant) </span>ECOSYSTEM_NAME<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Nome do serviço ou ecossistema ao qual a aplicação pertence, conforme definido pela variável de ambiente `ECOSYSTEM_NAME`. Este nome é usado para categorizar logs e é incluído nos metadados padrão de cada log, facilitando a filtragem e análise de logs em sistemas centralizados.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line85">line 85</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="INSTANCE_ID"><span class="type-signature">(constant) </span>INSTANCE_ID<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Identificador único para a instância da aplicação, utilizado para diferenciar logs em ambientes com múltiplas instâncias rodando simultaneamente (ex: em um cluster ou PM2). Deriva de `env.ECOSYSTEM_NAME`. Se `env.ECOSYSTEM_NAME` for 'system' (o padrão), `INSTANCE_ID` será 'local', indicando uma execução local ou não clusterizada. Caso contrário, `INSTANCE_ID` assume o valor de `env.ECOSYSTEM_NAME`. Este ID é incluído automaticamente nos metadados padrão de cada mensagem de log.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line74">line 74</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="IS_PRODUCTION"><span class="type-signature">(constant) </span>IS_PRODUCTION<span class="type-signature"> :boolean</span></h4>
+
+          <div class="description">Indica se o ambiente atual é de produção. É `true` se `env.NODE_ENV` for 'production', caso contrário `false`. Utilizado para lógicas condicionais baseadas no ambiente.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">boolean</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line58">line 58</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="LOG_COLORS"><span class="type-signature">(constant) </span>LOG_COLORS<span class="type-signature"> :Object.&lt;string, string></span></h4>
+
+          <div class="description">Mapeamento de níveis de log para cores, usado pelo Winston para colorir a saída no console. Facilita a visualização e distinção dos níveis de log durante o desenvolvimento.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">Object.&lt;string, string></span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line155">line 155</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="LOG_DEFAULTS"><span class="type-signature">(constant) </span>LOG_DEFAULTS<span class="type-signature"> :Object</span></h4>
+
+          <div class="description">Define as configurações padrão para os arquivos de log. Estas configurações são usadas ao criar os transportes de arquivo do Winston, a menos que sejam sobrescritas.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">Object</span>
+            </li>
+          </ul>
+
+          <h5 class="subsection-title">Properties:</h5>
+
+          <table class="props">
+            <thead>
+              <tr>
+                <th>Name</th>
+
+                <th>Type</th>
+
+                <th class="last">Description</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
                 <td class="name"><code>LOG_DIR</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Caminho absoluto para o diretório onde os arquivos de log serão armazenados.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Caminho absoluto para o diretório onde os arquivos de log serão armazenados.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>APP_LOG_FILENAME</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Padrão de nome para os arquivos de log da aplicação. Inclui `%DATE%` para rotação diária.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Padrão de nome para os arquivos de log da aplicação. Inclui `%DATE%` para rotação diária.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>ERROR_LOG_FILENAME</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Padrão de nome para os arquivos de log de erros. Inclui `%DATE%`.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Padrão de nome para os arquivos de log de erros. Inclui `%DATE%`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>WARN_LOG_FILENAME</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Padrão de nome para os arquivos de log de avisos. Inclui `%DATE%`.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Padrão de nome para os arquivos de log de avisos. Inclui `%DATE%`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>DATE_PATTERN</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Padrão de data usado para a rotação dos arquivos de log (ex: 'YYYY-MM-DD').</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Padrão de data usado para a rotação dos arquivos de log (ex: 'YYYY-MM-DD').</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>ZIPPED_ARCHIVE</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
+                <td class="type">
+                  <span class="param-type">boolean</span>
+                </td>
 
+                <td class="description last">Define se os arquivos de log arquivados devem ser compactados (gzip).</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Define se os arquivos de log arquivados devem ser compactados (gzip).</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>MAX_SIZE_APP</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Tamanho máximo para os arquivos de log da aplicação antes da rotação (ex: '20m' para 20MB).</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Tamanho máximo para os arquivos de log da aplicação antes da rotação (ex: '20m' para 20MB).</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>MAX_FILES_APP</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Número máximo de dias para manter os arquivos de log da aplicação (ex: '14d' para 14 dias).</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Número máximo de dias para manter os arquivos de log da aplicação (ex: '14d' para 14 dias).</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>MAX_SIZE_ERROR</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Tamanho máximo para os arquivos de log de erros.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Tamanho máximo para os arquivos de log de erros.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>MAX_FILES_ERROR</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Número máximo de dias para manter os arquivos de log de erros.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Número máximo de dias para manter os arquivos de log de erros.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>MAX_SIZE_WARN</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Tamanho máximo para os arquivos de log de avisos.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Tamanho máximo para os arquivos de log de avisos.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>MAX_FILES_WARN</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">Número máximo de dias para manter os arquivos de log de avisos.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Número máximo de dias para manter os arquivos de log de avisos.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>FILE_PERMISSIONS</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
+                <td class="type">
+                  <span class="param-type">number</span>
+                </td>
 
+                <td class="description last">Permissões (em octal) para os arquivos de log criados.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Permissões (em octal) para os arquivos de log criados.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>DIR_PERMISSIONS</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Permissões (em octal) para o diretório de log, se for criado.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line67">line 67</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="LOG_LEVELS"><span class="type-signature">(constant) </span>LOG_LEVELS<span class="type-signature"> :Object.&lt;string, number></span></h4>
-
-
-
-
-<div class="description">
-    Mapeamento dos níveis de log para seus valores numéricos correspondentes.
-Utilizado pelo Winston para definir a prioridade dos logs.
-Níveis mais baixos indicam maior prioridade (ex: 'error' é mais prioritário que 'debug').
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object.&lt;string, number></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line9">line 9</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="LOG_LEVEL_NAMES"><span class="type-signature">(constant) </span>LOG_LEVEL_NAMES<span class="type-signature"> :Array.&lt;string></span></h4>
-
-
-
-
-<div class="description">
-    Array contendo os nomes dos níveis de log disponíveis.
-Derivado das chaves do objeto `LOG_LEVELS`.
-Utilizado para validação da variável de ambiente `LOG_LEVEL`.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Array.&lt;string></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line25">line 25</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_PREFIX_CHAT"><span class="type-signature">(constant) </span>REDIS_PREFIX_CHAT<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Prefixo utilizado para chaves de dados de chat no Redis.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line30">line 30</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_PREFIX_CONTACT"><span class="type-signature">(constant) </span>REDIS_PREFIX_CONTACT<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Prefixo utilizado para chaves de dados de contato no Redis.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line35">line 35</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_PREFIX_GROUP"><span class="type-signature">(constant) </span>REDIS_PREFIX_GROUP<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Prefixo utilizado para chaves de metadados de grupo no Redis.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line25">line 25</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_PREFIX_MESSAGE"><span class="type-signature">(constant) </span>REDIS_PREFIX_MESSAGE<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Prefixo utilizado para chaves de dados de mensagem no Redis.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line40">line 40</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_TTL_MESSAGE"><span class="type-signature">(constant) </span>REDIS_TTL_MESSAGE<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    TTL (Time To Live) em segundos para mensagens no Redis. (7 dias)
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line56">line 56</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_TTL_METADATA_LONG"><span class="type-signature">(constant) </span>REDIS_TTL_METADATA_LONG<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    TTL (Time To Live) em segundos para metadados de longa duração no Redis (e.g., contatos). (24 horas)
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line51">line 51</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_TTL_METADATA_SHORT"><span class="type-signature">(constant) </span>REDIS_TTL_METADATA_SHORT<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    TTL (Time To Live) em segundos para metadados de curta duração no Redis (e.g., grupos, chats). (1 hora)
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line46">line 46</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_TTL_RECEIPT"><span class="type-signature">(constant) </span>REDIS_TTL_RECEIPT<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    TTL (Time To Live) em segundos para recibos de mensagem no Redis (usado como fallback se o TTL da mensagem original não puder ser determinado). (7 dias)
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line61">line 61</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="consoleFormat"><span class="type-signature">(constant) </span>consoleFormat<span class="type-signature"> :winston.Logform.Format</span></h4>
-
-
-
-
-<div class="description">
-    Formato customizado para logs exibidos no console.
-Inclui timestamp, colorização, tratamento de `splat` (interpolação de strings),
-extração de metadados e formatação customizada da string de log.
-A formatação visa clareza e legibilidade, incluindo informações como serviço, instância e label.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">winston.Logform.Format</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line120">line 120</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="env"><span class="type-signature">(constant) </span>env<span class="type-signature"> :object</span></h4>
-
-
-
-
-<div class="description">
-    Objeto contendo as variáveis de ambiente validadas e processadas pelo `envalid`.
-Este objeto fornece acesso seguro e tipado às configurações do ambiente.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">object</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+                <td class="type">
+                  <span class="param-type">number</span>
+                </td>
+
+                <td class="description last">Permissões (em octal) para o diretório de log, se for criado.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line118">line 118</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="LOG_DIR_PATH"><span class="type-signature">(constant) </span>LOG_DIR_PATH<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Caminho absoluto para o diretório onde os arquivos de log serão armazenados. Formado pela junção de `PROJECT_ROOT` com o subdiretório 'logs'. Este é o diretório que a função `ensureLogDirectoryExists` tentará criar se não existir.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line110">line 110</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="LOG_LEVELS"><span class="type-signature">(constant) </span>LOG_LEVELS<span class="type-signature"> :Object.&lt;string, number></span></h4>
+
+          <div class="description">Mapeamento dos níveis de log para seus valores numéricos correspondentes. Utilizado pelo Winston para definir a prioridade dos logs. Níveis mais baixos indicam maior prioridade (ex: 'error' é mais prioritário que 'debug').</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">Object.&lt;string, number></span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line9">line 9</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="LOG_LEVEL_NAMES"><span class="type-signature">(constant) </span>LOG_LEVEL_NAMES<span class="type-signature"> :Array.&lt;string></span></h4>
+
+          <div class="description">Array contendo os nomes dos níveis de log disponíveis. Derivado das chaves do objeto `LOG_LEVELS`. Utilizado para validação da variável de ambiente `LOG_LEVEL`.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">Array.&lt;string></span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line25">line 25</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="NODE_ENV"><span class="type-signature">(constant) </span>NODE_ENV<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Ambiente de execução atual da aplicação (ex: 'development', 'production', 'test'). Obtido diretamente de `env.NODE_ENV` após validação. Este valor influencia o comportamento do logger (ex: nível de log padrão, formatação) e é incluído nos metadados padrão de cada log.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line94">line 94</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="PROJECT_ROOT"><span class="type-signature">(constant) </span>PROJECT_ROOT<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Caminho absoluto para o diretório raiz do projeto. Determinado resolvendo o caminho a partir do diretório do arquivo atual (`__dirname`), subindo três níveis na estrutura de diretórios (`../../../`). Utilizado como base para construir outros caminhos, como o diretório de logs.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line102">line 102</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="REDIS_PREFIX_CHAT"><span class="type-signature">(constant) </span>REDIS_PREFIX_CHAT<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Prefixo utilizado para chaves de dados de chat no Redis.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line63">line 63</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="REDIS_PREFIX_CONTACT"><span class="type-signature">(constant) </span>REDIS_PREFIX_CONTACT<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Prefixo utilizado para chaves de dados de contato no Redis.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line68">line 68</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="REDIS_PREFIX_GROUP"><span class="type-signature">(constant) </span>REDIS_PREFIX_GROUP<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Prefixo utilizado para chaves de metadados de grupo no Redis.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line58">line 58</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="REDIS_PREFIX_MESSAGE"><span class="type-signature">(constant) </span>REDIS_PREFIX_MESSAGE<span class="type-signature"> :string</span></h4>
+
+          <div class="description">Prefixo utilizado para chaves de dados de mensagem no Redis.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">string</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line73">line 73</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="REDIS_TTL_MESSAGE"><span class="type-signature">(constant) </span>REDIS_TTL_MESSAGE<span class="type-signature"> :number</span></h4>
+
+          <div class="description">TTL (Time To Live) em segundos para mensagens no Redis. (7 dias)</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">number</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line89">line 89</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="REDIS_TTL_METADATA_LONG"><span class="type-signature">(constant) </span>REDIS_TTL_METADATA_LONG<span class="type-signature"> :number</span></h4>
+
+          <div class="description">TTL (Time To Live) em segundos para metadados de longa duração no Redis (e.g., contatos). (24 horas)</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">number</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line84">line 84</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="REDIS_TTL_METADATA_SHORT"><span class="type-signature">(constant) </span>REDIS_TTL_METADATA_SHORT<span class="type-signature"> :number</span></h4>
+
+          <div class="description">TTL (Time To Live) em segundos para metadados de curta duração no Redis (e.g., grupos, chats). (1 hora)</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">number</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line79">line 79</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="REDIS_TTL_RECEIPT"><span class="type-signature">(constant) </span>REDIS_TTL_RECEIPT<span class="type-signature"> :number</span></h4>
+
+          <div class="description">TTL (Time To Live) em segundos para recibos de mensagem no Redis (usado como fallback se o TTL da mensagem original não puder ser determinado). (7 dias)</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">number</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line94">line 94</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="consoleFormat"><span class="type-signature">(constant) </span>consoleFormat<span class="type-signature"> :winston.Logform.Format</span></h4>
+
+          <div class="description">Formato customizado para logs exibidos no console. Inclui timestamp, colorização, tratamento de `splat` (interpolação de strings), extração de metadados e formatação customizada da string de log. A formatação visa clareza e legibilidade, incluindo informações como serviço, instância e label.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">winston.Logform.Format</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line171">line 171</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="env"><span class="type-signature">(constant) </span>env<span class="type-signature"> :object</span></h4>
+
+          <div class="description">Objeto contendo as variáveis de ambiente validadas e processadas pelo `envalid`. Este objeto fornece acesso seguro e tipado às configurações do ambiente.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">object</span>
+            </li>
+          </ul>
+
+          <h5 class="subsection-title">Properties:</h5>
+
+          <table class="props">
+            <thead>
+              <tr>
+                <th>Name</th>
+
+                <th>Type</th>
+
+                <th class="last">Description</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
                 <td class="name"><code>NODE_ENV</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">O ambiente atual da aplicação (development, production, test).</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O ambiente atual da aplicação (development, production, test).</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>LOG_LEVEL</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">O nível de log configurado para a aplicação.</td>
+              </tr>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O nível de log configurado para a aplicação.</td>
-        </tr>
-
-    
-
-        <tr>
-            
+              <tr>
                 <td class="name"><code>ECOSYSTEM_NAME</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Nome do serviço ou aplicação, usado para identificar a origem dos logs.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line33">line 33</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="fileFormat"><span class="type-signature">(constant) </span>fileFormat<span class="type-signature"> :winston.Logform.Format</span></h4>
-
-
-
-
-<div class="description">
-    Formato customizado para logs armazenados em arquivos.
-Inclui timestamp, tratamento de `splat`, serialização de erros (incluindo stack trace),
-extração de metadados e formatação final em JSON para fácil parseamento e análise posterior.
-O JSON é indentado para melhor legibilidade humana quando inspecionado diretamente.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">winston.Logform.Format</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line154">line 154</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="logger"><span class="type-signature">(constant) </span>logger<span class="type-signature"> :winston.Logger</span></h4>
-
-
-
-
-<div class="description">
-    Instância principal do logger Winston, configurada com as definições padrão.
-Este é o logger exportado e deve ser usado em toda a aplicação para registrar mensagens.
-Ele é inicializado chamando `createLoggerInstance()` sem argumentos,
-utilizando assim as configurações derivadas das variáveis de ambiente e dos `LOG_DEFAULTS`.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">winston.Logger</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line358">line 358</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const logger = require('./logger'); // Supondo que este arquivo seja logger.js
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
+
+                <td class="description last">Nome do serviço ou aplicação, usado para identificar a origem dos logs.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line33">line 33</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="fileFormat"><span class="type-signature">(constant) </span>fileFormat<span class="type-signature"> :winston.Logform.Format</span></h4>
+
+          <div class="description">Formato customizado para logs armazenados em arquivos. Inclui timestamp, tratamento de `splat`, serialização de erros (incluindo stack trace), extração de metadados e formatação final em JSON para fácil parseamento e análise posterior. O JSON é indentado para melhor legibilidade humana quando inspecionado diretamente.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">winston.Logform.Format</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line205">line 205</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="logger"><span class="type-signature">(constant) </span>logger<span class="type-signature"> :winston.Logger</span></h4>
+
+          <div class="description">Instância principal do logger Winston, configurada com as definições padrão. Este é o logger exportado e deve ser usado em toda a aplicação para registrar mensagens. Ele é inicializado chamando `createLoggerInstance()` sem argumentos, utilizando assim as configurações derivadas das variáveis de ambiente e dos `LOG_DEFAULTS`.</div>
+
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">winston.Logger</span>
+            </li>
+          </ul>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line409">line 409</a></li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h5>Example</h5>
+
+          <pre class="prettyprint"><code>const logger = require('./logger'); // Supondo que este arquivo seja logger.js
 logger.info('Aplicação iniciada com sucesso.', { port: 3000 });
 logger.error('Falha ao conectar ao banco de dados.', { error: new Error('DB Timeout') });</code></pre>
 
+          <h3 class="subsection-title">Methods</h3>
 
+          <h4 class="name" id="closePool"><span class="type-signature">(async) </span>closePool<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
-        
-    
+          <div class="description">Fecha o pool de conexões MySQL, liberando todos os recursos associados. Este método deve ser chamado quando a aplicação está sendo encerrada para garantir que todas as conexões com o banco de dados sejam fechadas corretamente. Se o pool já estiver fechado ou não tiver sido inicializado (`this.pool` é `null`), o método não faz nada além de registrar um aviso (se aplicável).</div>
 
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="closePool"><span class="type-signature">(async) </span>closePool<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Fecha o pool de conexões MySQL, liberando todos os recursos associados.
-Este método deve ser chamado quando a aplicação está sendo encerrada para garantir
-que todas as conexões com o banco de dados sejam fechadas corretamente.
-Se o pool já estiver fechado ou não tiver sido inicializado (`this.pool` é `null`),
-o método não faz nada além de registrar um aviso (se aplicável).
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line974">line 974</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Erros ao fechar o pool são registrados pelo logger, mas não são propagados.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line987">line 987</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Erros ao fechar o pool são registrados pelo logger, mas não são propagados.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve quando o pool é fechado com sucesso.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve quando o pool é fechado com sucesso.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;void></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Em um processo de desligamento da aplicação:
+          <pre class="prettyprint"><code>// Em um processo de desligamento da aplicação:
 await dbManager.closePool();
 logger.info('Aplicação encerrada.');</code></pre>
 
+          <h4 class="name" id="createLoggerInstance">
+            <span class="type-signature"></span>createLoggerInstance<span class="signature">(overrideOptions<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {winston.Logger}</span>
+          </h4>
 
+          <div class="description">Cria e configura uma nova instância do logger Winston. Esta função é o núcleo da configuração do sistema de logging.</div>
 
-        
-            
+          <h5>Parameters:</h5>
 
-    
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
 
-    
-    <h4 class="name" id="createLoggerInstance"><span class="type-signature"></span>createLoggerInstance<span class="signature">(overrideOptions<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {winston.Logger}</span></h4>
-    
+                <th>Type</th>
 
-    
+                <th>Attributes</th>
 
+                <th>Default</th>
 
+                <th class="last">Description</th>
+              </tr>
+            </thead>
 
-<div class="description">
-    Cria e configura uma nova instância do logger Winston.
-Esta função é o núcleo da configuração do sistema de logging.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+            <tbody>
+              <tr>
                 <td class="name"><code>overrideOptions</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
+                <td class="type">
+                  <span class="param-type">Object</span>
                 </td>
-            
 
-            
-                <td class="default">
-                
-                    {}
-                
+                <td class="attributes">&lt;optional><br /></td>
+
+                <td class="default">{}</td>
+
+                <td class="description last">
+                  Um objeto opcional para sobrescrever as configurações padrão do logger.
+                  <h6>Properties</h6>
+
+                  <table class="params">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+
+                        <th>Type</th>
+
+                        <th>Attributes</th>
+
+                        <th class="last">Description</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr>
+                        <td class="name"><code>level</code></td>
+
+                        <td class="type">
+                          <span class="param-type">string</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="description last">Nível de log a ser usado. Se não fornecido, usa `DEFAULT_LOG_LEVEL`.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>transports</code></td>
+
+                        <td class="type">
+                          <span class="param-type">Array.&lt;winston.transport></span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="description last">Um array de transportes Winston já instanciados. Se fornecido, ignora `transportDefinitions`.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>transportDefinitions</code></td>
+
+                        <td class="type">
+                          <span class="param-type">Array.&lt;Object></span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="description last">Um array de definições de transporte, similar ao retornado por `getDefaultTransportDefinitions`. Usado se `overrideOptions.transports` não for fornecido.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>defaultMeta</code></td>
+
+                        <td class="type">
+                          <span class="param-type">Object</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="description last">Metadados padrão a serem adicionados a todas as mensagens de log desta instância. Estes são mesclados com os metadados base (service, instanceId, environment).</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
-            
-
-            <td class="description last">Um objeto opcional para sobrescrever as configurações padrão do logger.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>level</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Nível de log a ser usado. Se não fornecido, usa `DEFAULT_LOG_LEVEL`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>transports</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;winston.transport></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Um array de transportes Winston já instanciados.
-                                                                 Se fornecido, ignora `transportDefinitions`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>transportDefinitions</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;Object></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Um array de definições de transporte, similar ao
-                                                                retornado por `getDefaultTransportDefinitions`.
-                                                                Usado se `overrideOptions.transports` não for fornecido.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>defaultMeta</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Metadados padrão a serem adicionados a todas as mensagens de log
-                                                desta instância. Estes são mesclados com os metadados base
-                                                (service, instanceId, environment).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line267">line 267</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Propaga erros de `ensureLogDirectoryExists` se o diretório de log não puder ser acessado/criado.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line318">line 318</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Propaga erros de `ensureLogDirectoryExists` se o diretório de log não puder ser acessado/criado.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma instância configurada do logger Winston.</div>
 
-        
-<div class="param-desc">
-    Uma instância configurada do logger Winston.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">winston.Logger</span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">winston.Logger</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Criar logger com configurações padrão
+          <pre class="prettyprint"><code>// Criar logger com configurações padrão
 const defaultLogger = createLoggerInstance();
 defaultLogger.info("Mensagem de log padrão.");
 
@@ -2263,784 +905,280 @@ const errorOnlyLogger = createLoggerInstance({
 });
 errorOnlyLogger.error("Falha crítica no gateway.", { transactionId: '123' });</code></pre>
 
+          <h4 class="name" id="deleteChatData"><span class="type-signature">(async) </span>deleteChatData<span class="signature">(chatJid)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
+          <div class="description">Remove todos os dados associados a um chat específico do banco de dados. A remoção é em cascata devido às chaves estrangeiras `ON DELETE CASCADE`: - Se o `chatJid` pertencer a um grupo (termina com '@g.us'), a entrada correspondente na tabela `Groups` (e, por cascata, `GroupParticipants`) é removida. - A entrada na tabela `Chats` é removida. - Por cascata, todas as mensagens (`Messages`) e recibos de mensagens (`MessageReceipts`) associados a este `chatJid` também são removidos.</div>
 
-        
-            
+          <h5>Parameters:</h5>
 
-    
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
 
-    
-    <h4 class="name" id="deleteChatData"><span class="type-signature">(async) </span>deleteChatData<span class="signature">(chatJid)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
+                <th>Type</th>
 
-    
+                <th class="last">Description</th>
+              </tr>
+            </thead>
 
-
-
-<div class="description">
-    Remove todos os dados associados a um chat específico do banco de dados.
-A remoção é em cascata devido às chaves estrangeiras `ON DELETE CASCADE`:
-- Se o `chatJid` pertencer a um grupo (termina com '@g.us'), a entrada correspondente
-  na tabela `Groups` (e, por cascata, `GroupParticipants`) é removida.
-- A entrada na tabela `Chats` é removida.
-- Por cascata, todas as mensagens (`Messages`) e recibos de mensagens (`MessageReceipts`)
-  associados a este `chatJid` também são removidos.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+            <tbody>
+              <tr>
                 <td class="name"><code>chatJid</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">O JID do chat cujos dados devem ser removidos.</td>
+              </tr>
+            </tbody>
+          </table>
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O JID do chat cujos dados devem ser removidos.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line774">line 774</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Erros são registrados pelo logger, mas não são propagados por este método.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line787">line 787</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Erros são registrados pelo logger, mas não são propagados por este método.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve quando os dados do chat são removidos.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve quando os dados do chat são removidos.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;void></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const chatToDeletJid = '5511999999999@s.whatsapp.net';
+          <pre class="prettyprint"><code>const chatToDeletJid = '5511999999999@s.whatsapp.net';
 await dbManager.deleteChatData(chatToDeletJid);
 
 const groupToDeleteJid = '1234567890@g.us';
 await dbManager.deleteChatData(groupToDeleteJid);</code></pre>
 
+          <h4 class="name" id="executeQuery">
+            <span class="type-signature">(async) </span>executeQuery<span class="signature">(sql, params<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;any>}</span>
+          </h4>
 
+          <div class="description">Executa uma query SQL parametrizada no banco de dados. Obtém uma conexão do pool, executa a query e libera a conexão de volta ao pool. Este é um método genérico para interagir com o banco de dados.</div>
 
-        
-            
+          <h5>Parameters:</h5>
 
-    
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
 
-    
-    <h4 class="name" id="executeQuery"><span class="type-signature">(async) </span>executeQuery<span class="signature">(sql, params<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;any>}</span></h4>
-    
+                <th>Type</th>
 
-    
+                <th>Attributes</th>
 
+                <th>Default</th>
 
+                <th class="last">Description</th>
+              </tr>
+            </thead>
 
-<div class="description">
-    Executa uma query SQL parametrizada no banco de dados.
-Obtém uma conexão do pool, executa a query e libera a conexão de volta ao pool.
-Este é um método genérico para interagir com o banco de dados.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+            <tbody>
+              <tr>
                 <td class="name"><code>sql</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
+                <td class="type">
+                  <span class="param-type">string</span>
                 </td>
-            
 
-            
-                <td class="default">
-                
-                </td>
-            
+                <td class="attributes"></td>
 
-            <td class="description last">A string da query SQL a ser executada. Pode conter placeholders `?`
-para os parâmetros.</td>
-        </tr>
+                <td class="default"></td>
 
-    
+                <td class="description last">A string da query SQL a ser executada. Pode conter placeholders `?` para os parâmetros.</td>
+              </tr>
 
-        <tr>
-            
+              <tr>
                 <td class="name"><code>params</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;any></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
+                <td class="type">
+                  <span class="param-type">Array.&lt;any></span>
                 </td>
-            
 
-            
-                <td class="default">
-                
-                    []
-                
-                </td>
-            
+                <td class="attributes">&lt;optional><br /></td>
 
-            <td class="description last">Um array de parâmetros para substituir os placeholders na query SQL.
-O padrão é um array vazio se não houver parâmetros.</td>
-        </tr>
+                <td class="default">[]</td>
 
-    
-    </tbody>
-</table>
+                <td class="description last">Um array de parâmetros para substituir os placeholders na query SQL. O padrão é um array vazio se não houver parâmetros.</td>
+              </tr>
+            </tbody>
+          </table>
 
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line239">line 239</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Lança um erro se a execução da query falhar. O erro original é
-registrado e propagado.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line252">line 252</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Lança um erro se a execução da query falhar. O erro original é registrado e propagado.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve com os resultados da query. O formato dos resultados depende do tipo de query (SELECT, INSERT, UPDATE, DELETE). Para SELECT, retorna um array de linhas. Para INSERT, retorna um objeto com `insertId`, etc.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve com os resultados da query.
-O formato dos resultados depende do tipo de query (SELECT, INSERT, UPDATE, DELETE).
-Para SELECT, retorna um array de linhas. Para INSERT, retorna um objeto com `insertId`, etc.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;any></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;any></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Exemplo de SELECT
+          <pre class="prettyprint"><code>// Exemplo de SELECT
 const users = await dbManager.executeQuery('SELECT * FROM Users WHERE status = ?', ['active']);
 
 // Exemplo de INSERT
 const result = await dbManager.executeQuery('INSERT INTO Logs (message) VALUES (?)', ['Nova entrada de log']);
 console.log('ID do log inserido:', result.insertId);</code></pre>
 
+          <h4 class="name" id="getDefaultTransportDefinitions"><span class="type-signature"></span>getDefaultTransportDefinitions<span class="signature">(level)</span><span class="type-signature"> &rarr; {Array.&lt;Object>}</span></h4>
 
+          <div class="description">Retorna um array com as definições padrão dos transportes do Winston. Estas definições são usadas para criar instâncias de transporte para console e arquivos de log rotacionados. Inclui um transporte para console e três transportes de arquivo: um para todos os logs (nível configurado), um específico para erros e outro específico para avisos.</div>
 
-        
-            
+          <h5>Parameters:</h5>
 
-    
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
 
-    
-    <h4 class="name" id="getDefaultTransportDefinitions"><span class="type-signature"></span>getDefaultTransportDefinitions<span class="signature">(level)</span><span class="type-signature"> &rarr; {Array.&lt;Object>}</span></h4>
-    
+                <th>Type</th>
 
-    
+                <th class="last">Description</th>
+              </tr>
+            </thead>
 
-
-
-<div class="description">
-    Retorna um array com as definições padrão dos transportes do Winston.
-Estas definições são usadas para criar instâncias de transporte para console e arquivos de log rotacionados.
-Inclui um transporte para console e três transportes de arquivo: um para todos os logs (nível configurado),
-um específico para erros e outro específico para avisos.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+            <tbody>
+              <tr>
                 <td class="name"><code>level</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O nível de log mínimo para o transporte principal da aplicação (console e arquivo geral).
-                        Os transportes de erro e aviso terão seus níveis fixos ('error' e 'warn', respectivamente).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line173">line 173</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Um array de objetos, onde cada objeto representa a definição de um transporte.
-  Cada definição contém:
-  - `type`: {string} O tipo de transporte ('console' ou 'dailyRotateFile').
-  - `options`: {Object} As opções de configuração para o respectivo transporte.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Array.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getInstance"><span class="type-signature">(async) </span>getInstance<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="MySQLDBManager.html">MySQLDBManager</a>>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Obtém a instância singleton do `MySQLDBManager`.
-Se a instância ainda não existir, ela é criada e o método `initialize()`
-é chamado para configurar a conexão com o banco de dados e as tabelas.
-Chamadas subsequentes retornam a instância já existente.
-Este é o método preferencial para obter acesso ao `MySQLDBManager`.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line1018">line 1018</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Lança um erro se a inicialização da instância do `MySQLDBManager` falhar.
-Este erro geralmente se origina do método `initialize()` da classe.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
+
+                <td class="description last">O nível de log mínimo para o transporte principal da aplicação (console e arquivo geral). Os transportes de erro e aviso terão seus níveis fixos ('error' e 'warn', respectivamente).</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line224">line 224</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Returns:</h5>
 
-    
+          <div class="param-desc">Um array de objetos, onde cada objeto representa a definição de um transporte. Cada definição contém: - `type`: {string} O tipo de transporte ('console' ou 'dailyRotateFile'). - `options`: {Object} As opções de configuração para o respectivo transporte.</div>
 
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Array.&lt;Object></span>
+            </dd>
+          </dl>
 
-<h5>Returns:</h5>
+          <h4 class="name" id="getInstance">
+            <span class="type-signature">(async) </span>getInstance<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="MySQLDBManager.html">MySQLDBManager</a>>}</span>
+          </h4>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve com a instância
-inicializada do `MySQLDBManager`.
-</div>
+          <div class="description">Obtém a instância singleton do `MySQLDBManager`. Se a instância ainda não existir, ela é criada e o método `initialize()` é chamado para configurar a conexão com o banco de dados e as tabelas. Chamadas subsequentes retornam a instância já existente. Este é o método preferencial para obter acesso ao `MySQLDBManager`.</div>
 
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line1031">line 1031</a></li>
+              </ul>
+            </dd>
+          </dl>
 
+          <h5>Throws:</h5>
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="MySQLDBManager.html">MySQLDBManager</a>></span>
+          <dl>
+            <dt>
+              <div class="param-desc">Lança um erro se a inicialização da instância do `MySQLDBManager` falhar. Este erro geralmente se origina do método `initialize()` da classe.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-    </dd>
-</dl>
+          <div class="param-desc">Uma promessa que resolve com a instância inicializada do `MySQLDBManager`.</div>
 
-    
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;<a href="MySQLDBManager.html">MySQLDBManager</a>></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>async function main() {
+          <pre class="prettyprint"><code>async function main() {
   try {
     const dbManager = await MySQLDBManager.getInstance();
     // Usar dbManager para operações de banco de dados
@@ -3052,1440 +1190,512 @@ inicializada do `MySQLDBManager`.
 }
 main();</code></pre>
 
+          <h4 class="name" id="initialize"><span class="type-signature">(async) </span>initialize<span class="signature">()</span><span class="type-signature"></span></h4>
 
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="initialize"><span class="type-signature">(async) </span>initialize<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line145">line 145</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Propaga erros que podem ocorrer durante `loadAuthState` ou `connect`.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line178">line 178</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="initialize"><span class="type-signature">(async) </span>initialize<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Inicializa o `MySQLDBManager`. Este método realiza as seguintes etapas:
-1. Cria uma conexão temporária com o servidor MySQL para verificar se o banco de dados
-   especificado em `this.dbName` existe. Se não existir, o banco de dados é criado.
-2. Cria um pool de conexões MySQL (`this.pool`) configurado para usar o banco de dados
-   `this.dbName`. O pool gerencia múltiplas conexões para otimizar o desempenho.
-3. Testa a conexão do pool obtendo uma conexão e liberando-a.
-4. Chama `this.initializeTables()` para garantir que todas as tabelas necessárias
-   (Chats, Groups, GroupParticipants, Messages, MessageReceipts) existam e estejam
-   com a estrutura correta.
-
-Este método deve ser chamado antes de qualquer outra operação de banco de dados.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line70">line 70</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Lança um erro se houver falha ao conectar ao MySQL, criar o banco de dados,
-estabelecer o pool de conexões ou inicializar as tabelas. O erro original é registrado
-e propagado.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
+          <dl>
             <dt>
-                Type
+              <div class="param-desc">Propaga erros que podem ocorrer durante `loadAuthState` ou `connect`.</div>
             </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h4 class="name" id="initialize"><span class="type-signature">(async) </span>initialize<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
+          <div class="description">Inicializa o `MySQLDBManager`. Este método realiza as seguintes etapas: 1. Cria uma conexão temporária com o servidor MySQL para verificar se o banco de dados especificado em `this.dbName` existe. Se não existir, o banco de dados é criado. 2. Cria um pool de conexões MySQL (`this.pool`) configurado para usar o banco de dados `this.dbName`. O pool gerencia múltiplas conexões para otimizar o desempenho. 3. Testa a conexão do pool obtendo uma conexão e liberando-a. 4. Chama `this.initializeTables()` para garantir que todas as tabelas necessárias (Chats, Groups, GroupParticipants, Messages, MessageReceipts) existam e estejam com a estrutura correta. Este método deve ser chamado antes de qualquer outra operação de banco de dados.</div>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line83">line 83</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Lança um erro se houver falha ao conectar ao MySQL, criar o banco de dados, estabelecer o pool de conexões ou inicializar as tabelas. O erro original é registrado e propagado.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve quando a inicialização é concluída com sucesso.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve quando a inicialização é concluída com sucesso.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;void></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Geralmente chamado através do getInstance
+          <pre class="prettyprint"><code>// Geralmente chamado através do getInstance
 const dbManager = await MySQLDBManager.getInstance();
 // A inicialização já ocorreu dentro do getInstance.</code></pre>
 
+          <h4 class="name" id="start"><span class="type-signature">(async) </span>start<span class="signature">()</span><span class="type-signature"></span></h4>
 
+          <div class="description">Ponto de entrada principal para iniciar a aplicação Omnizap. Este script orquestra a inicialização dos componentes chave: 1. Inicializa o `MySQLDBManager` para interação com o banco de dados. 2. Inicializa o `ConnectionManager`, passando a instância do `mysqlDbManager`, para conectar ao WhatsApp. 3. Realiza uma sincronização inicial de dados do Redis para o MySQL, se o `redisClient` no `ConnectionManager` estiver disponível e conectado.</div>
 
-        
-            
-
-    
-
-    
-    <h4 class="name" id="start"><span class="type-signature">(async) </span>start<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Ponto de entrada principal para iniciar a aplicação Omnizap.
-Este script orquestra a inicialização dos componentes chave:
-1. Inicializa o `MySQLDBManager` para interação com o banco de dados.
-2. Inicializa o `ConnectionManager`, passando a instância do `mysqlDbManager`, para conectar ao WhatsApp.
-3. Realiza uma sincronização inicial de dados do Redis para o MySQL, se o `redisClient` no `ConnectionManager`
-   estiver disponível e conectado.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_index.js.html">connection/index.js</a>, <a href="connection_index.js.html#line6">line 6</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Se ocorrer qualquer falha crítica durante a inicialização (ex: falha ao conectar ao MySQL, erro fatal no ConnectionManager), a aplicação registrará o erro e terminará com `process.exit(1)`.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_index.js.html">connection/index.js</a>, <a href="connection_index.js.html#line6">line 6</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="syncFromRedis"><span class="type-signature">(async) </span>syncFromRedis<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Sincroniza dados (chats, grupos, mensagens e recibos de mensagens) de um cache Redis
-para o banco de dados MySQL. Este método é útil para popular o MySQL com dados
-que podem ter sido acumulados no Redis enquanto o MySQL estava indisponível ou
-durante uma inicialização.
-
-A sincronização ocorre em etapas:
-1. **Chats**: Varre chaves no Redis com prefixo `this.REDIS_PREFIX_CHAT`. Para cada chave,
-   obtém os dados do chat, parseia o JSON e chama `this.upsertChat()`.
-2. **Grupos**: Similarmente, varre chaves com prefixo `this.REDIS_PREFIX_GROUP` e chama
-   `this.upsertGroup()`.
-3. **Mensagens e Recibos**: Varre chaves com prefixo `this.REDIS_PREFIX_MESSAGE`. Para cada
-   mensagem:
-   a. Chama `this.upsertMessage()`.
-   b. Se a mensagem tiver um campo `receipts`, itera sobre os recibos e chama
-      `this.upsertMessageReceipt()` para cada um.
-
-Utiliza `redisClient.scan()` para iterar sobre as chaves de forma eficiente, evitando
-o bloqueio do servidor Redis que `KEYS *` causaria.
-`Promise.allSettled` é usado para processar lotes de upserts, permitindo que a
-sincronização continue mesmo que algumas entradas individuais falhem. Erros são registrados.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line814">line 814</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Erros durante as operações de varredura do Redis ou falhas críticas
-podem ser registrados, mas o método tenta completar o máximo possível da sincronização.
-Não propaga erros diretamente, mas registra-os extensivamente.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
+          <dl>
             <dt>
-                Type
+              <div class="param-desc">Se ocorrer qualquer falha crítica durante a inicialização (ex: falha ao conectar ao MySQL, erro fatal no ConnectionManager), a aplicação registrará o erro e terminará com `process.exit(1)`.</div>
             </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h4 class="name" id="syncFromRedis"><span class="type-signature">(async) </span>syncFromRedis<span class="signature">(redisClient)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
+          <div class="description">
+            Sincroniza dados (chats, grupos, mensagens e recibos de mensagens) de um cache Redis para o banco de dados MySQL. Este método é útil para popular o MySQL com dados que podem ter sido acumulados no Redis enquanto o MySQL estava indisponível ou durante uma inicialização. A sincronização ocorre em etapas: 1. **Chats**: Varre chaves no Redis com prefixo `this.REDIS_PREFIX_CHAT`. Para cada chave, obtém os dados do chat, parseia o JSON e chama `this.upsertChat()`. 2. **Grupos**: Similarmente, varre chaves com prefixo `this.REDIS_PREFIX_GROUP` e chama `this.upsertGroup()`. 3. **Mensagens e Recibos**: Varre chaves com prefixo `this.REDIS_PREFIX_MESSAGE`. Para cada mensagem: a. Chama `this.upsertMessage()`. b. Se a mensagem tiver um campo `receipts`, itera sobre os recibos e chama `this.upsertMessageReceipt()` para cada um. Utiliza `redisClient.scan()` para iterar sobre as chaves de forma eficiente, evitando o bloqueio do servidor Redis que `KEYS *` causaria. `Promise.allSettled` é
+            usado para processar lotes de upserts, permitindo que a sincronização continue mesmo que algumas entradas individuais falhem. Erros são registrados.
+          </div>
+
+          <h5>Parameters:</h5>
+
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
+
+                <th>Type</th>
+
+                <th class="last">Description</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td class="name"><code>redisClient</code></td>
+
+                <td class="type">
+                  <span class="param-type">IORedisClient</span>
+                </td>
+
+                <td class="description last">Uma instância do cliente ioredis conectada ao servidor Redis de onde os dados serão lidos.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line827">line 827</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Erros durante as operações de varredura do Redis ou falhas críticas podem ser registrados, mas o método tenta completar o máximo possível da sincronização. Não propaga erros diretamente, mas registra-os extensivamente.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve quando todas as etapas de sincronização são concluídas.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve quando todas as etapas de sincronização
-são concluídas.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;void></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Supondo que `redisClient` seja uma instância de ioredis conectada
+          <pre class="prettyprint"><code>// Supondo que `redisClient` seja uma instância de ioredis conectada
 // e `dbManager` seja uma instância de MySQLDBManager.
 if (connectionManager.redisClient) { // connectionManager é onde o redisClient pode estar
   await dbManager.syncFromRedis(connectionManager.redisClient);
 }</code></pre>
 
+          <h4 class="name" id="updateGroupParticipants"><span class="type-signature">(async) </span>updateGroupParticipants<span class="signature">(groupJid, participants)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
+          <div class="description">Atualiza a lista de participantes de um grupo específico na tabela `GroupParticipants`. A operação é transacional: 1. Inicia uma transação. 2. Remove todos os participantes existentes para o `groupJid` fornecido. 3. Insere os novos participantes da lista `participants`. 4. Se todas as operações forem bem-sucedidas, a transação é confirmada (commit). 5. Se ocorrer qualquer erro, a transação é revertida (rollback).</div>
 
-        
-            
+          <h5>Parameters:</h5>
 
-    
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
 
-    
-    <h4 class="name" id="updateGroupParticipants"><span class="type-signature">(async) </span>updateGroupParticipants<span class="signature">(groupJid)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
+                <th>Type</th>
 
-    
+                <th class="last">Description</th>
+              </tr>
+            </thead>
 
-
-
-<div class="description">
-    Atualiza a lista de participantes de um grupo específico na tabela `GroupParticipants`.
-A operação é transacional:
-1. Inicia uma transação.
-2. Remove todos os participantes existentes para o `groupJid` fornecido.
-3. Insere os novos participantes da lista `participants`.
-4. Se todas as operações forem bem-sucedidas, a transação é confirmada (commit).
-5. Se ocorrer qualquer erro, a transação é revertida (rollback).
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+            <tbody>
+              <tr>
                 <td class="name"><code>groupJid</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
 
+                <td class="description last">O JID do grupo cujos participantes serão atualizados.</td>
+              </tr>
 
-            
-            </td>
+              <tr>
+                <td class="name"><code>participants</code></td>
 
-            
+                <td class="type">
+                  <span class="param-type">Array.&lt;GroupParticipant></span>
+                </td>
 
-            
+                <td class="description last">Um array de objetos de participantes. Cada objeto deve ter `id` (o JID do participante) e `admin` (o status de administrador, que pode ser 'admin', 'superadmin', ou `null`/`undefined` se não for admin).</td>
+              </tr>
+            </tbody>
+          </table>
 
-            <td class="description last">O JID do grupo cujos participantes serão atualizados.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line466">line 466</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Lança um erro se a atualização dos participantes falhar. O erro original é
-registrado, a transação é revertida e o erro é propagado.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line479">line 479</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Lança um erro se a atualização dos participantes falhar. O erro original é registrado, a transação é revertida e o erro é propagado.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve quando os participantes são atualizados com sucesso.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve quando os participantes são atualizados com sucesso.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;void></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const groupJid = '1234567890@g.us';
+          <pre class="prettyprint"><code>const groupJid = '1234567890@g.us';
 const newParticipants = [
   { id: '5511999999999@s.whatsapp.net', admin: 'admin' },
   { id: '5511888888888@s.whatsapp.net', admin: null }
 ];
 await dbManager.updateGroupParticipants(groupJid, newParticipants);</code></pre>
 
+          <h4 class="name" id="upsertChat"><span class="type-signature">(async) </span>upsertChat<span class="signature">(chat)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
+          <div class="description">Insere um novo registro de chat na tabela `Chats` ou atualiza um existente se o `jid` já existir. A lógica de atualização (`ON DUPLICATE KEY UPDATE`) é projetada para: - Atualizar `name` apenas se o novo valor não for nulo. - Sempre atualizar `unread_count`. - Atualizar `last_message_timestamp` apenas se o novo valor for mais recente que o existente ou se o existente for nulo. - Sempre atualizar `is_group`, `pinned_timestamp`, `mute_until_timestamp`, `archived`, `ephemeral_duration`. - `created_at` é definido no momento da inserção. - `updated_at` é atualizado para o timestamp atual em cada operação de inserção ou atualização.</div>
 
-        
-            
+          <h5>Parameters:</h5>
 
-    
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
 
-    
-    <h4 class="name" id="upsertChat"><span class="type-signature">(async) </span>upsertChat<span class="signature">(chat)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
+                <th>Type</th>
 
-    
+                <th class="last">Description</th>
+              </tr>
+            </thead>
 
-
-
-<div class="description">
-    Insere um novo registro de chat na tabela `Chats` ou atualiza um existente se o `jid` já existir.
-A lógica de atualização (`ON DUPLICATE KEY UPDATE`) é projetada para:
-- Atualizar `name` apenas se o novo valor não for nulo.
-- Sempre atualizar `unread_count`.
-- Atualizar `last_message_timestamp` apenas se o novo valor for mais recente que o existente ou se o existente for nulo.
-- Sempre atualizar `is_group`, `pinned_timestamp`, `mute_until_timestamp`, `archived`, `ephemeral_duration`.
-- `created_at` é definido no momento da inserção.
-- `updated_at` é atualizado para o timestamp atual em cada operação de inserção ou atualização.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+            <tbody>
+              <tr>
                 <td class="name"><code>chat</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O objeto de chat, geralmente proveniente da biblioteca Baileys.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
+                <td class="type">
+                  <span class="param-type">Object</span>
                 </td>
-            
 
-            
-                <td class="default">
-                
+                <td class="description last">
+                  O objeto de chat, geralmente proveniente da biblioteca Baileys.
+                  <h6>Properties</h6>
+
+                  <table class="params">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+
+                        <th>Type</th>
+
+                        <th>Attributes</th>
+
+                        <th>Default</th>
+
+                        <th class="last">Description</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr>
+                        <td class="name"><code>id</code></td>
+
+                        <td class="type">
+                          <span class="param-type">string</span>
+                        </td>
+
+                        <td class="attributes"></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">O JID (identificador único) do chat. Ex: 'xxxxxxxxxxx@s.whatsapp.net' ou 'xxxxxxxxxxxx-xxxx@g.us'.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>name</code></td>
+
+                        <td class="type">
+                          <span class="param-type">string</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">O nome do chat (para contatos) ou assunto (para grupos).</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>unreadCount</code></td>
+
+                        <td class="type">
+                          <span class="param-type">number</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default">0</td>
+
+                        <td class="description last">O número de mensagens não lidas. Padrão é 0.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>conversationTimestamp</code></td>
+
+                        <td class="type">
+                          <span class="param-type">number</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">Timestamp da última conversa/mensagem. Usado para `last_message_timestamp`.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>lastMessageTimestamp</code></td>
+
+                        <td class="type">
+                          <span class="param-type">number</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">Timestamp da última mensagem (alternativa a `conversationTimestamp`).</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>pinned</code></td>
+
+                        <td class="type">
+                          <span class="param-type">number</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default">0</td>
+
+                        <td class="description last">Timestamp de quando o chat foi fixado, ou 0 se não estiver fixado.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>muteEndTime</code></td>
+
+                        <td class="type">
+                          <span class="param-type">number</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">Timestamp de quando o silenciamento do chat expira. Pode ser `null` ou `undefined` se não estiver silenciado.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>archived</code></td>
+
+                        <td class="type">
+                          <span class="param-type">boolean</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default">false</td>
+
+                        <td class="description last">Indica se o chat está arquivado.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>archive</code></td>
+
+                        <td class="type">
+                          <span class="param-type">boolean</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default">false</td>
+
+                        <td class="description last">Alternativa para `chat.archived`.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>ephemeralDuration</code></td>
+
+                        <td class="type">
+                          <span class="param-type">number</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">Duração das mensagens efêmeras em segundos. Pode ser `null` ou `undefined`.</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
-            
-
-            <td class="description last">O JID (identificador único) do chat. Ex: 'xxxxxxxxxxx@s.whatsapp.net' ou 'xxxxxxxxxxxx-xxxx@g.us'.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">O nome do chat (para contatos) ou assunto (para grupos).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>unreadCount</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    0
-                
-                </td>
-            
-
-            <td class="description last">O número de mensagens não lidas. Padrão é 0.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>conversationTimestamp</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Timestamp da última conversa/mensagem. Usado para `last_message_timestamp`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>lastMessageTimestamp</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Timestamp da última mensagem (alternativa a `conversationTimestamp`).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pinned</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    0
-                
-                </td>
-            
-
-            <td class="description last">Timestamp de quando o chat foi fixado, ou 0 se não estiver fixado.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>muteEndTime</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Timestamp de quando o silenciamento do chat expira. Pode ser `null` ou `undefined` se não estiver silenciado.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>archived</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">Indica se o chat está arquivado.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>archive</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">Alternativa para `chat.archived`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ephemeralDuration</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Duração das mensagens efêmeras em segundos. Pode ser `null` ou `undefined`.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line280">line 280</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Erros são registrados pelo logger, mas não são propagados (re-lançados) por este método.
-Isso significa que falhas aqui não interromperão o fluxo de chamadas, a menos que o chamador
-verifique os logs ou o estado do banco de dados.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line293">line 293</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Erros são registrados pelo logger, mas não são propagados (re-lançados) por este método. Isso significa que falhas aqui não interromperão o fluxo de chamadas, a menos que o chamador verifique os logs ou o estado do banco de dados.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve quando a operação de upsert é concluída. Não retorna dados, mas registra um log em caso de sucesso ou erro.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve quando a operação de upsert é concluída.
-Não retorna dados, mas registra um log em caso de sucesso ou erro.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;void></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const chatData = {
+          <pre class="prettyprint"><code>const chatData = {
   id: '5511999999999@s.whatsapp.net',
   name: 'John Doe',
   unreadCount: 2,
@@ -4497,556 +1707,224 @@ Não retorna dados, mas registra um log em caso de sucesso ou erro.
 };
 await dbManager.upsertChat(chatData);</code></pre>
 
+          <h4 class="name" id="upsertGroup"><span class="type-signature">(async) </span>upsertGroup<span class="signature">(groupMetadata)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
+          <div class="description">Insere ou atualiza os metadados de um grupo no banco de dados. Esta operação envolve duas etapas principais: 1. Chama `this.upsertChat()` para garantir que uma entrada correspondente exista na tabela `Chats`, marcando-o como um grupo (`is_group: 1`). 2. Insere ou atualiza os detalhes específicos do grupo (assunto, proprietário, descrição, etc.) na tabela `Groups`. 3. Se `groupMetadata.participants` for fornecido e não estiver vazio, chama `this.updateGroupParticipants()` para atualizar a lista de participantes do grupo. Se `groupMetadata` ou `groupMetadata.id` forem nulos ou indefinidos, a operação é abortada e um aviso é registrado.</div>
 
-        
-            
+          <h5>Parameters:</h5>
 
-    
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
 
-    
-    <h4 class="name" id="upsertGroup"><span class="type-signature">(async) </span>upsertGroup<span class="signature">(groupMetadata)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
+                <th>Type</th>
 
-    
+                <th class="last">Description</th>
+              </tr>
+            </thead>
 
-
-
-<div class="description">
-    Insere ou atualiza os metadados de um grupo no banco de dados.
-Esta operação envolve duas etapas principais:
-1. Chama `this.upsertChat()` para garantir que uma entrada correspondente exista na tabela `Chats`,
-   marcando-o como um grupo (`is_group: 1`).
-2. Insere ou atualiza os detalhes específicos do grupo (assunto, proprietário, descrição, etc.)
-   na tabela `Groups`.
-3. Se `groupMetadata.participants` for fornecido e não estiver vazio, chama
-   `this.updateGroupParticipants()` para atualizar a lista de participantes do grupo.
-
-Se `groupMetadata` ou `groupMetadata.id` forem nulos ou indefinidos, a operação é abortada
-e um aviso é registrado.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+            <tbody>
+              <tr>
                 <td class="name"><code>groupMetadata</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O objeto de metadados do grupo, geralmente da biblioteca Baileys.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
+                <td class="type">
+                  <span class="param-type">Object</span>
                 </td>
-            
 
-            
-                <td class="default">
-                
+                <td class="description last">
+                  O objeto de metadados do grupo, geralmente da biblioteca Baileys.
+                  <h6>Properties</h6>
+
+                  <table class="params">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+
+                        <th>Type</th>
+
+                        <th>Attributes</th>
+
+                        <th>Default</th>
+
+                        <th class="last">Description</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr>
+                        <td class="name"><code>id</code></td>
+
+                        <td class="type">
+                          <span class="param-type">string</span>
+                        </td>
+
+                        <td class="attributes"></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">O JID (identificador único) do grupo. Ex: 'xxxxxxxxxxxx-xxxx@g.us'. Essencial.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>subject</code></td>
+
+                        <td class="type">
+                          <span class="param-type">string</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">O assunto (nome) do grupo.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>owner</code></td>
+
+                        <td class="type">
+                          <span class="param-type">string</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">O JID do proprietário do grupo.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>creation</code></td>
+
+                        <td class="type">
+                          <span class="param-type">number</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">Timestamp UNIX da criação do grupo.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>desc</code></td>
+
+                        <td class="type">
+                          <span class="param-type">string</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">A descrição do grupo.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>restrict</code></td>
+
+                        <td class="type">
+                          <span class="param-type">boolean</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default">false</td>
+
+                        <td class="description last">`true` se apenas administradores podem enviar mensagens.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>announce</code></td>
+
+                        <td class="type">
+                          <span class="param-type">boolean</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default">false</td>
+
+                        <td class="description last">`true` se apenas administradores podem alterar informações do grupo (modo anúncio).</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>profilePictureUrl</code></td>
+
+                        <td class="type">
+                          <span class="param-type">string</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">URL da imagem de perfil do grupo.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>participants</code></td>
+
+                        <td class="type">
+                          <span class="param-type">Array.&lt;GroupParticipant></span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="default"></td>
+
+                        <td class="description last">Array de objetos de participantes. Cada participante deve ter `id` (JID) e `admin` (pode ser 'admin', 'superadmin', ou `null`/`undefined`).</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
-            
-
-            <td class="description last">O JID (identificador único) do grupo. Ex: 'xxxxxxxxxxxx-xxxx@g.us'. Essencial.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>subject</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">O assunto (nome) do grupo.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>owner</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">O JID do proprietário do grupo.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>creation</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Timestamp UNIX da criação do grupo.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>desc</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">A descrição do grupo.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>restrict</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">`true` se apenas administradores podem enviar mensagens.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>announce</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">`true` se apenas administradores podem alterar informações do grupo (modo anúncio).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>profilePictureUrl</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">URL da imagem de perfil do grupo.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line351">line 351</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Lança um erro se qualquer parte da operação de upsert (chat, grupo, participantes)
-falhar. O erro original é registrado e propagado.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line364">line 364</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Lança um erro se qualquer parte da operação de upsert (chat, grupo, participantes) falhar. O erro original é registrado e propagado.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve quando a operação de upsert do grupo e de seus participantes (se aplicável) é concluída.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve quando a operação de upsert do grupo
-e de seus participantes (se aplicável) é concluída.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;void></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const groupData = {
+          <pre class="prettyprint"><code>const groupData = {
   id: '1234567890@g.us',
   subject: 'Grupo de Teste',
   owner: '5511999999999@s.whatsapp.net',
@@ -5061,579 +1939,288 @@ e de seus participantes (se aplicável) é concluída.
 };
 await dbManager.upsertGroup(groupData);</code></pre>
 
+          <h4 class="name" id="upsertMessage"><span class="type-signature">(async) </span>upsertMessage<span class="signature">(msg)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
+          <div class="description">Insere uma nova mensagem na tabela `Messages` ou atualiza uma existente (baseado na chave primária composta `message_id` e `chat_jid`). Antes de inserir/atualizar a mensagem, este método tenta garantir que o chat (`chat_jid`) associado à mensagem exista na tabela `Chats` chamando `this.upsertChat`. O nome do chat para `upsertChat` é inferido do `pushName` da mensagem ou do JID do remetente/chat. Após o upsert da mensagem, atualiza a tabela `Chats` para refletir o `last_message_timestamp` e incrementar `unread_count` se a mensagem não for do próprio usuário (`from_me` é falso). O tipo de mensagem (`message_type`) é determinado usando `getContentType` da biblioteca Baileys. O conteúdo textual da mensagem (`textContent`) é extraído para fins de logging, mas o conteúdo completo da mensagem Baileys (`msg.message`) é armazenado como JSON na coluna `raw_message_content`.</div>
 
-        
-            
+          <h5>Parameters:</h5>
 
-    
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
 
-    
-    <h4 class="name" id="upsertMessage"><span class="type-signature">(async) </span>upsertMessage<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
+                <th>Type</th>
 
-    
+                <th class="last">Description</th>
+              </tr>
+            </thead>
 
+            <tbody>
+              <tr>
+                <td class="name"><code>msg</code></td>
 
-
-<div class="description">
-    Insere uma nova mensagem na tabela `Messages` ou atualiza uma existente (baseado na chave primária composta `message_id` e `chat_jid`).
-Antes de inserir/atualizar a mensagem, este método tenta garantir que o chat (`chat_jid`)
-associado à mensagem exista na tabela `Chats` chamando `this.upsertChat`.
-O nome do chat para `upsertChat` é inferido do `pushName` da mensagem ou do JID do remetente/chat.
-
-Após o upsert da mensagem, atualiza a tabela `Chats` para refletir o `last_message_timestamp`
-e incrementar `unread_count` se a mensagem não for do próprio usuário (`from_me` é falso).
-
-O tipo de mensagem (`message_type`) é determinado usando `getContentType` da biblioteca Baileys.
-O conteúdo textual da mensagem (`textContent`) é extraído para fins de logging, mas o
-conteúdo completo da mensagem Baileys (`msg.message`) é armazenado como JSON na coluna `raw_message_content`.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
+                <td class="type">
+                  <span class="param-type">BaileysWAMessage</span>
                 </td>
-            
 
-            
+                <td class="description last">
+                  O objeto da mensagem, geralmente da biblioteca Baileys.
+                  <h6>Properties</h6>
 
-            <td class="description last"></td>
-        </tr>
+                  <table class="params">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
 
-    
+                        <th>Type</th>
 
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
+                        <th>Attributes</th>
 
-            <td class="type">
-            
-            </td>
+                        <th class="last">Description</th>
+                      </tr>
+                    </thead>
 
-            
-                <td class="attributes">
-                
+                    <tbody>
+                      <tr>
+                        <td class="name"><code>key</code></td>
 
-                
+                        <td class="type">
+                          <span class="param-type">BaileysWAMessageKey</span>
+                        </td>
 
-                
+                        <td class="attributes"></td>
+
+                        <td class="description last">
+                          Chave da mensagem, contendo `id`, `remoteJid`, `fromMe`, `participant` (opcional).
+                          <h6>Properties</h6>
+
+                          <table class="params">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+
+                                <th>Type</th>
+
+                                <th>Attributes</th>
+
+                                <th class="last">Description</th>
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              <tr>
+                                <td class="name"><code>id</code></td>
+
+                                <td class="type">
+                                  <span class="param-type">string</span>
+                                </td>
+
+                                <td class="attributes"></td>
+
+                                <td class="description last">ID único da mensagem (ex: 'ABCDEF123456').</td>
+                              </tr>
+
+                              <tr>
+                                <td class="name"><code>remoteJid</code></td>
+
+                                <td class="type">
+                                  <span class="param-type">string</span>
+                                </td>
+
+                                <td class="attributes"></td>
+
+                                <td class="description last">JID do chat ao qual a mensagem pertence (ex: 'xxxxxxxxxxx@s.whatsapp.net' ou 'xxxxxxxxxxxx-xxxx@g.us').</td>
+                              </tr>
+
+                              <tr>
+                                <td class="name"><code>participant</code></td>
+
+                                <td class="type">
+                                  <span class="param-type">string</span>
+                                </td>
+
+                                <td class="attributes">&lt;optional><br /></td>
+
+                                <td class="description last">JID do remetente em um chat de grupo (ex: 'yyyyyyyyyyy@s.whatsapp.net').</td>
+                              </tr>
+
+                              <tr>
+                                <td class="name"><code>fromMe</code></td>
+
+                                <td class="type">
+                                  <span class="param-type">boolean</span>
+                                </td>
+
+                                <td class="attributes"></td>
+
+                                <td class="description last">`true` se a mensagem foi enviada pelo usuário da sessão atual.</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>messageTimestamp</code></td>
+
+                        <td class="type">
+                          <span class="param-type">number</span>
+                          |
+
+                          <span class="param-type">LongJsObject</span>
+                        </td>
+
+                        <td class="attributes"></td>
+
+                        <td class="description last">Timestamp UNIX da mensagem (pode ser um número ou um objeto Long.js).</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>pushName</code></td>
+
+                        <td class="type">
+                          <span class="param-type">string</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="description last">Nome de exibição (push name) do remetente da mensagem.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="name"><code>message</code></td>
+
+                        <td class="type">
+                          <span class="param-type">BaileysWAMessageContent</span>
+                        </td>
+
+                        <td class="attributes">&lt;optional><br /></td>
+
+                        <td class="description last">
+                          O conteúdo real da mensagem (ex: `conversation`, `extendedTextMessage`, `imageMessage`).
+                          <h6>Properties</h6>
+
+                          <table class="params">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+
+                                <th>Type</th>
+
+                                <th>Attributes</th>
+
+                                <th class="last">Description</th>
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              <tr>
+                                <td class="name"><code>extendedTextMessage.contextInfo</code></td>
+
+                                <td class="type">
+                                  <span class="param-type">Object</span>
+                                </td>
+
+                                <td class="attributes">&lt;optional><br /></td>
+
+                                <td class="description last">
+                                  Informações de contexto, como mensagem citada.
+                                  <h6>Properties</h6>
+
+                                  <table class="params">
+                                    <thead>
+                                      <tr>
+                                        <th>Name</th>
+
+                                        <th>Type</th>
+
+                                        <th>Attributes</th>
+
+                                        <th class="last">Description</th>
+                                      </tr>
+                                    </thead>
+
+                                    <tbody>
+                                      <tr>
+                                        <td class="name"><code>stanzaId</code></td>
+
+                                        <td class="type">
+                                          <span class="param-type">string</span>
+                                        </td>
+
+                                        <td class="attributes">&lt;optional><br /></td>
+
+                                        <td class="description last">ID da mensagem citada.</td>
+                                      </tr>
+
+                                      <tr>
+                                        <td class="name"><code>participant</code></td>
+
+                                        <td class="type">
+                                          <span class="param-type">string</span>
+                                        </td>
+
+                                        <td class="attributes">&lt;optional><br /></td>
+
+                                        <td class="description last">JID do remetente da mensagem citada.</td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>msg.key.id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">ID único da mensagem (ex: 'ABCDEF123456').</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>msg.key.remoteJid</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">JID do chat ao qual a mensagem pertence (ex: 'xxxxxxxxxxx@s.whatsapp.net' ou 'xxxxxxxxxxxx-xxxx@g.us').</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>msg.key.participant</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">JID do remetente em um chat de grupo (ex: 'yyyyyyyyyyy@s.whatsapp.net').</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>msg.key.fromMe</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">`true` se a mensagem foi enviada pelo usuário da sessão atual.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>msg.pushName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Nome de exibição (push name) do remetente da mensagem.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>msg.message.extendedTextMessage.contextInfo</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Informações de contexto, como mensagem citada.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>stanzaId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">ID da mensagem citada.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>participant</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">JID do remetente da mensagem citada.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line531">line 531</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Erros são registrados pelo logger, mas não são propagados por este método.
-Falhas aqui podem levar a inconsistências de dados se não monitoradas.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line544">line 544</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Erros são registrados pelo logger, mas não são propagados por este método. Falhas aqui podem levar a inconsistências de dados se não monitoradas.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve quando a operação de upsert da mensagem e a atualização do chat associado são concluídas.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve quando a operação de upsert da mensagem e
-a atualização do chat associado são concluídas.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;void></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const messageData = {
+          <pre class="prettyprint"><code>const messageData = {
   key: {
     remoteJid: '5511999999999@s.whatsapp.net',
     fromMe: false,
@@ -5669,374 +2256,236 @@ const groupMessageData = {
 };
 await dbManager.upsertMessage(groupMessageData);</code></pre>
 
+          <h4 class="name" id="upsertMessageReceipt">
+            <span class="type-signature">(async) </span>upsertMessageReceipt<span class="signature">(messageKey, messageKey, recipientJid, receiptType<span class="signature-attributes">opt</span>, receiptTimestamp)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span>
+          </h4>
 
+          <div class="description">Insere ou atualiza um recibo de mensagem na tabela `MessageReceipts`. Um recibo indica o status de uma mensagem para um destinatário específico (ex: 'delivered', 'read', 'played'). A chave primária da tabela `MessageReceipts` é composta por `(message_id, chat_jid, recipient_jid, receipt_type)`, então uma nova entrada é criada para cada tipo de recibo diferente para o mesmo destinatário, ou o `receipt_timestamp` é atualizado se o mesmo tipo de recibo for recebido novamente. Se `receiptType` for nulo ou indefinido, ele é padronizado para 'delivered'. O `receiptTimestamp` é normalizado para um número. Se não puder ser normalizado, `UNIX_TIMESTAMP()` (timestamp atual do servidor MySQL) é usado como fallback na query.</div>
 
-        
-            
+          <h5>Parameters:</h5>
 
-    
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
 
-    
-    <h4 class="name" id="upsertMessageReceipt"><span class="type-signature">(async) </span>upsertMessageReceipt<span class="signature">(messageKey, recipientJid, receiptType<span class="signature-attributes">opt</span>, receiptTimestamp)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
+                <th>Type</th>
 
-    
+                <th>Attributes</th>
 
+                <th>Default</th>
 
+                <th class="last">Description</th>
+              </tr>
+            </thead>
 
-<div class="description">
-    Insere ou atualiza um recibo de mensagem na tabela `MessageReceipts`.
-Um recibo indica o status de uma mensagem para um destinatário específico (ex: 'delivered', 'read', 'played').
-A chave primária da tabela `MessageReceipts` é composta por `(message_id, chat_jid, recipient_jid, receipt_type)`,
-então uma nova entrada é criada para cada tipo de recibo diferente para o mesmo destinatário,
-ou o `receipt_timestamp` é atualizado se o mesmo tipo de recibo for recebido novamente.
-
-Se `receiptType` for nulo ou indefinido, ele é padronizado para 'delivered'.
-O `receiptTimestamp` é normalizado para um número. Se não puder ser normalizado,
-`UNIX_TIMESTAMP()` (timestamp atual do servidor MySQL) é usado como fallback na query.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
+            <tbody>
+              <tr>
                 <td class="name"><code>messageKey</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
+                <td class="type">
+                  <span class="param-type">BaileysWAMessageKey</span>
                 </td>
-            
 
-            
-                <td class="default">
-                
+                <td class="attributes"></td>
+
+                <td class="default"></td>
+
+                <td class="description last">A chave da mensagem à qual o recibo se refere.</td>
+              </tr>
+
+              <tr>
+                <td class="name"><code>messageKey</code></td>
+
+                <td class="type">
+                  <span class="param-type">Object</span>
                 </td>
-            
 
-            <td class="description last">A chave da mensagem à qual o recibo se refere.
-Deve conter `id` (ID da mensagem) e `remoteJid` (JID do chat).</td>
-        </tr>
+                <td class="attributes"></td>
 
-    
+                <td class="default"></td>
 
-        <tr>
-            
+                <td class="description last">A chave da mensagem à qual o recibo se refere. Deve conter `id` (ID da mensagem) e `remoteJid` (JID do chat).</td>
+              </tr>
+
+              <tr>
                 <td class="name"><code>recipientJid</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
+                <td class="type">
+                  <span class="param-type">string</span>
                 </td>
-            
 
-            
-                <td class="default">
-                
-                </td>
-            
+                <td class="attributes"></td>
 
-            <td class="description last">O JID do usuário/participante que gerou o recibo.</td>
-        </tr>
+                <td class="default"></td>
 
-    
+                <td class="description last">O JID do usuário/participante que gerou o recibo.</td>
+              </tr>
 
-        <tr>
-            
+              <tr>
                 <td class="name"><code>receiptType</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
+                <td class="type">
+                  <span class="param-type">string</span>
                 </td>
-            
 
-            
-                <td class="default">
-                
-                    'delivered'
-                
-                </td>
-            
+                <td class="attributes">&lt;optional><br /></td>
 
-            <td class="description last">O tipo de recibo (ex: 'delivered', 'read', 'played').
-                                           Padrão é 'delivered' se não fornecido.</td>
-        </tr>
+                <td class="default">'delivered'</td>
 
-    
+                <td class="description last">O tipo de recibo (ex: 'delivered', 'read', 'played'). Padrão é 'delivered' se não fornecido.</td>
+              </tr>
 
-        <tr>
-            
+              <tr>
                 <td class="name"><code>receiptTimestamp</code></td>
-            
 
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-|
+                <td class="type">
+                  <span class="param-type">number</span>
+                  |
 
-<span class="param-type">Long</span>
-|
+                  <span class="param-type">Long</span>
+                  |
 
-<span class="param-type">null</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
+                  <span class="param-type">null</span>
                 </td>
-            
 
-            
-                <td class="default">
-                
-                </td>
-            
+                <td class="attributes"></td>
 
-            <td class="description last">O timestamp UNIX do recibo. Pode ser um número,
-                                                 um objeto Long.js, ou `null`/`undefined`.</td>
-        </tr>
+                <td class="default"></td>
 
-    
-    </tbody>
-</table>
+                <td class="description last">O timestamp UNIX do recibo. Pode ser um número, um objeto Long.js, ou `null`/`undefined`.</td>
+              </tr>
+            </tbody>
+          </table>
 
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line706">line 706</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Erros são registrados pelo logger, mas não são propagados por este método.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line719">line 719</a></li>
+              </ul>
             </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+          </dl>
 
+          <h5>Throws:</h5>
 
-    
+          <dl>
+            <dt>
+              <div class="param-desc">Erros são registrados pelo logger, mas não são propagados por este método.</div>
+            </dt>
+            <dd></dd>
+            <dt>
+              <dl>
+                <dt>Type</dt>
+                <dd>
+                  <span class="param-type">Error</span>
+                </dd>
+              </dl>
+            </dt>
+            <dd></dd>
+          </dl>
 
+          <h5>Returns:</h5>
 
-<h5>Returns:</h5>
+          <div class="param-desc">Uma promessa que resolve quando a operação de upsert do recibo é concluída.</div>
 
-        
-<div class="param-desc">
-    Uma promessa que resolve quando a operação de upsert do recibo é concluída.
-</div>
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;void></span>
+            </dd>
+          </dl>
 
+          <h5>Example</h5>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const msgKey = { id: 'ABCDEF123456', remoteJid: '5511999999999@s.whatsapp.net' };
+          <pre class="prettyprint"><code>const msgKey = { id: 'ABCDEF123456', remoteJid: '5511999999999@s.whatsapp.net' };
 const recipient = '5511888888888@s.whatsapp.net'; // JID do destinatário que leu a mensagem
 await dbManager.upsertMessageReceipt(msgKey, recipient, 'read', 1678886500);
 
 // Exemplo com timestamp nulo (usará o tempo atual do DB)
 await dbManager.upsertMessageReceipt(msgKey, recipient, 'delivered', null);</code></pre>
 
+          <h3 class="subsection-title">Type Definitions</h3>
 
+          <h4 class="name" id="PresenceUpdateData">PresenceUpdateData</h4>
 
-        
-    
+          <div class="description">JSDoc type definitions for Baileys and other external types. NOTE: The 'import(...)' type syntax is standard for JSDoc but causes errors with the current parser. These types have been changed to 'Object' as a workaround to allow JSDoc to pass. For more precise type information in documentation, the JSDoc parser/environment should be configured to support 'import()' type expressions.</div>
 
-    
+          <h5>Type:</h5>
+          <ul>
+            <li>
+              <span class="param-type">Object</span>
+            </li>
+          </ul>
 
-    
-</article>
+          <dl class="details">
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li><a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line11">line 11</a></li>
+              </ul>
+            </dd>
+          </dl>
+        </article>
+      </section>
+    </div>
 
-</section>
+    <nav>
+      <h2><a href="index.html">Home</a></h2>
+      <h3>Classes</h3>
+      <ul>
+        <li><a href="ConnectionManager.html">ConnectionManager</a></li>
+        <li><a href="MySQLDBManager.html">MySQLDBManager</a></li>
+      </ul>
+      <h3>Global</h3>
+      <ul>
+        <li><a href="global.html#DEFAULT_LOG_LEVEL">DEFAULT_LOG_LEVEL</a></li>
+        <li><a href="global.html#ECOSYSTEM_NAME">ECOSYSTEM_NAME</a></li>
+        <li><a href="global.html#INSTANCE_ID">INSTANCE_ID</a></li>
+        <li><a href="global.html#IS_PRODUCTION">IS_PRODUCTION</a></li>
+        <li><a href="global.html#LOG_COLORS">LOG_COLORS</a></li>
+        <li><a href="global.html#LOG_DEFAULTS">LOG_DEFAULTS</a></li>
+        <li><a href="global.html#LOG_DIR_PATH">LOG_DIR_PATH</a></li>
+        <li><a href="global.html#LOG_LEVELS">LOG_LEVELS</a></li>
+        <li><a href="global.html#LOG_LEVEL_NAMES">LOG_LEVEL_NAMES</a></li>
+        <li><a href="global.html#NODE_ENV">NODE_ENV</a></li>
+        <li><a href="global.html#PROJECT_ROOT">PROJECT_ROOT</a></li>
+        <li><a href="global.html#REDIS_PREFIX_CHAT">REDIS_PREFIX_CHAT</a></li>
+        <li><a href="global.html#REDIS_PREFIX_CONTACT">REDIS_PREFIX_CONTACT</a></li>
+        <li><a href="global.html#REDIS_PREFIX_GROUP">REDIS_PREFIX_GROUP</a></li>
+        <li><a href="global.html#REDIS_PREFIX_MESSAGE">REDIS_PREFIX_MESSAGE</a></li>
+        <li><a href="global.html#REDIS_TTL_MESSAGE">REDIS_TTL_MESSAGE</a></li>
+        <li><a href="global.html#REDIS_TTL_METADATA_LONG">REDIS_TTL_METADATA_LONG</a></li>
+        <li><a href="global.html#REDIS_TTL_METADATA_SHORT">REDIS_TTL_METADATA_SHORT</a></li>
+        <li><a href="global.html#REDIS_TTL_RECEIPT">REDIS_TTL_RECEIPT</a></li>
+        <li><a href="global.html#closePool">closePool</a></li>
+        <li><a href="global.html#consoleFormat">consoleFormat</a></li>
+        <li><a href="global.html#createLoggerInstance">createLoggerInstance</a></li>
+        <li><a href="global.html#deleteChatData">deleteChatData</a></li>
+        <li><a href="global.html#env">env</a></li>
+        <li><a href="global.html#executeQuery">executeQuery</a></li>
+        <li><a href="global.html#fileFormat">fileFormat</a></li>
+        <li><a href="global.html#getDefaultTransportDefinitions">getDefaultTransportDefinitions</a></li>
+        <li><a href="global.html#getInstance">getInstance</a></li>
+        <li><a href="global.html#initialize">initialize</a></li>
+        <li><a href="global.html#logger">logger</a></li>
+        <li><a href="global.html#start">start</a></li>
+        <li><a href="global.html#syncFromRedis">syncFromRedis</a></li>
+        <li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li>
+        <li><a href="global.html#upsertChat">upsertChat</a></li>
+        <li><a href="global.html#upsertGroup">upsertGroup</a></li>
+        <li><a href="global.html#upsertMessage">upsertMessage</a></li>
+        <li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li>
+      </ul>
+    </nav>
 
+    <br class="clear" />
 
+    <footer>Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 14:40:27 GMT-0400 (Horário Padrão do Amazonas)</footer>
 
-
-</div>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConnectionManager.html">ConnectionManager</a></li><li><a href="MySQLDBManager.html">MySQLDBManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#LOG_COLORS">LOG_COLORS</a></li><li><a href="global.html#LOG_DEFAULTS">LOG_DEFAULTS</a></li><li><a href="global.html#LOG_LEVELS">LOG_LEVELS</a></li><li><a href="global.html#LOG_LEVEL_NAMES">LOG_LEVEL_NAMES</a></li><li><a href="global.html#REDIS_PREFIX_CHAT">REDIS_PREFIX_CHAT</a></li><li><a href="global.html#REDIS_PREFIX_CONTACT">REDIS_PREFIX_CONTACT</a></li><li><a href="global.html#REDIS_PREFIX_GROUP">REDIS_PREFIX_GROUP</a></li><li><a href="global.html#REDIS_PREFIX_MESSAGE">REDIS_PREFIX_MESSAGE</a></li><li><a href="global.html#REDIS_TTL_MESSAGE">REDIS_TTL_MESSAGE</a></li><li><a href="global.html#REDIS_TTL_METADATA_LONG">REDIS_TTL_METADATA_LONG</a></li><li><a href="global.html#REDIS_TTL_METADATA_SHORT">REDIS_TTL_METADATA_SHORT</a></li><li><a href="global.html#REDIS_TTL_RECEIPT">REDIS_TTL_RECEIPT</a></li><li><a href="global.html#closePool">closePool</a></li><li><a href="global.html#consoleFormat">consoleFormat</a></li><li><a href="global.html#createLoggerInstance">createLoggerInstance</a></li><li><a href="global.html#deleteChatData">deleteChatData</a></li><li><a href="global.html#env">env</a></li><li><a href="global.html#executeQuery">executeQuery</a></li><li><a href="global.html#fileFormat">fileFormat</a></li><li><a href="global.html#getDefaultTransportDefinitions">getDefaultTransportDefinitions</a></li><li><a href="global.html#getInstance">getInstance</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#logger">logger</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#syncFromRedis">syncFromRedis</a></li><li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li><li><a href="global.html#upsertChat">upsertChat</a></li><li><a href="global.html#upsertGroup">upsertGroup</a></li><li><a href="global.html#upsertMessage">upsertMessage</a></li><li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li></ul>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 13:33:33 GMT-0400 (Horário Padrão do Amazonas)
-</footer>
-
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
-</body>
+    <script>
+      prettyPrint();
+    </script>
+    <script src="scripts/linenumber.js"></script>
+  </body>
 </html>
