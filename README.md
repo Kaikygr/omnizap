@@ -144,6 +144,156 @@ CREATE TABLE MessageReceipts (
 - `contact:` - Informações de contatos
 - `message:` - Mensagens e recibos
 
+## 🔄 Sistema de Cache
+
+### Diagrama de Relações
+
+```ascii
+┌─────────────────────── Cache Redis ────────────────────────┐
+│                                                            │
+│  Prefixos e TTLs:                                          │
+│  ┌─────────────────────────────────────────┐               │
+│  │ REDIS_PREFIX_GROUP    (TTL: 1h)         │               │
+│  │ REDIS_PREFIX_CHAT     (TTL: 1h)         │               │
+│  │ REDIS_PREFIX_CONTACT  (TTL: 24h)        │               │
+│  │ REDIS_PREFIX_MESSAGE  (TTL: 7d)         │               │
+│  └─────────────────────────────────────────┘               │
+│                                                            │
+│  Estrutura de Dados:                                       │
+│                                                            │
+│    ┌─────────── Mensagem ──────────┐                       │
+│    │ Key: message:<remoteJid>:<id> │                       │
+│    │ - messageContentType          │    ┌── Grupo ────┐    │
+│    │ - receipts                    │────►  Key: group:<jid>│
+│    │ - groupMetadata (se grupo)    │    │ - participantes  │
+│    └───────────────────────────────┘    │ - descrição      │
+│                │                        │ - configurações  │
+│                │                        └──────────────┘   │
+│                │                                           │
+│                │         ┌────── Chat ─────┐               │
+│                └────────►│ Key: chat:<id>  │               │
+│                          │ - unreadCount   │               │
+│                          │ - lastMessage   │               │
+│                          └────────────── ──┘               │
+│                                │                           │
+│                                │                           │
+│                     ┌──── Contato ────┐                    │
+│                     │ Key:contact:<id>│                    │
+│                     │ - nome          │                    │
+│                     │ - notify        │                    │
+│                     └──────────────── ┘                    │
+│                                                            │
+└────────────────────────────────────────────────────────── ─┘
+```
+
+## 🎯 Sistema de Eventos
+
+### Eventos Principais
+
+#### Conexão
+- `connection.update` - Atualizações de estado da conexão
+- `creds.update` - Atualizações de credenciais
+
+#### Mensagens
+- `messages.upsert` - Novas mensagens/atualizações
+- `messages.update` - Atualizações de status
+- `messages.delete` - Exclusão de mensagens
+- `messages.reaction` - Reações em mensagens
+- `message-receipt.update` - Recibos de mensagem
+
+#### Grupos
+- `groups.update` - Atualizações de metadados
+- `groups.upsert` - Novos grupos
+- `group-participants.update` - Mudanças de participantes
+
+#### Chats e Contatos
+- `chats.upsert` - Novos chats
+- `chats.update` - Atualizações de chat
+- `chats.delete` - Exclusão de chats
+- `contacts.upsert` - Novos contatos
+- `contacts.update` - Atualizações de contato
+
+#### Outros
+- `blocklist.set` - Lista de bloqueio
+- `blocklist.update` - Atualizações de bloqueio
+- `call` - Chamadas de voz/vídeo
+- `presence.update` - Status de presença
+
+### Fluxo de Dados
+1. Evento recebido do WhatsApp
+2. Processamento pelo handler específico
+3. Atualização do cache Redis (se aplicável)
+4. Persistência no MySQL (se aplicável)
+5. Emissão de eventos customizados para subscribers
+
+### Estrutura de Chaves
+
+#### Mensagens
+- **Chave**: `message:<remoteJid>:<id>`
+- **TTL**: 7 dias
+- **Dados**:
+  - Conteúdo da mensagem
+  - Tipo de conteúdo
+  - Status de entrega/leitura
+  - Metadados do grupo (se aplicável)
+
+#### Grupos
+- **Chave**: `group:<jid>`
+- **TTL**: 1 hora
+- **Dados**:
+  - Lista de participantes
+  - Configurações do grupo
+  - Descrição
+  - Imagem do grupo
+
+#### Chats
+- **Chave**: `chat:<id>`
+- **TTL**: 1 hora
+- **Dados**:
+  - Contagem de mensagens não lidas
+  - Última mensagem
+  - Status de silenciamento
+  - Configurações do chat
+
+#### Contatos
+- **Chave**: `contact:<id>`
+- **TTL**: 24 horas
+- **Dados**:
+  - Nome do contato
+  - Configurações de notificação
+  - Informações de perfil
+
+### Estratégia de Cache
+
+1. **Cache First**
+   - Todas as consultas primeiro verificam o cache
+   - Em caso de miss, busca da API e atualiza o cache
+
+2. **TTLs Diferenciados**
+   - Metadados de curta duração: 1 hora
+   - Informações de contato: 24 horas
+   - Mensagens e recibos: 7 dias
+
+3. **Invalidação Automática**
+   - TTLs automáticos para evitar dados obsoletos
+   - Atualização proativa em eventos relevantes
+
+4. **Otimização de Desempenho**
+   - Cache de metadados de grupo para operações frequentes
+   - Armazenamento de recibos de mensagem para consulta rápida
+
+5. **Persistência em Camadas**
+   - Redis: Dados frequentemente acessados
+   - MySQL: Armazenamento persistente de longo prazo
+   - Sincronização automática entre camadas
+
+### Monitoramento e Logs
+
+- Rastreamento de hits/misses do cache
+- Logging detalhado de operações
+- Métricas de performance por tipo de dado
+- Alertas para falhas de cache
+
 ## 🚀 Começando
 
 ### Pré-requisitos
@@ -223,3 +373,4 @@ Se você gostou do projeto e quer apoiar seu desenvolvimento: [Apoiar](https://b
 🚀 **OmniZap** — Sistema robusto e escalável para automação do WhatsApp
 
 ⚠️ **Aviso**: Este é um projeto educacional e não se destina a fins comerciais ou spam.
+
