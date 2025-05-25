@@ -1,0 +1,1072 @@
+const mysql = require('mysql2/promise');
+const path = require('path');
+const { cleanEnv, num, str, host, port } = require('envalid');
+const { getContentType } = require('baileys');
+const logger = require('../utils/logs/logger');
+
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
+const env = cleanEnv(process.env, {
+  MYSQL_HOST: host({ default: 'localhost' }),
+  MYSQL_PORT: port({ default: 3306 }),
+  MYSQL_USER: str(),
+  MYSQL_PASSWORD: str(),
+  MYSQL_DATABASE_NAME: str({ default: 'omnizap_db' }),
+  REDIS_PREFIX_CHAT: str({ default: 'chat:' }),
+  REDIS_PREFIX_GROUP: str({ default: 'group:' }),
+  REDIS_PREFIX_MESSAGE: str({ default: 'message:' }),
+});
+
+/**
+ * @class MySQLDBManager
+ * @description
+ * Gerencia todas as interações com o banco de dados MySQL. É responsável por
+ * estabelecer a conexão, criar/verificar o banco de dados e tabelas,
+ * executar queries SQL e fornecer métodos para operações CRUD (Create, Read, Update, Delete)
+ * específicas para as entidades da aplicação (Chats, Grupos, Mensagens, Recibos).
+ * Utiliza um pool de conexões para otimizar o desempenho e o gerenciamento de recursos.
+ * Também inclui funcionalidades para sincronizar dados a partir de um cache Redis.
+ *
+ * As configurações de conexão com o MySQL (host, porta, usuário, senha, nome do banco)
+ * são obtidas a partir de variáveis de ambiente, validadas por `envalid`.
+ *
+ * @property {mysql.Pool | null} pool - O pool de conexões MySQL. Inicializado como `null` e
+ * populado após a conexão bem-sucedida no método `initialize`.
+ * @property {Object} dbConfig - Objeto contendo as configurações de conexão com o MySQL
+ * (host, porta, usuário, senha), excluindo o nome do banco de dados.
+ * @property {string} dbName - O nome do banco de dados MySQL a ser utilizado.
+ * @property {string} REDIS_PREFIX_CHAT - Prefixo utilizado para chaves de chat no Redis,
+ * obtido de variáveis de ambiente. Usado no método `syncFromRedis`.
+ * @property {string} REDIS_PREFIX_GROUP - Prefixo utilizado para chaves de grupo no Redis,
+ * obtido de variáveis de ambiente. Usado no método `syncFromRedis`.
+ * @property {string} REDIS_PREFIX_MESSAGE - Prefixo utilizado para chaves de mensagem no Redis,
+ * obtido de variáveis de ambiente. Usado no método `syncFromRedis`.
+ */
+class MySQLDBManager {
+  /**
+   * @constructor
+   * @description
+   * Cria uma nova instância do `MySQLDBManager`.
+   * Inicializa as propriedades de configuração do banco de dados (`dbConfig`, `dbName`)
+   * e os prefixos Redis com base nas variáveis de ambiente processadas por `envalid`.
+   * O pool de conexões (`this.pool`) é inicializado como `null` e será configurado
+   * posteriormente pelo método `initialize`.
+   */
+  constructor() {
+    this.pool = null;
+    this.dbConfig = {
+      host: env.MYSQL_HOST,
+      port: env.MYSQL_PORT,
+      user: env.MYSQL_USER,
+      password: env.MYSQL_PASSWORD,
+    };
+    this.dbName = env.MYSQL_DATABASE_NAME;
+
+    this.REDIS_PREFIX_CHAT = env.REDIS_PREFIX_CHAT;
+    this.REDIS_PREFIX_GROUP = env.REDIS_PREFIX_GROUP;
+    this.REDIS_PREFIX_MESSAGE = env.REDIS_PREFIX_MESSAGE;
+  }
+
+  /**
+   * @async
+   * @method initialize
+   * @description
+   * Inicializa o `MySQLDBManager`. Este método realiza as seguintes etapas:
+   * 1. Cria uma conexão temporária com o servidor MySQL para verificar se o banco de dados
+   *    especificado em `this.dbName` existe. Se não existir, o banco de dados é criado.
+   * 2. Cria um pool de conexões MySQL (`this.pool`) configurado para usar o banco de dados
+   *    `this.dbName`. O pool gerencia múltiplas conexões para otimizar o desempenho.
+   * 3. Testa a conexão do pool obtendo uma conexão e liberando-a.
+   * 4. Chama `this.initializeTables()` para garantir que todas as tabelas necessárias
+   *    (Chats, Groups, GroupParticipants, Messages, MessageReceipts) existam e estejam
+   *    com a estrutura correta.
+   *
+   * Este método deve ser chamado antes de qualquer outra operação de banco de dados.
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando a inicialização é concluída com sucesso.
+   * @throws {Error} Lança um erro se houver falha ao conectar ao MySQL, criar o banco de dados,
+   * estabelecer o pool de conexões ou inicializar as tabelas. O erro original é registrado
+   * e propagado.
+   *
+   * @example
+   * // Geralmente chamado através do getInstance
+   * const dbManager = await MySQLDBManager.getInstance();
+   * // A inicialização já ocorreu dentro do getInstance.
+   */
+  async initialize() {
+    try {
+      const tempConnection = await mysql.createConnection({
+        host: this.dbConfig.host,
+        port: this.dbConfig.port,
+        user: this.dbConfig.user,
+        password: this.dbConfig.password,
+      });
+      await tempConnection.query(`CREATE DATABASE IF NOT EXISTS \`${this.dbName}\`;`);
+      await tempConnection.end();
+      logger.info(`Banco de dados '${this.dbName}' verificado/criado com sucesso.`, { label: 'MySQLDBManager' });
+
+      this.pool = mysql.createPool({
+        ...this.dbConfig,
+        database: this.dbName,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+      });
+
+      const connection = await this.pool.getConnection();
+      logger.info('Conectado ao banco de dados MySQL com sucesso via pool.', {
+        label: 'MySQLDBManager',
+        dbName: this.dbName,
+      });
+      connection.release();
+
+      await this.initializeTables();
+    } catch (err) {
+      logger.error('Erro ao inicializar o MySQLDBManager:', {
+        label: 'MySQLDBManager',
+        message: err.message,
+        stack: err.stack,
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * @async
+   * @method initializeTables
+   * @private
+   * @description
+   * Garante que todas as tabelas necessárias para a aplicação existam no banco de dados.
+   * Executa uma série de queries `CREATE TABLE IF NOT EXISTS` para as tabelas:
+   * `Chats`, `Groups`, `GroupParticipants`, `Messages`, e `MessageReceipts`.
+   * Define a estrutura, tipos de dados, chaves primárias, chaves estrangeiras, índices
+   * e collation para cada tabela.
+   * Utiliza `ENGINE=InnoDB` e `CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci` para
+   * suportar uma ampla gama de caracteres, incluindo emojis.
+   *
+   * Este método é chamado internamente por `initialize()`.
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando todas as tabelas foram
+   * verificadas/criadas com sucesso.
+   * @throws {Error} Lança um erro se houver falha na criação de qualquer uma das tabelas.
+   * O erro original é registrado e propagado.
+   */
+  async initializeTables() {
+    const queries = [
+      `CREATE TABLE IF NOT EXISTS \`Chats\` (
+        jid VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255),
+        unread_count INT DEFAULT 0,
+        last_message_timestamp BIGINT,
+        is_group BOOLEAN DEFAULT 0,
+        pinned_timestamp BIGINT DEFAULT 0,
+        mute_until_timestamp BIGINT DEFAULT 0,
+        archived BOOLEAN DEFAULT 0,
+        ephemeral_duration INT,
+        created_at BIGINT,
+        updated_at BIGINT
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+      `CREATE TABLE IF NOT EXISTS \`Groups\` (
+        jid VARCHAR(255) PRIMARY KEY,
+        subject VARCHAR(255),
+        owner_jid VARCHAR(255),
+        creation_timestamp BIGINT,
+        description TEXT,
+        restrict_mode BOOLEAN DEFAULT 0,
+        announce_mode BOOLEAN DEFAULT 0,
+        img_url TEXT,
+        created_at BIGINT,
+        updated_at BIGINT,
+        FOREIGN KEY (jid) REFERENCES \`Chats\`(jid) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+      `CREATE TABLE IF NOT EXISTS \`GroupParticipants\` (
+        group_jid VARCHAR(255) NOT NULL,
+        participant_jid VARCHAR(255) NOT NULL,
+        admin_status VARCHAR(50) COMMENT 'e.g., admin, superadmin, null',
+        PRIMARY KEY (group_jid, participant_jid),
+        FOREIGN KEY (group_jid) REFERENCES \`Groups\`(jid) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+      `CREATE TABLE IF NOT EXISTS \`Messages\` (
+        message_id VARCHAR(255) NOT NULL,
+        chat_jid VARCHAR(255) NOT NULL,
+        sender_jid VARCHAR(255),
+        from_me BOOLEAN NOT NULL,
+        message_timestamp BIGINT NOT NULL,
+        push_name VARCHAR(255),
+        message_type VARCHAR(50),
+        quoted_message_id VARCHAR(255),
+        quoted_message_sender_jid VARCHAR(255),
+        raw_message_content JSON COMMENT 'Store the raw Baileys message object as JSON',
+        created_at BIGINT,
+        updated_at BIGINT,
+        PRIMARY KEY (message_id, chat_jid),
+        INDEX idx_messages_chat_timestamp (chat_jid, message_timestamp),
+        INDEX idx_messages_sender (sender_jid),
+        FOREIGN KEY (chat_jid) REFERENCES \`Chats\`(jid) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+      `CREATE TABLE IF NOT EXISTS \`MessageReceipts\` (
+        message_id VARCHAR(255) NOT NULL,
+        chat_jid VARCHAR(255) NOT NULL,
+        recipient_jid VARCHAR(255) NOT NULL,
+        receipt_type VARCHAR(50) NOT NULL COMMENT 'e.g., delivered, read, played',
+        receipt_timestamp BIGINT NOT NULL,
+        PRIMARY KEY (message_id(191), chat_jid(191), recipient_jid(191), receipt_type),
+        FOREIGN KEY (message_id, chat_jid) REFERENCES \`Messages\`(message_id, chat_jid) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+    ];
+
+    const connection = await this.pool.getConnection();
+    try {
+      for (const query of queries) {
+        await connection.query(query);
+      }
+      logger.info('Tabelas MySQL inicializadas/verificadas.', { label: 'MySQLDBManager' });
+    } catch (err) {
+      logger.error('Erro ao criar tabelas MySQL:', {
+        label: 'MySQLDBManager',
+        message: err.message,
+      });
+      throw err;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * @async
+   * @method executeQuery
+   * @description
+   * Executa uma query SQL parametrizada no banco de dados.
+   * Obtém uma conexão do pool, executa a query e libera a conexão de volta ao pool.
+   * Este é um método genérico para interagir com o banco de dados.
+   *
+   * @param {string} sql - A string da query SQL a ser executada. Pode conter placeholders `?`
+   * para os parâmetros.
+   * @param {Array<any>} [params=[]] - Um array de parâmetros para substituir os placeholders na query SQL.
+   * O padrão é um array vazio se não houver parâmetros.
+   *
+   * @returns {Promise<any>} Uma promessa que resolve com os resultados da query.
+   * O formato dos resultados depende do tipo de query (SELECT, INSERT, UPDATE, DELETE).
+   * Para SELECT, retorna um array de linhas. Para INSERT, retorna um objeto com `insertId`, etc.
+   * @throws {Error} Lança um erro se a execução da query falhar. O erro original é
+   * registrado e propagado.
+   *
+   * @example
+   * // Exemplo de SELECT
+   * const users = await dbManager.executeQuery('SELECT * FROM Users WHERE status = ?', ['active']);
+   *
+   * // Exemplo de INSERT
+   * const result = await dbManager.executeQuery('INSERT INTO Logs (message) VALUES (?)', ['Nova entrada de log']);
+   * console.log('ID do log inserido:', result.insertId);
+   */
+  async executeQuery(sql, params = []) {
+    let connection;
+    try {
+      connection = await this.pool.getConnection();
+      const [results] = await connection.query(sql, params);
+      return results;
+    } catch (err) {
+      logger.error('Erro ao executar query MySQL:', { label: 'MySQLDBManager', sql, params, message: err.message });
+      throw err;
+    } finally {
+      if (connection) connection.release();
+    }
+  }
+
+  /**
+   * @async
+   * @method upsertChat
+   * @description
+   * Insere um novo registro de chat na tabela `Chats` ou atualiza um existente se o `jid` já existir.
+   * A lógica de atualização (`ON DUPLICATE KEY UPDATE`) é projetada para:
+   * - Atualizar `name` apenas se o novo valor não for nulo.
+   * - Sempre atualizar `unread_count`.
+   * - Atualizar `last_message_timestamp` apenas se o novo valor for mais recente que o existente ou se o existente for nulo.
+   * - Sempre atualizar `is_group`, `pinned_timestamp`, `mute_until_timestamp`, `archived`, `ephemeral_duration`.
+   * - `created_at` é definido no momento da inserção.
+   * - `updated_at` é atualizado para o timestamp atual em cada operação de inserção ou atualização.
+   *
+   * @param {Object} chat - O objeto de chat, geralmente proveniente da biblioteca Baileys.
+   * @param {string} chat.id - O JID (identificador único) do chat. Usado como chave primária.
+   * @param {string} [chat.name] - O nome do chat (para contatos) ou assunto (para grupos).
+   * @param {number} [chat.unreadCount=0] - O número de mensagens não lidas. Padrão é 0.
+   * @param {number} [chat.conversationTimestamp] - Timestamp da última conversa/mensagem. Usado para `last_message_timestamp`.
+   * @param {number} [chat.lastMessageTimestamp] - Timestamp da última mensagem (alternativa a `conversationTimestamp`).
+   * @param {number} [chat.pinned=0] - Timestamp de quando o chat foi fixado, ou 0 se não estiver fixado.
+   * @param {number} [chat.muteEndTime] - Timestamp de quando o silenciamento do chat expira. Pode ser `null` ou `undefined` se não estiver silenciado.
+   * @param {boolean} [chat.archived=false] - Indica se o chat está arquivado.
+   * @param {boolean} [chat.archive=false] - Alternativa para `chat.archived`.
+   * @param {number} [chat.ephemeralDuration] - Duração das mensagens efêmeras em segundos. Pode ser `null` ou `undefined`.
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando a operação de upsert é concluída.
+   * Não retorna dados, mas registra um log em caso de sucesso ou erro.
+   * @throws {Error} Erros são registrados pelo logger, mas não são propagados (re-lançados) por este método.
+   * Isso significa que falhas aqui não interromperão o fluxo de chamadas, a menos que o chamador
+   * verifique os logs ou o estado do banco de dados.
+   *
+   * @example
+   * const chatData = {
+   *   id: '5511999999999@s.whatsapp.net',
+   *   name: 'John Doe',
+   *   unreadCount: 2,
+   *   conversationTimestamp: 1678886400, // Exemplo de timestamp UNIX
+   *   pinned: 0,
+   *   muteEndTime: null,
+   *   archived: false,
+   *   ephemeralDuration: 86400 // 1 dia
+   * };
+   * await dbManager.upsertChat(chatData);
+   */
+  async upsertChat(chat) {
+    const sql = `
+      INSERT INTO Chats (jid, name, unread_count, last_message_timestamp, is_group, pinned_timestamp, mute_until_timestamp, archived, ephemeral_duration, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP())
+      ON DUPLICATE KEY UPDATE
+        name = IF(VALUES(name) IS NOT NULL, VALUES(name), Chats.name),
+        unread_count = VALUES(unread_count), -- Assume-se que o valor passado (chat.unreadCount || 0) é o desejado
+        last_message_timestamp = CASE
+                                   WHEN VALUES(last_message_timestamp) IS NOT NULL AND (Chats.last_message_timestamp IS NULL OR VALUES(last_message_timestamp) > Chats.last_message_timestamp)
+                                   THEN VALUES(last_message_timestamp)
+                                   ELSE Chats.last_message_timestamp
+                                 END,
+        is_group = VALUES(is_group), -- Assume-se que o valor passado é o desejado
+        pinned_timestamp = VALUES(pinned_timestamp), -- Assume-se que o valor passado é o desejado
+        mute_until_timestamp = VALUES(mute_until_timestamp), -- Permite definir como NULL para remover o mute
+        archived = VALUES(archived), -- Assume-se que o valor passado é o desejado
+        ephemeral_duration = VALUES(ephemeral_duration), -- Permite definir como NULL
+        updated_at = UNIX_TIMESTAMP();
+    `;
+    try {
+      await this.executeQuery(sql, [chat.id, chat.name, chat.unreadCount || 0, chat.conversationTimestamp || chat.lastMessageTimestamp, chat.id.endsWith('@g.us') ? 1 : 0, chat.pinned || 0, chat.muteEndTime, chat.archived || chat.archive ? 1 : 0, chat.ephemeralDuration]);
+      logger.debug(`Chat ${chat.id} salvo/atualizado no MySQL.`, { label: 'MySQLDBManager', jid: chat.id });
+    } catch (error) {
+      logger.error(`Erro ao fazer upsert do chat ${chat.id} no MySQL: ${error.message}`, { label: 'MySQLDBManager', jid: chat.id, error: error.message, stack: error.stack });
+    }
+  }
+
+  /**
+   * @async
+   * @method upsertGroup
+   * @description
+   * Insere ou atualiza os metadados de um grupo no banco de dados.
+   * Esta operação envolve duas etapas principais:
+   * 1. Chama `this.upsertChat()` para garantir que uma entrada correspondente exista na tabela `Chats`,
+   *    marcando-o como um grupo (`is_group: 1`).
+   * 2. Insere ou atualiza os detalhes específicos do grupo (assunto, proprietário, descrição, etc.)
+   *    na tabela `Groups`.
+   * 3. Se `groupMetadata.participants` for fornecido e não estiver vazio, chama
+   *    `this.updateGroupParticipants()` para atualizar a lista de participantes do grupo.
+   *
+   * Se `groupMetadata` ou `groupMetadata.id` forem nulos ou indefinidos, a operação é abortada
+   * e um aviso é registrado.
+   *
+   * @param {Object} groupMetadata - O objeto de metadados do grupo, geralmente da biblioteca Baileys.
+   * @param {string} groupMetadata.id - O JID (identificador único) do grupo. Essencial.
+   * @param {string} [groupMetadata.subject] - O assunto (nome) do grupo.
+   * @param {string} [groupMetadata.owner] - O JID do proprietário do grupo.
+   * @param {number} [groupMetadata.creation] - Timestamp UNIX da criação do grupo.
+   * @param {string} [groupMetadata.desc] - A descrição do grupo.
+   * @param {boolean} [groupMetadata.restrict=false] - `true` se apenas administradores podem enviar mensagens.
+   * @param {boolean} [groupMetadata.announce=false] - `true` se apenas administradores podem alterar informações do grupo (modo anúncio).
+   * @param {string} [groupMetadata.profilePictureUrl] - URL da imagem de perfil do grupo.
+   * @param {Array<Object>} [groupMetadata.participants] - Array de objetos de participantes.
+   *   Cada participante deve ter `id` (JID) e opcionalmente `admin` ('admin', 'superadmin').
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando a operação de upsert do grupo
+   * e de seus participantes (se aplicável) é concluída.
+   * @throws {Error} Lança um erro se qualquer parte da operação de upsert (chat, grupo, participantes)
+   * falhar. O erro original é registrado e propagado.
+   *
+   * @example
+   * const groupData = {
+   *   id: '1234567890@g.us',
+   *   subject: 'Grupo de Teste',
+   *   owner: '5511999999999@s.whatsapp.net',
+   *   creation: 1678880000,
+   *   desc: 'Este é um grupo para testes.',
+   *   restrict: false,
+   *   announce: false,
+   *   participants: [
+   *     { id: '5511999999999@s.whatsapp.net', admin: 'superadmin' },
+   *     { id: '5511888888888@s.whatsapp.net', admin: null }
+   *   ]
+   * };
+   * await dbManager.upsertGroup(groupData);
+   */
+  async upsertGroup(groupMetadata) {
+    if (!groupMetadata || !groupMetadata.id) {
+      logger.warn('Tentativa de upsert de grupo com dados inválidos', {
+        label: 'MySQLDBManager',
+        metadata: groupMetadata,
+      });
+      return;
+    }
+
+    try {
+      // Garante que o chat correspondente ao grupo exista ou seja criado/atualizado.
+      await this.upsertChat({
+        id: groupMetadata.id,
+        name: groupMetadata.subject, // Nome do chat é o assunto do grupo
+        is_group: 1, // Marca como grupo
+        lastMessageTimestamp: groupMetadata.creation, // Pode usar a criação do grupo como um timestamp inicial
+        unreadCount: 0, // Grupos podem não ter 'unreadCount' da mesma forma que chats individuais no Baileys GroupMetadata
+        // Outras propriedades de chat podem ser padrão ou inferidas
+      });
+
+      const sql = `
+        INSERT INTO \`Groups\` (
+          jid, subject, owner_jid, creation_timestamp, 
+          description, restrict_mode, announce_mode, 
+          img_url, created_at, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP())
+        ON DUPLICATE KEY UPDATE
+          subject = VALUES(subject),
+          owner_jid = VALUES(owner_jid),
+          creation_timestamp = VALUES(creation_timestamp),
+          description = VALUES(description),
+          restrict_mode = VALUES(restrict_mode),
+          announce_mode = VALUES(announce_mode),
+          img_url = VALUES(img_url),
+          updated_at = UNIX_TIMESTAMP();
+      `;
+
+      await this.executeQuery(sql, [groupMetadata.id, groupMetadata.subject, groupMetadata.owner, groupMetadata.creation, groupMetadata.desc, groupMetadata.restrict ? 1 : 0, groupMetadata.announce ? 1 : 0, groupMetadata.profilePictureUrl]);
+
+      logger.info(`Grupo ${groupMetadata.id} atualizado com sucesso no MySQL`, {
+        label: 'MySQLDBManager',
+        jid: groupMetadata.id,
+        subject: groupMetadata.subject,
+      });
+
+      // Atualiza os participantes do grupo, se fornecidos
+      if (Array.isArray(groupMetadata.participants) && groupMetadata.participants.length > 0) {
+        await this.updateGroupParticipants(groupMetadata.id, groupMetadata.participants);
+      } else {
+        logger.warn(`Grupo ${groupMetadata.id} sem participantes para atualizar ou lista de participantes vazia.`, {
+          label: 'MySQLDBManager',
+          jid: groupMetadata.id,
+        });
+      }
+    } catch (error) {
+      logger.error(`Erro ao fazer upsert do grupo ${groupMetadata.id} no MySQL`, {
+        label: 'MySQLDBManager',
+        jid: groupMetadata.id,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error; // Propaga o erro para o chamador
+    }
+  }
+
+  /**
+   * @async
+   * @method updateGroupParticipants
+   * @description
+   * Atualiza a lista de participantes de um grupo específico na tabela `GroupParticipants`.
+   * A operação é transacional:
+   * 1. Inicia uma transação.
+   * 2. Remove todos os participantes existentes para o `groupJid` fornecido.
+   * 3. Insere os novos participantes da lista `participants`.
+   * 4. Se todas as operações forem bem-sucedidas, a transação é confirmada (commit).
+   * 5. Se ocorrer qualquer erro, a transação é revertida (rollback).
+   *
+   * @param {string} groupJid - O JID do grupo cujos participantes serão atualizados.
+   * @param {Array<Object>} participants - Um array de objetos de participantes.
+   *   Cada objeto deve conter:
+   *   - `id` (string): O JID do participante.
+   *   - `admin` (string | null): O status de administrador do participante (ex: 'admin', 'superadmin', ou `null` se não for admin).
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando os participantes são atualizados com sucesso.
+   * @throws {Error} Lança um erro se a atualização dos participantes falhar. O erro original é
+   * registrado, a transação é revertida e o erro é propagado.
+   *
+   * @example
+   * const groupJid = '1234567890@g.us';
+   * const newParticipants = [
+   *   { id: '5511999999999@s.whatsapp.net', admin: 'admin' },
+   *   { id: '5511888888888@s.whatsapp.net', admin: null }
+   * ];
+   * await dbManager.updateGroupParticipants(groupJid, newParticipants);
+   */
+  async updateGroupParticipants(groupJid, participants) {
+    const connection = await this.pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      // Remove participantes antigos
+      await connection.query('DELETE FROM GroupParticipants WHERE group_jid = ?', [groupJid]);
+
+      // Insere novos participantes, se houver
+      const participantSql = 'INSERT INTO GroupParticipants (group_jid, participant_jid, admin_status) VALUES ?';
+      const values = participants.map((p) => [groupJid, p.id, p.admin || null]); // Garante que admin seja null se undefined
+
+      if (values.length > 0) {
+        await connection.query(participantSql, [values]);
+      }
+
+      await connection.commit();
+      logger.info(`${participants.length} participantes atualizados para o grupo ${groupJid}`, {
+        label: 'MySQLDBManager',
+        groupJid,
+        participantCount: participants.length,
+      });
+    } catch (error) {
+      await connection.rollback();
+      logger.error(`Erro ao atualizar participantes do grupo ${groupJid}`, {
+        label: 'MySQLDBManager',
+        groupJid,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error; // Propaga o erro
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * @async
+   * @method upsertMessage
+   * @description
+   * Insere uma nova mensagem na tabela `Messages` ou atualiza uma existente (baseado na chave primária composta `message_id` e `chat_jid`).
+   * Antes de inserir/atualizar a mensagem, este método tenta garantir que o chat (`chat_jid`)
+   * associado à mensagem exista na tabela `Chats` chamando `this.upsertChat`.
+   * O nome do chat para `upsertChat` é inferido do `pushName` da mensagem ou do JID do remetente/chat.
+   *
+   * Após o upsert da mensagem, atualiza a tabela `Chats` para refletir o `last_message_timestamp`
+   * e incrementar `unread_count` se a mensagem não for do próprio usuário (`from_me` é falso).
+   *
+   * O tipo de mensagem (`message_type`) é determinado usando `getContentType` da biblioteca Baileys.
+   * O conteúdo textual da mensagem (`textContent`) é extraído para fins de logging, mas o
+   * conteúdo completo da mensagem Baileys (`msg.message`) é armazenado como JSON na coluna `raw_message_content`.
+   *
+   * @param {import('@WhiskeySockets/Baileys').WAMessage} msg - O objeto da mensagem, geralmente da biblioteca Baileys.
+   * @param {Object} msg.key - Chave da mensagem.
+   * @param {string} msg.key.id - ID único da mensagem.
+   * @param {string} msg.key.remoteJid - JID do chat ao qual a mensagem pertence.
+   * @param {string} [msg.key.participant] - JID do remetente em um chat de grupo. Se ausente (chat individual), `sender_jid` será `msg.key.remoteJid`.
+   * @param {boolean} msg.key.fromMe - `true` se a mensagem foi enviada pelo usuário atual, `false` caso contrário.
+   * @param {number | Long} msg.messageTimestamp - Timestamp da mensagem (pode ser um número ou um objeto Long.js).
+   * @param {string} [msg.pushName] - Nome de exibição (push name) do remetente.
+   * @param {Object} [msg.message] - O conteúdo real da mensagem (ex: `conversation`, `extendedTextMessage`, `imageMessage`).
+   * @param {Object} [msg.message.extendedTextMessage.contextInfo] - Informações de contexto, como mensagem citada.
+   * @param {string} [msg.message.extendedTextMessage.contextInfo.stanzaId] - ID da mensagem citada.
+   * @param {string} [msg.message.extendedTextMessage.contextInfo.participant] - JID do remetente da mensagem citada.
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando a operação de upsert da mensagem e
+   * a atualização do chat associado são concluídas.
+   * @throws {Error} Erros são registrados pelo logger, mas não são propagados por este método.
+   * Falhas aqui podem levar a inconsistências de dados se não monitoradas.
+   *
+   * @example
+   * const messageData = {
+   *   key: {
+   *     remoteJid: '5511999999999@s.whatsapp.net',
+   *     fromMe: false,
+   *     id: 'ABCDEF123456',
+   *     participant: undefined // Em chat individual
+   *   },
+   *   messageTimestamp: 1678886450,
+   *   pushName: 'John Doe',
+   *   message: {
+   *     conversation: 'Olá, mundo!'
+   *   }
+   * };
+   * await dbManager.upsertMessage(messageData);
+   *
+   * const groupMessageData = {
+   *   key: {
+   *     remoteJid: '1234567890@g.us',
+   *     fromMe: true,
+   *     id: 'GHIJKL789012',
+   *     participant: '5511222222222@s.whatsapp.net' // JID do remetente no grupo (o próprio usuário)
+   *   },
+   *   messageTimestamp: 1678886500,
+   *   pushName: 'MyUser', // Push name do remetente
+   *   message: {
+   *     extendedTextMessage: {
+   *       text: 'Resposta em grupo',
+   *       contextInfo: {
+   *         stanzaId: 'XYZMSGID',
+   *         participant: '5511999999999@s.whatsapp.net'
+   *       }
+   *     }
+   *   }
+   * };
+   * await dbManager.upsertMessage(groupMessageData);
+   */
+  async upsertMessage(msg) {
+    // Determina o JID do remetente. Em grupos, é `msg.key.participant`.
+    // Em chats individuais, `msg.key.participant` é undefined; se `msg.key.fromMe` é true, o remetente é o próprio usuário (não explicitamente armazenado aqui como sender_jid, mas inferido).
+    // Se `msg.key.fromMe` é false em chat individual, `msg.key.remoteJid` é o JID do outro contato.
+    // Para consistência, usamos `msg.key.participant` se existir, senão `msg.key.remoteJid` (que pode ser o JID do chat ou do contato, dependendo do contexto).
+    // No entanto, a tabela Messages tem `sender_jid`. Se `fromMe` é true, `sender_jid` deve ser o JID do próprio usuário.
+    // Se `fromMe` é false:
+    //    - Em grupo: `sender_jid` é `msg.key.participant`.
+    //    - Em chat individual: `sender_jid` é `msg.key.remoteJid`.
+    // A lógica atual usa `msg.key.participant || msg.key.remoteJid`. Isso pode precisar de ajuste
+    // se `sender_jid` deve sempre representar o "outro" em um chat 1:1 quando `fromMe` é true.
+    // Baileys geralmente define `msg.key.participant` como o JID do remetente real em grupos.
+    // E `msg.key.remoteJid` é o JID do chat.
+    const senderJid = msg.key.participant || (msg.key.fromMe ? null : msg.key.remoteJid); // Se fromMe, sender_jid pode ser null ou o JID do próprio usuário. Se não for fromMe, é o participant (grupo) ou remoteJid (individual).
+    const chatJid = msg.key.remoteJid;
+
+    // Upsert de entidades relacionadas (Chat)
+    // É importante fazer isso antes para que as chaves estrangeiras sejam satisfeitas.
+    const relatedUpsertPromises = [];
+    relatedUpsertPromises.push(
+      this.upsertChat({
+        id: chatJid,
+        name: chatJid.endsWith('@g.us') ? 'Grupo' : msg.pushName || (senderJid ? senderJid.split('@')[0] : chatJid.split('@')[0]), // Tenta obter um nome para o chat
+        // Outras propriedades do chat serão atualizadas pela query `updateChatSql` abaixo
+      }),
+    );
+
+    // Aguarda a conclusão dos upserts preparatórios.
+    // Usar Promise.allSettled para não falhar se um upsert preparatório opcional falhar.
+    const preparatoryResults = await Promise.allSettled(relatedUpsertPromises);
+    preparatoryResults.forEach((result) => {
+      if (result.status === 'rejected') {
+        logger.warn(`Falha no upsert preparatório (chat) para mensagem ${msg.key.id}. Erro: ${result.reason?.message}`, {
+          label: 'MySQLDBManager',
+          messageKey: msg.key,
+          error: result.reason?.message,
+        });
+      }
+    });
+    let messageType = 'unknown';
+    let textContent = null; // Apenas para logging, não armazenado diretamente
+
+    if (msg.message) {
+      messageType = getContentType(msg.message) || 'unknown';
+
+      // Extrai texto para logging (opcional)
+      if (msg.message.conversation) {
+        textContent = msg.message.conversation;
+      } else if (msg.message.extendedTextMessage) {
+        textContent = msg.message.extendedTextMessage.text;
+      } else if (msg.message.imageMessage) {
+        textContent = msg.message.imageMessage.caption;
+      } else if (msg.message.videoMessage) {
+        textContent = msg.message.videoMessage.caption;
+      }
+      // Adicionar mais tipos conforme necessário para `textContent`
+
+      logger.debug(`Tipo de mensagem detectado: ${messageType} para mensagem ${msg.key.id}`, {
+        label: 'MySQLDBManager',
+        messageId: msg.key.id,
+        messageType,
+        hasContent: !!textContent,
+      });
+    }
+
+    const sql = `
+      INSERT INTO Messages (
+        message_id, chat_jid, sender_jid, from_me, message_timestamp, push_name,
+        message_type, quoted_message_id, quoted_message_sender_jid, raw_message_content,
+        created_at, updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP())
+      ON DUPLICATE KEY UPDATE
+        push_name = VALUES(push_name),
+        message_type = VALUES(message_type),
+        raw_message_content = VALUES(raw_message_content),
+        updated_at = UNIX_TIMESTAMP();
+    `;
+    try {
+      // Normaliza o messageTimestamp para número (BIGINT no MySQL)
+      const messageTimestamp = typeof msg.messageTimestamp === 'number' ? msg.messageTimestamp : msg.messageTimestamp?.low || msg.messageTimestamp?.toNumber?.();
+
+      await this.executeQuery(sql, [
+        msg.key.id,
+        chatJid,
+        senderJid, // JID do remetente real
+        msg.key.fromMe ? 1 : 0,
+        messageTimestamp,
+        msg.pushName,
+        messageType,
+        msg.message?.extendedTextMessage?.contextInfo?.stanzaId || null,
+        msg.message?.extendedTextMessage?.contextInfo?.participant || null,
+        JSON.stringify(msg.message || {}), // Armazena o objeto de mensagem Baileys completo
+      ]);
+
+      // Atualiza last_message_timestamp e unread_count na tabela Chats
+      // Incrementa unread_count apenas se a mensagem não for do próprio usuário (fromMe = false)
+      const updateChatSql = 'UPDATE Chats SET last_message_timestamp = ?, unread_count = CASE WHEN ? = 0 THEN unread_count + 1 ELSE unread_count END, updated_at = UNIX_TIMESTAMP() WHERE jid = ? AND (? > COALESCE(last_message_timestamp, 0))';
+      await this.executeQuery(updateChatSql, [messageTimestamp, msg.key.fromMe ? 1 : 0, chatJid, messageTimestamp]);
+    } catch (error) {
+      logger.error(`Erro ao fazer upsert da mensagem ${msg.key?.id} no MySQL: ${error.message}`, { label: 'MySQLDBManager', messageKey: msg.key, error: error.message, stack: error.stack });
+    }
+  }
+
+  /**
+   * @async
+   * @method upsertMessageReceipt
+   * @description
+   * Insere ou atualiza um recibo de mensagem na tabela `MessageReceipts`.
+   * Um recibo indica o status de uma mensagem para um destinatário específico (ex: 'delivered', 'read', 'played').
+   * A chave primária da tabela `MessageReceipts` é composta por `(message_id, chat_jid, recipient_jid, receipt_type)`,
+   * então uma nova entrada é criada para cada tipo de recibo diferente para o mesmo destinatário,
+   * ou o `receipt_timestamp` é atualizado se o mesmo tipo de recibo for recebido novamente.
+   *
+   * Se `receiptType` for nulo ou indefinido, ele é padronizado para 'delivered'.
+   * O `receiptTimestamp` é normalizado para um número. Se não puder ser normalizado,
+   * `UNIX_TIMESTAMP()` (timestamp atual do servidor MySQL) é usado como fallback na query.
+   *
+   * @param {Object} messageKey - A chave da mensagem à qual o recibo se refere.
+   * @param {string} messageKey.id - O ID da mensagem.
+   * @param {string} messageKey.remoteJid - O JID do chat onde a mensagem está.
+   * @param {string} recipientJid - O JID do usuário/participante que gerou o recibo.
+   * @param {string} [receiptType='delivered'] - O tipo de recibo (ex: 'delivered', 'read', 'played').
+   *                                            Padrão é 'delivered' se não fornecido.
+   * @param {number | Long | null} receiptTimestamp - O timestamp UNIX do recibo. Pode ser um número,
+   *                                                  um objeto Long.js, ou `null`/`undefined`.
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando a operação de upsert do recibo é concluída.
+   * @throws {Error} Erros são registrados pelo logger, mas não são propagados por este método.
+   *
+   * @example
+   * const msgKey = { id: 'ABCDEF123456', remoteJid: '5511999999999@s.whatsapp.net' };
+   * const recipient = '5511888888888@s.whatsapp.net'; // JID do destinatário que leu a mensagem
+   * await dbManager.upsertMessageReceipt(msgKey, recipient, 'read', 1678886500);
+   *
+   * // Exemplo com timestamp nulo (usará o tempo atual do DB)
+   * await dbManager.upsertMessageReceipt(msgKey, recipient, 'delivered', null);
+   */
+  async upsertMessageReceipt(messageKey, recipientJid, receiptType, receiptTimestamp) {
+    if (!messageKey?.id || !messageKey?.remoteJid || !recipientJid) {
+      logger.warn('Dados inválidos para upsert de recibo (faltando messageKey.id, messageKey.remoteJid ou recipientJid).', {
+        label: 'MySQLDBManager',
+        messageKey,
+        recipientJid,
+        originalReceiptType: receiptType,
+      });
+      return;
+    }
+
+    const finalReceiptType = receiptType || 'delivered'; // Garante que receiptType não seja nulo
+
+    const sql = `
+      INSERT INTO MessageReceipts (message_id, chat_jid, recipient_jid, receipt_type, receipt_timestamp)
+      VALUES (?, ?, ?, ?, COALESCE(?, UNIX_TIMESTAMP()))
+      ON DUPLICATE KEY UPDATE
+        receipt_timestamp = COALESCE(VALUES(receipt_timestamp), receipt_timestamp); 
+        -- Atualiza o timestamp se o novo valor for fornecido e válido, 
+        -- caso contrário, mantém o timestamp existente.
+        -- COALESCE(?, UNIX_TIMESTAMP()) no INSERT garante que um timestamp seja sempre inserido.
+    `;
+
+    try {
+      // Normaliza o timestamp para número ou null
+      const timestamp = typeof receiptTimestamp === 'number' ? receiptTimestamp : receiptTimestamp?.low || receiptTimestamp?.toNumber?.() || null;
+
+      await this.executeQuery(sql, [messageKey.id, messageKey.remoteJid, recipientJid, finalReceiptType, timestamp]);
+
+      logger.debug(`Recibo para msg ${messageKey.id} (tipo ${finalReceiptType}, user ${recipientJid}) salvo no MySQL.`, { label: 'MySQLDBManager' });
+    } catch (error) {
+      logger.error(`Erro ao fazer upsert do recibo para msg ${messageKey?.id} (user ${recipientJid}) no MySQL: ${error.message}`, { label: 'MySQLDBManager', messageKey, recipientJid, error: error.message, stack: error.stack });
+    }
+  }
+
+  /**
+   * @async
+   * @method deleteChatData
+   * @description
+   * Remove todos os dados associados a um chat específico do banco de dados.
+   * A remoção é em cascata devido às chaves estrangeiras `ON DELETE CASCADE`:
+   * - Se o `chatJid` pertencer a um grupo (termina com '@g.us'), a entrada correspondente
+   *   na tabela `Groups` (e, por cascata, `GroupParticipants`) é removida.
+   * - A entrada na tabela `Chats` é removida.
+   * - Por cascata, todas as mensagens (`Messages`) e recibos de mensagens (`MessageReceipts`)
+   *   associados a este `chatJid` também são removidos.
+   *
+   * @param {string} chatJid - O JID do chat cujos dados devem ser removidos.
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando os dados do chat são removidos.
+   * @throws {Error} Erros são registrados pelo logger, mas não são propagados por este método.
+   *
+   * @example
+   * const chatToDeletJid = '5511999999999@s.whatsapp.net';
+   * await dbManager.deleteChatData(chatToDeletJid);
+   *
+   * const groupToDeleteJid = '1234567890@g.us';
+   * await dbManager.deleteChatData(groupToDeleteJid);
+   */
+  async deleteChatData(chatJid) {
+    try {
+      // Se for um grupo, remove primeiro da tabela Groups.
+      // A remoção de GroupParticipants é feita por CASCADE a partir de Groups.
+      if (chatJid.endsWith('@g.us')) {
+        await this.executeQuery('DELETE FROM Groups WHERE jid = ?', [chatJid]);
+      }
+      // Remove da tabela Chats.
+      // A remoção de Messages e MessageReceipts é feita por CASCADE a partir de Chats.
+      await this.executeQuery('DELETE FROM Chats WHERE jid = ?', [chatJid]);
+      logger.info(`Dados do chat ${chatJid} removidos do MySQL.`, { label: 'MySQLDBManager', jid: chatJid });
+    } catch (error) {
+      logger.error(`Erro ao deletar dados do chat ${chatJid} no MySQL: ${error.message}`, { label: 'MySQLDBManager', jid: chatJid, error: error.message, stack: error.stack });
+    }
+  }
+
+  /**
+   * @async
+   * @method syncFromRedis
+   * @description
+   * Sincroniza dados (chats, grupos, mensagens e recibos de mensagens) de um cache Redis
+   * para o banco de dados MySQL. Este método é útil para popular o MySQL com dados
+   * que podem ter sido acumulados no Redis enquanto o MySQL estava indisponível ou
+   * durante uma inicialização.
+   *
+   * A sincronização ocorre em etapas:
+   * 1. **Chats**: Varre chaves no Redis com prefixo `this.REDIS_PREFIX_CHAT`. Para cada chave,
+   *    obtém os dados do chat, parseia o JSON e chama `this.upsertChat()`.
+   * 2. **Grupos**: Similarmente, varre chaves com prefixo `this.REDIS_PREFIX_GROUP` e chama
+   *    `this.upsertGroup()`.
+   * 3. **Mensagens e Recibos**: Varre chaves com prefixo `this.REDIS_PREFIX_MESSAGE`. Para cada
+   *    mensagem:
+   *    a. Chama `this.upsertMessage()`.
+   *    b. Se a mensagem tiver um campo `receipts`, itera sobre os recibos e chama
+   *       `this.upsertMessageReceipt()` para cada um.
+   *
+   * Utiliza `redisClient.scan()` para iterar sobre as chaves de forma eficiente, evitando
+   * o bloqueio do servidor Redis que `KEYS *` causaria.
+   * `Promise.allSettled` é usado para processar lotes de upserts, permitindo que a
+   * sincronização continue mesmo que algumas entradas individuais falhem. Erros são registrados.
+   *
+   * @param {import('ioredis').Redis} redisClient - Uma instância do cliente ioredis conectada
+   * ao servidor Redis de onde os dados serão lidos.
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando todas as etapas de sincronização
+   * são concluídas.
+   * @throws {Error} Erros durante as operações de varredura do Redis ou falhas críticas
+   * podem ser registrados, mas o método tenta completar o máximo possível da sincronização.
+   * Não propaga erros diretamente, mas registra-os extensivamente.
+   *
+   * @example
+   * // Supondo que `redisClient` seja uma instância de ioredis conectada
+   * // e `dbManager` seja uma instância de MySQLDBManager.
+   * if (connectionManager.redisClient) { // connectionManager é onde o redisClient pode estar
+   *   await dbManager.syncFromRedis(connectionManager.redisClient);
+   * }
+   */
+  async syncFromRedis(redisClient) {
+    logger.info('Iniciando sincronização de dados do Redis para o MySQL...', { label: 'MySQLDBManager' });
+
+    // Sincronizar Chats
+    try {
+      logger.info('Sincronizando chats...', { label: 'MySQLDBManager' });
+      let cursor = '0';
+      do {
+        const [nextCursor, keys] = await redisClient.scan(cursor, 'MATCH', `${this.REDIS_PREFIX_CHAT}*`, 'COUNT', 100);
+        const upsertPromises = keys.map(async (key) => {
+          try {
+            const chatData = await redisClient.get(key);
+            if (chatData) {
+              return this.upsertChat(JSON.parse(chatData));
+            }
+          } catch (err) {
+            logger.error(`Erro ao processar chave Redis ${key} para chat: ${err.message}`, { label: 'MySQLDBManager', key });
+            return Promise.reject(err); // Rejeita para ser pego por allSettled
+          }
+        });
+        const results = await Promise.allSettled(upsertPromises);
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            const failedKey = keys[index];
+            logger.error(`Falha no upsert do chat via Redis (chave: ${failedKey}):`, { label: 'MySQLDBManager', key: failedKey, error: result.reason?.message, stack: result.reason?.stack });
+          }
+        });
+        cursor = nextCursor;
+      } while (cursor !== '0');
+      logger.info('Chats sincronizados.', { label: 'MySQLDBManager' });
+    } catch (error) {
+      logger.error('Erro durante a varredura de chats do Redis:', { label: 'MySQLDBManager', error: error.message });
+    }
+
+    // Sincronizar Grupos
+    try {
+      logger.info('Sincronizando grupos...', { label: 'MySQLDBManager' });
+      let cursor = '0';
+      do {
+        const [nextCursor, keys] = await redisClient.scan(cursor, 'MATCH', `${this.REDIS_PREFIX_GROUP}*`, 'COUNT', 100);
+        const upsertPromises = keys.map(async (key) => {
+          try {
+            const groupData = await redisClient.get(key);
+            if (groupData) {
+              return this.upsertGroup(JSON.parse(groupData));
+            }
+          } catch (err) {
+            logger.error(`Erro ao processar chave Redis ${key} para grupo: ${err.message}`, { label: 'MySQLDBManager', key });
+            return Promise.reject(err);
+          }
+        });
+        const results = await Promise.allSettled(upsertPromises);
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            const failedKey = keys[index];
+            logger.error(`Falha no upsert do grupo via Redis (chave: ${failedKey}):`, { label: 'MySQLDBManager', key: failedKey, error: result.reason?.message, stack: result.reason?.stack });
+          }
+        });
+        cursor = nextCursor;
+      } while (cursor !== '0');
+      logger.info('Grupos sincronizados.', { label: 'MySQLDBManager' });
+    } catch (error) {
+      logger.error('Erro durante a varredura de grupos do Redis:', { label: 'MySQLDBManager', error: error.message });
+    }
+
+    // Sincronizar Mensagens e seus Recibos
+    try {
+      logger.info('Sincronizando mensagens...', { label: 'MySQLDBManager' });
+      let messageCursor = '0';
+      do {
+        // Usar COUNT menor para mensagens, pois o processamento de cada uma é mais intensivo
+        const [nextCursor, keys] = await redisClient.scan(messageCursor, 'MATCH', `${this.REDIS_PREFIX_MESSAGE}*`, 'COUNT', 50);
+        const messageProcessingPromises = keys.map(async (key) => {
+          try {
+            const messageData = await redisClient.get(key);
+            if (messageData) {
+              const msg = JSON.parse(messageData);
+              await this.upsertMessage(msg); // Sincroniza a mensagem principal
+
+              // Sincroniza os recibos associados à mensagem
+              if (msg.receipts && typeof msg.receipts === 'object') {
+                const receiptUpsertPromises = Object.entries(msg.receipts).map(([recipientJid, receipt]) =>
+                  this.upsertMessageReceipt(msg.key, recipientJid, receipt.type, receipt.timestamp).catch((errRec) => {
+                    // Captura erros específicos do upsert de recibo
+                    logger.error(`Falha ao sincronizar recibo para msg ${msg.key?.id}, user ${recipientJid} (chave Redis: ${key})`, {
+                      label: 'MySQLDBManager',
+                      messageKey: msg.key,
+                      recipientJid,
+                      redisKey: key,
+                      error: errRec.message,
+                    });
+                  }),
+                );
+                await Promise.allSettled(receiptUpsertPromises); // Aguarda todos os recibos da mensagem atual
+              }
+            }
+          } catch (err) {
+            logger.error(`Erro ao processar chave Redis ${key} para mensagem e/ou seus recibos: ${err.message}`, { label: 'MySQLDBManager', key });
+            return Promise.reject(err); // Rejeita para ser pego por allSettled
+          }
+        });
+
+        const messageResults = await Promise.allSettled(messageProcessingPromises);
+        messageResults.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            const failedKey = keys[index];
+            logger.error(`Falha geral ao processar mensagem/recibos do Redis (chave: ${failedKey}):`, { label: 'MySQLDBManager', key: failedKey, error: result.reason?.message, stack: result.reason?.stack });
+          }
+        });
+        messageCursor = nextCursor;
+      } while (messageCursor !== '0');
+      logger.info('Mensagens sincronizadas.', { label: 'MySQLDBManager' });
+    } catch (error) {
+      logger.error('Erro durante a varredura de mensagens do Redis:', { label: 'MySQLDBManager', error: error.message });
+    }
+
+    logger.info('Sincronização de dados do Redis para o MySQL concluída.', { label: 'MySQLDBManager' });
+  }
+
+  /**
+   * @async
+   * @method closePool
+   * @description
+   * Fecha o pool de conexões MySQL, liberando todos os recursos associados.
+   * Este método deve ser chamado quando a aplicação está sendo encerrada para garantir
+   * que todas as conexões com o banco de dados sejam fechadas corretamente.
+   * Se o pool já estiver fechado ou não tiver sido inicializado (`this.pool` é `null`),
+   * o método não faz nada além de registrar um aviso (se aplicável).
+   *
+   * @returns {Promise<void>} Uma promessa que resolve quando o pool é fechado com sucesso.
+   * @throws {Error} Erros ao fechar o pool são registrados pelo logger, mas não são propagados.
+   *
+   * @example
+   * // Em um processo de desligamento da aplicação:
+   * await dbManager.closePool();
+   * logger.info('Aplicação encerrada.');
+   */
+  async closePool() {
+    if (this.pool) {
+      try {
+        await this.pool.end();
+        logger.info('Pool de conexões MySQL fechado com sucesso.', { label: 'MySQLDBManager' });
+        this.pool = null; // Define como null para indicar que foi fechado
+      } catch (err) {
+        logger.error('Erro ao fechar pool de conexões MySQL:', { label: 'MySQLDBManager', message: err.message });
+        // Não propaga o erro, apenas registra
+      }
+    } else {
+      logger.warn('Tentativa de fechar pool de conexões MySQL que não está inicializado ou já foi fechado.', { label: 'MySQLDBManager' });
+    }
+  }
+}
+
+/**
+ * @type {MySQLDBManager | null}
+ * @private
+ * @description
+ * Instância singleton da classe `MySQLDBManager`.
+ * É inicializada na primeira chamada a `getInstance()`.
+ */
+let instance = null;
+
+module.exports = {
+  /**
+   * @async
+   * @function getInstance
+   * @description
+   * Obtém a instância singleton do `MySQLDBManager`.
+   * Se a instância ainda não existir, ela é criada e o método `initialize()`
+   * é chamado para configurar a conexão com o banco de dados e as tabelas.
+   * Chamadas subsequentes retornam a instância já existente.
+   * Este é o método preferencial para obter acesso ao `MySQLDBManager`.
+   *
+   * @returns {Promise<MySQLDBManager>} Uma promessa que resolve com a instância
+   * inicializada do `MySQLDBManager`.
+   * @throws {Error} Lança um erro se a inicialização da instância do `MySQLDBManager` falhar.
+   * Este erro geralmente se origina do método `initialize()` da classe.
+   *
+   * @example
+   * async function main() {
+   *   try {
+   *     const dbManager = await MySQLDBManager.getInstance();
+   *     // Usar dbManager para operações de banco de dados
+   *     const chats = await dbManager.executeQuery('SELECT * FROM Chats LIMIT 10');
+   *     console.log(chats);
+   *   } catch (error) {
+   *     console.error('Falha ao obter instância do DBManager:', error);
+   *   }
+   * }
+   * main();
+   */
+  getInstance: async () => {
+    if (!instance) {
+      const tempInstance = new MySQLDBManager();
+      await tempInstance.initialize(); // A inicialização pode lançar um erro
+      instance = tempInstance;
+    }
+    return instance;
+  },
+  /**
+   * @description
+   * Exporta a própria classe `MySQLDBManager` para permitir a criação de instâncias
+   * de forma manual, se necessário, ou para fins de teste e extensão.
+   * No entanto, para uso geral na aplicação, `getInstance()` é o método recomendado
+   * para garantir o padrão singleton.
+   *
+   * @type {typeof MySQLDBManager}
+   * @example
+   * // Uso menos comum, preferir getInstance()
+   * const manualInstance = new MySQLDBManager.MySQLDBManagerClass();
+   * await manualInstance.initialize();
+   * // ... usar manualInstance
+   * await manualInstance.closePool();
+   */
+  MySQLDBManagerClass: MySQLDBManager,
+};
