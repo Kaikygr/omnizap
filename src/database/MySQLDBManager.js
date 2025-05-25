@@ -1,6 +1,6 @@
 const mysql = require('mysql2/promise');
 const path = require('path');
-const { cleanEnv, num, str, host, port } = require('envalid');
+const { cleanEnv, str, host, port } = require('envalid');
 const { getContentType } = require('baileys');
 const logger = require('../utils/logs/logger');
 
@@ -18,6 +18,19 @@ const env = cleanEnv(process.env, {
 });
 
 /**
+ * JSDoc type definitions for external types used within MySQLDBManager.
+ * NOTE: The 'import(...)' type syntax is standard for JSDoc but may cause errors with some parsers.
+ * These types are often simplified to 'Object' or a more generic JSDoc type as a workaround.
+ * For more precise type information in documentation, the JSDoc parser/environment should be configured
+ * to support 'import()' type expressions or TypeScript definition files.
+ *
+ * @typedef {Object} MySQLPool - Represents the mysql2/promise Pool object.
+ * @typedef {Object} BaileysWAMessage - Represents the WAMessage object from Baileys.
+ * @typedef {Object} BaileysWAMessageKey - Represents the WAMessageKey object from Baileys.
+ * @typedef {Object} BaileysWAMessageContent - Represents the WAMessageContent object from Baileys.
+ * @typedef {Object} IORedisClient - Represents the ioredis Redis client object.
+ * @typedef {Object} LongJsObject - Represents a Long.js object, often used for timestamps.
+ * @typedef {{id: string, admin: (('admin'|'superadmin')|null)=}} GroupParticipant
  * @class MySQLDBManager
  * @description
  * Gerencia todas as interações com o banco de dados MySQL. É responsável por
@@ -30,9 +43,9 @@ const env = cleanEnv(process.env, {
  * As configurações de conexão com o MySQL (host, porta, usuário, senha, nome do banco)
  * são obtidas a partir de variáveis de ambiente, validadas por `envalid`.
  *
- * @property {mysql.Pool | null} pool - O pool de conexões MySQL. Inicializado como `null` e
+ * @property {(MySQLPool | null)} pool - O pool de conexões MySQL. Inicializado como `null` e
  * populado após a conexão bem-sucedida no método `initialize`.
- * @property {Object} dbConfig - Objeto contendo as configurações de conexão com o MySQL
+ * @property {{host: string, port: number, user: string, password: string}} dbConfig - Objeto contendo as configurações de conexão com o MySQL
  * (host, porta, usuário, senha), excluindo o nome do banco de dados.
  * @property {string} dbName - O nome do banco de dados MySQL a ser utilizado.
  * @property {string} REDIS_PREFIX_CHAT - Prefixo utilizado para chaves de chat no Redis,
@@ -291,7 +304,7 @@ class MySQLDBManager {
    * - `updated_at` é atualizado para o timestamp atual em cada operação de inserção ou atualização.
    *
    * @param {Object} chat - O objeto de chat, geralmente proveniente da biblioteca Baileys.
-   * @param {string} chat.id - O JID (identificador único) do chat. Usado como chave primária.
+   * @param {string} chat.id - O JID (identificador único) do chat. Ex: 'xxxxxxxxxxx@s.whatsapp.net' ou 'xxxxxxxxxxxx-xxxx@g.us'.
    * @param {string} [chat.name] - O nome do chat (para contatos) ou assunto (para grupos).
    * @param {number} [chat.unreadCount=0] - O número de mensagens não lidas. Padrão é 0.
    * @param {number} [chat.conversationTimestamp] - Timestamp da última conversa/mensagem. Usado para `last_message_timestamp`.
@@ -329,10 +342,10 @@ class MySQLDBManager {
         name = IF(VALUES(name) IS NOT NULL, VALUES(name), Chats.name),
         unread_count = VALUES(unread_count), -- Assume-se que o valor passado (chat.unreadCount || 0) é o desejado
         last_message_timestamp = CASE
-                                   WHEN VALUES(last_message_timestamp) IS NOT NULL AND (Chats.last_message_timestamp IS NULL OR VALUES(last_message_timestamp) > Chats.last_message_timestamp)
-                                   THEN VALUES(last_message_timestamp)
-                                   ELSE Chats.last_message_timestamp
-                                 END,
+        WHEN VALUES(last_message_timestamp) IS NOT NULL AND (Chats.last_message_timestamp IS NULL OR VALUES(last_message_timestamp) > Chats.last_message_timestamp)
+        THEN VALUES(last_message_timestamp)
+        ELSE Chats.last_message_timestamp
+        END,
         is_group = VALUES(is_group), -- Assume-se que o valor passado é o desejado
         pinned_timestamp = VALUES(pinned_timestamp), -- Assume-se que o valor passado é o desejado
         mute_until_timestamp = VALUES(mute_until_timestamp), -- Permite definir como NULL para remover o mute
@@ -365,7 +378,7 @@ class MySQLDBManager {
    * e um aviso é registrado.
    *
    * @param {Object} groupMetadata - O objeto de metadados do grupo, geralmente da biblioteca Baileys.
-   * @param {string} groupMetadata.id - O JID (identificador único) do grupo. Essencial.
+   * @param {string} groupMetadata.id - O JID (identificador único) do grupo. Ex: 'xxxxxxxxxxxx-xxxx@g.us'. Essencial.
    * @param {string} [groupMetadata.subject] - O assunto (nome) do grupo.
    * @param {string} [groupMetadata.owner] - O JID do proprietário do grupo.
    * @param {number} [groupMetadata.creation] - Timestamp UNIX da criação do grupo.
@@ -373,8 +386,8 @@ class MySQLDBManager {
    * @param {boolean} [groupMetadata.restrict=false] - `true` se apenas administradores podem enviar mensagens.
    * @param {boolean} [groupMetadata.announce=false] - `true` se apenas administradores podem alterar informações do grupo (modo anúncio).
    * @param {string} [groupMetadata.profilePictureUrl] - URL da imagem de perfil do grupo.
-   * @param {Array<Object>} [groupMetadata.participants] - Array de objetos de participantes.
-   *   Cada participante deve ter `id` (JID) e opcionalmente `admin` ('admin', 'superadmin').
+   * @param {Array<GroupParticipant>} [groupMetadata.participants] - Array de objetos de participantes.
+   *   Cada participante deve ter `id` (JID) e `admin` (pode ser 'admin', 'superadmin', ou `null`/`undefined`).
    *
    * @returns {Promise<void>} Uma promessa que resolve quando a operação de upsert do grupo
    * e de seus participantes (se aplicável) é concluída.
@@ -476,10 +489,9 @@ class MySQLDBManager {
    * 5. Se ocorrer qualquer erro, a transação é revertida (rollback).
    *
    * @param {string} groupJid - O JID do grupo cujos participantes serão atualizados.
-   * @param {Array<Object>} participants - Um array de objetos de participantes.
-   *   Cada objeto deve conter:
-   *   - `id` (string): O JID do participante.
-   *   - `admin` (string | null): O status de administrador do participante (ex: 'admin', 'superadmin', ou `null` se não for admin).
+   * @param {Array<GroupParticipant>} participants - Um array de objetos de participantes.
+   *   Cada objeto deve ter `id` (o JID do participante) e `admin` (o status de administrador,
+   *   que pode ser 'admin', 'superadmin', ou `null`/`undefined` se não for admin).
    *
    * @returns {Promise<void>} Uma promessa que resolve quando os participantes são atualizados com sucesso.
    * @throws {Error} Lança um erro se a atualização dos participantes falhar. O erro original é
@@ -545,15 +557,15 @@ class MySQLDBManager {
    * O conteúdo textual da mensagem (`textContent`) é extraído para fins de logging, mas o
    * conteúdo completo da mensagem Baileys (`msg.message`) é armazenado como JSON na coluna `raw_message_content`.
    *
-   * @param {import('@WhiskeySockets/Baileys').WAMessage} msg - O objeto da mensagem, geralmente da biblioteca Baileys.
-   * @param {Object} msg.key - Chave da mensagem.
-   * @param {string} msg.key.id - ID único da mensagem.
-   * @param {string} msg.key.remoteJid - JID do chat ao qual a mensagem pertence.
-   * @param {string} [msg.key.participant] - JID do remetente em um chat de grupo. Se ausente (chat individual), `sender_jid` será `msg.key.remoteJid`.
-   * @param {boolean} msg.key.fromMe - `true` se a mensagem foi enviada pelo usuário atual, `false` caso contrário.
-   * @param {number | Long} msg.messageTimestamp - Timestamp da mensagem (pode ser um número ou um objeto Long.js).
-   * @param {string} [msg.pushName] - Nome de exibição (push name) do remetente.
-   * @param {Object} [msg.message] - O conteúdo real da mensagem (ex: `conversation`, `extendedTextMessage`, `imageMessage`).
+   * @param {BaileysWAMessage} msg - O objeto da mensagem, geralmente da biblioteca Baileys.
+   * @param {BaileysWAMessageKey} msg.key - Chave da mensagem, contendo `id`, `remoteJid`, `fromMe`, `participant` (opcional).
+   * @param {string} msg.key.id - ID único da mensagem (ex: 'ABCDEF123456').
+   * @param {string} msg.key.remoteJid - JID do chat ao qual a mensagem pertence (ex: 'xxxxxxxxxxx@s.whatsapp.net' ou 'xxxxxxxxxxxx-xxxx@g.us').
+   * @param {string} [msg.key.participant] - JID do remetente em um chat de grupo (ex: 'yyyyyyyyyyy@s.whatsapp.net').
+   * @param {boolean} msg.key.fromMe - `true` se a mensagem foi enviada pelo usuário da sessão atual.
+   * @param {(number | LongJsObject)} msg.messageTimestamp - Timestamp UNIX da mensagem (pode ser um número ou um objeto Long.js).
+   * @param {string} [msg.pushName] - Nome de exibição (push name) do remetente da mensagem.
+   * @param {BaileysWAMessageContent} [msg.message] - O conteúdo real da mensagem (ex: `conversation`, `extendedTextMessage`, `imageMessage`).
    * @param {Object} [msg.message.extendedTextMessage.contextInfo] - Informações de contexto, como mensagem citada.
    * @param {string} [msg.message.extendedTextMessage.contextInfo.stanzaId] - ID da mensagem citada.
    * @param {string} [msg.message.extendedTextMessage.contextInfo.participant] - JID do remetente da mensagem citada.
@@ -717,10 +729,9 @@ class MySQLDBManager {
    * Se `receiptType` for nulo ou indefinido, ele é padronizado para 'delivered'.
    * O `receiptTimestamp` é normalizado para um número. Se não puder ser normalizado,
    * `UNIX_TIMESTAMP()` (timestamp atual do servidor MySQL) é usado como fallback na query.
-   *
-   * @param {Object} messageKey - A chave da mensagem à qual o recibo se refere.
-   * @param {string} messageKey.id - O ID da mensagem.
-   * @param {string} messageKey.remoteJid - O JID do chat onde a mensagem está.
+   * @param {BaileysWAMessageKey} messageKey - A chave da mensagem à qual o recibo se refere.
+   * @param {{id: string, remoteJid: string}} messageKey - A chave da mensagem à qual o recibo se refere.
+   * Deve conter `id` (ID da mensagem) e `remoteJid` (JID do chat).
    * @param {string} recipientJid - O JID do usuário/participante que gerou o recibo.
    * @param {string} [receiptType='delivered'] - O tipo de recibo (ex: 'delivered', 'read', 'played').
    *                                            Padrão é 'delivered' se não fornecido.
@@ -838,7 +849,7 @@ class MySQLDBManager {
    * `Promise.allSettled` é usado para processar lotes de upserts, permitindo que a
    * sincronização continue mesmo que algumas entradas individuais falhem. Erros são registrados.
    *
-   * @param {import('ioredis').Redis} redisClient - Uma instância do cliente ioredis conectada
+   * @param {IORedisClient} redisClient - Uma instância do cliente ioredis conectada
    * ao servidor Redis de onde os dados serão lidos.
    *
    * @returns {Promise<void>} Uma promessa que resolve quando todas as etapas de sincronização
@@ -1060,7 +1071,7 @@ module.exports = {
    * No entanto, para uso geral na aplicação, `getInstance()` é o método recomendado
    * para garantir o padrão singleton.
    *
-   * @type {typeof MySQLDBManager}
+   * @type {Class<MySQLDBManager>}
    * @example
    * // Uso menos comum, preferir getInstance()
    * const manualInstance = new MySQLDBManager.MySQLDBManagerClass();
