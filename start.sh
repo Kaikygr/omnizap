@@ -71,15 +71,42 @@ run_nvm_command() {
     # Se nvm_script_path estiver vazio, a função implicitamente retorna string vazia (sem saída)
 }
 
+# Função para verificar requisitos básicos do sistema
+check_system_requirements_inline() {
+    type_echo "   Verificando requisitos básicos do sistema..." "${BRIGHT_MAGENTA}"
+    
+    # Verificar memória disponível (em GB)
+    if command -v free >/dev/null 2>&1 && command -v awk >/dev/null 2>&1; then
+        local mem_available
+        mem_available=$(free -m | awk 'NR==2{printf "%.1f", $7/1024}')
+        type_echo "     💾 Memória disponível (aprox.): ${BRIGHT_BLUE}${mem_available}GB${RESET}"
+    else
+        type_echo "     💾 Memória disponível: ${BRIGHT_YELLOW}Não foi possível verificar (free/awk não encontrados)${RESET}"
+    fi
+    
+    # Verificar espaço em disco disponível no diretório atual
+    if command -v df >/dev/null 2>&1 && command -v awk >/dev/null 2>&1; then
+        local disk_space
+        disk_space=$(df -h . | awk 'NR==2{print $4}')
+        type_echo "     💿 Espaço em disco (partição atual): ${BRIGHT_BLUE}${disk_space}${RESET}"
+    else
+        type_echo "     💿 Espaço em disco: ${BRIGHT_YELLOW}Não foi possível verificar (df/awk não encontrados)${RESET}"
+    fi
+    
+    # Verificar núcleos de CPU
+    if command -v nproc >/dev/null 2>&1; then
+        local cpu_cores
+        cpu_cores=$(nproc)
+        type_echo "     🔧 Núcleos de CPU: ${BRIGHT_BLUE}${cpu_cores}${RESET}"
+    else
+        type_echo "     🔧 Núcleos de CPU: ${BRIGHT_YELLOW}Não foi possível verificar (nproc não encontrado)${RESET}"
+    fi
+}
+
 # Função para exibir informações do sistema e projeto
 display_system_info_and_project() {
     type_echo "🔍 Verificando informações do ambiente..." "${BRIGHT_MAGENTA}${BOLD}"
-
-    local os_info kernel_info arch_info
-    os_info=$(uname -s)
-    kernel_info=$(uname -r)
-    arch_info=$(uname -m)
-    type_echo "   Sistema Operacional: ${BRIGHT_BLUE}${os_info} ${kernel_info} (${arch_info})${RESET}"
+    check_system_requirements_inline # Adiciona verificação de requisitos do sistema aqui
 
     # Node.js e NVM
     if command -v node >/dev/null 2>&1; then
@@ -119,6 +146,28 @@ display_system_info_and_project() {
     else
         type_echo "   Versão do Node.js:   ${BRIGHT_YELLOW}Não encontrado${RESET}"
         if [ -f .nvmrc ]; then type_echo "   Projeto .nvmrc:    ${BRIGHT_CYAN}Requer Node ~$(cat .nvmrc | tr -d '[:space:]') (Node.js não encontrado)${RESET}"; fi
+    fi
+
+    # Verificar package.json e dependências
+    if [ -f "package.json" ]; then
+        type_echo "   Verificando dependências do projeto (package.json)..." "${BRIGHT_MAGENTA}"
+        
+        if [ ! -d "node_modules" ]; then
+            echo -n -e "${BRIGHT_YELLOW}   ⚠️  node_modules não encontrado. Deseja instalar as dependências agora? (s/N): ${RESET}"
+            read -r install_deps
+            if [[ "$install_deps" =~ ^[SsYy]$ ]]; then
+                type_echo "   🔄 Instalando dependências (npm install)..." "${BRIGHT_BLUE}"
+                if npm install; then
+                    type_echo "   ✅ Dependências instaladas com sucesso!" "${BRIGHT_GREEN}"
+                else
+                    type_echo "   ❌ Falha ao instalar dependências. Verifique os erros acima." "${BRIGHT_RED}"
+                fi
+            else
+                type_echo "   Skipping dependency installation." "${BRIGHT_YELLOW}"
+            fi
+        else
+            type_echo "   ✅ node_modules encontrado." "${BRIGHT_GREEN}"
+        fi
     fi
 
     if command -v npm >/dev/null 2>&1; then
@@ -229,6 +278,41 @@ display_system_info_and_project() {
     echo ""
 }
 
+# Função para verificar atualizações do repositório Git
+check_repository_updates() {
+    if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        type_echo "🔄 Verificando atualizações do repositório Git..." "${BRIGHT_MAGENTA}${BOLD}"
+        
+        type_echo "   Atualizando informações do remote (git remote update)..." "${BRIGHT_BLUE}"
+        if git remote update >/dev/null 2>&1; then
+            local current_git_branch commits_behind
+            current_git_branch=$(git rev-parse --abbrev-ref HEAD) # Mais portável que --show-current
+            
+            # Tenta verificar contra origin/branch_atual. Pode falhar se a branch não existir no remote.
+            commits_behind=$(git rev-list HEAD.."origin/${current_git_branch}" --count 2>/dev/null) 
+            
+            if [[ -n "$commits_behind" && "$commits_behind" -gt 0 ]]; then
+                type_echo "   ⚠️  Existem ${BRIGHT_YELLOW}${commits_behind}${RESET} commits disponíveis na branch remota 'origin/${current_git_branch}'."
+                echo -n -e "${BRIGHT_CYAN}   Deseja atualizar o projeto (git pull) agora? (s/N): ${RESET}"
+                read -r update_repo
+                if [[ "$update_repo" =~ ^[SsYy]$ ]]; then
+                    type_echo "   Executando 'git pull'..." "${BRIGHT_BLUE}"
+                    if git pull; then
+                        type_echo "   ✅ Projeto atualizado com sucesso!" "${BRIGHT_GREEN}"
+                    else
+                        type_echo "   ❌ Falha ao atualizar o projeto (git pull). Verifique os erros." "${BRIGHT_RED}"
+                    fi
+                fi
+            else
+                type_echo "   ✅ Projeto parece estar atualizado com 'origin/${current_git_branch}' ou não foi possível verificar." "${BRIGHT_GREEN}"
+            fi
+        else
+            type_echo "   ⚠️ Não foi possível executar 'git remote update'. Verifique a conexão e configuração do remote." "${BRIGHT_YELLOW}"
+        fi
+        echo ""
+    fi
+}
+
 # Função para ações Git interativas
 interactive_git_actions() {
     if ! command -v git >/dev/null 2>&1; then
@@ -318,11 +402,91 @@ interactive_git_actions() {
     done
 }
 
+# Função para menu de Configurações Avançadas
+show_advanced_settings() {
+    echo ""
+    type_echo "⚙️ Menu de Configurações Avançadas:" "${BRIGHT_MAGENTA}${BOLD}"
+    
+    local adv_options=("Limpar cache NPM" "Reinstalar dependências" "Criar .env de .env.example" "Voltar ao fluxo principal")
+    local adv_ps3_prompt="${BOLD}${BRIGHT_YELLOW}Escolha uma opção avançada: ${RESET}"
+    
+    PS3="$adv_ps3_prompt"
+    select adv_opt in "${adv_options[@]}"; do
+        case $adv_opt in
+            "Limpar cache NPM")
+                type_echo "   🧹 Limpando cache do NPM (npm cache clean --force)..." "${BRIGHT_BLUE}"
+                if npm cache clean --force; then
+                    type_echo "   ✅ Cache do NPM limpo com sucesso!" "${BRIGHT_GREEN}"
+                else
+                    type_echo "   ❌ Falha ao limpar o cache do NPM." "${BRIGHT_RED}"
+                fi
+                # Não quebra, permite mais ações avançadas ou voltar
+                ;;
+            "Reinstalar dependências")
+                type_echo "   🔄 Reinstalando dependências (removendo node_modules e package-lock.json)..." "${BRIGHT_BLUE}"
+                rm -rf node_modules package-lock.json
+                if npm install; then
+                    type_echo "   ✅ Dependências reinstaladas com sucesso!" "${BRIGHT_GREEN}"
+                else
+                    type_echo "   ❌ Falha ao reinstalar dependências." "${BRIGHT_RED}"
+                fi
+                ;;
+            "Criar .env de .env.example")
+                if [ -f ".env.example" ]; then
+                    type_echo "   📝 Tentando criar .env a partir de .env.example (sem sobrescrever)..." "${BRIGHT_BLUE}"
+                    if cp -n .env.example .env; then # -n para não sobrescrever se .env já existir
+                        if [ -f ".env" ]; then # Verifica se foi criado ou já existia
+                             type_echo "   ✅ Arquivo .env está presente. Se foi criado agora, configure-o." "${BRIGHT_GREEN}"
+                        fi
+                    else
+                        type_echo "   ❌ Falha ao copiar .env.example. Verifique as permissões." "${BRIGHT_RED}"
+                    fi
+                else
+                    type_echo "   ⚠️  Arquivo .env.example não encontrado." "${BRIGHT_YELLOW}"
+                fi
+                ;;
+            "Voltar ao fluxo principal")
+                type_echo "   Retornando ao fluxo principal..." "${BRIGHT_GREEN}"
+                echo ""
+                return
+                ;;
+            *) 
+                echo -e "${BRIGHT_RED}Opção inválida '$REPLY'. Tente novamente.${RESET}"
+                ;;
+        esac
+        # Após cada ação (exceto Voltar), o menu é reexibido.
+        # Para reexibir o prompt corretamente após uma ação:
+        echo -e "\n${adv_ps3_prompt}"
+    done
+}
+
+# Função para Log de Execuções
+log_execution() {
+    local exit_c="${1:-?}" # Usa o argumento ou o exit status do último comando se não fornecido
+    local log_dir="logs"
+    local log_file="$log_dir/start_script.log"
+    
+    # Criar diretório de logs se não existir
+    mkdir -p "$log_dir"
+    
+    # Registrar execução
+    {
+        echo "=== Execução em $(date) ==="
+        echo "NODE_ENV: ${NODE_ENV:-Nao definido}"
+        echo "Script de Inicialização: ${INIT_SCRIPT_PATH:-Nao definido}"
+        echo "Código de Saída Final: $exit_c"
+        echo "=========================="
+        echo ""
+    } >> "$log_file"
+}
+
 type_echo "Bem-vindo ao inicializador do OmniZap!" "${BRIGHT_CYAN}${BOLD}"
 type_echo "Este script irá configurar o NODE_ENV e, em seguida, tentará executar o script de inicialização." "${BRIGHT_BLUE}"
 echo ""
 display_system_info_and_project # Chama a função para exibir as informações
+check_repository_updates # Verifica atualizações do Git
 interactive_git_actions # Chama a função para ações Git interativas
+show_advanced_settings # Oferece menu de configurações avançadas
 
 # Verifica se NODE_ENV foi passado como argumento
 PRESET_NODE_ENV=""
@@ -357,12 +521,14 @@ if [ -z "$NODE_ENV" ]; then
                 break
                 ;;
             "Cancelar")
+                log_execution 0 # Log de cancelamento pelo usuário como saída normal
                 echo -e "${BRIGHT_YELLOW}Operação cancelada pelo usuário.${RESET}"
                 exit 0
                 ;;
             *)
                 # A variável $REPLY contém a entrada do usuário se não corresponder a um número de opção
                 echo -e "${BRIGHT_RED}Opção inválida '$REPLY'. Tente novamente.${RESET}"
+                # O loop select continuará
                 ;;
         esac
     done
@@ -370,6 +536,7 @@ if [ -z "$NODE_ENV" ]; then
     # Verifica se NODE_ENV foi definido (caso o usuário pressione Ctrl+D ou outra interrupção no select)
     if [ -z "$NODE_ENV" ]; then
         echo -e "${BRIGHT_RED}Nenhum ambiente foi selecionado. Saindo sem inicializar.${RESET}"
+        log_execution 1
         exit 1
     fi
 fi
@@ -409,6 +576,7 @@ spinner() {
 # Verifica se Node.js está instalado
 if ! command -v node >/dev/null 2>&1; then
     type_echo "Erro: Node.js não encontrado. Por favor, instale o Node.js para continuar." "${BRIGHT_RED}${BOLD}"
+    log_execution 1
     exit 1
 fi
 
@@ -425,18 +593,21 @@ if [ -f "$INIT_SCRIPT_PATH" ]; then
     exit_code=$?
 
     if [ $exit_code -eq 0 ]; then
-        echo -e "${BRIGHT_GREEN}${BOLD}✓ Sucesso!${RESET}"
+        # echo -e "${BRIGHT_GREEN}${BOLD}✓ Sucesso!${RESET}" # Removido para evitar duplicidade com type_echo
         type_echo "Script de inicialização do índice concluído." "${BRIGHT_GREEN}"
     else
-        echo -e "${BRIGHT_RED}${BOLD}✗ Falha!${RESET}"
+        # echo -e "${BRIGHT_RED}${BOLD}✗ Falha!${RESET}" # Removido para evitar duplicidade com type_echo
         type_echo "Script de inicialização do índice falhou com o código de saída: $exit_code." "${BRIGHT_RED}"
+        log_execution "$exit_code"
         exit $exit_code # Propaga o código de erro
     fi
 else
     type_echo "Erro: Script de inicialização não encontrado em '$INIT_SCRIPT_PATH'." "${BRIGHT_RED}${BOLD}"
     type_echo "Verifique o caminho, o nome do arquivo ou a variável de ambiente OMNIZAP_INIT_SCRIPT." "${BRIGHT_YELLOW}"
     echo -e "${BRIGHT_RED}Nenhuma ação de inicialização foi executada.${RESET}"
+    log_execution 1
     exit 1 # Sair com erro se o script não for encontrado
 fi
 
-exit 0 # Sair com sucesso se tudo correu bem
+log_execution 0 # Log de saída bem-sucedida
+exit 0 
