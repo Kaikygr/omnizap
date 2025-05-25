@@ -1,4 +1,4 @@
-[![3DG6WBV.th.png](https://iili.io/3DG6WBV.th.png)](https://freeimage.host/i/3DG6WBV)
+[![3DG6WBV.md.png](https://iili.io/3DG6WBV.md.png)](https://freeimage.host/i/3DG6WBV)
 
 Bot multifuncional para WhatsApp, desenvolvido em JavaScript como um projeto open-source e educacional.
 
