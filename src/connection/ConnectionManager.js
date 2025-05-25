@@ -5,6 +5,7 @@ const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const { cleanEnv, num, str } = require('envalid');
 const Redis = require('ioredis');
+const EventEmitter = require('events');
 
 const logger = require('../utils/logs/logger');
 
@@ -125,6 +126,7 @@ const REDIS_TTL_RECEIPT = 7 * 24 * 3600;
  * @property {boolean} isReconnecting - Flag que indica se o ConnectionManager está atualmente
  * tentando se reconectar.
  */
+
 class ConnectionManager {
   /**
    * @constructor
@@ -137,6 +139,7 @@ class ConnectionManager {
    * @param {string} [authStatePath=env.AUTH_STATE_PATH] - Caminho para o diretório onde o estado de autenticação será salvo.
    */
   constructor(mysqlDbManager, initialBackoffDelayMs = env.BACKOFF_INITIAL_DELAY_MS, maxBackoffDelayMs = env.BACKOFF_MAX_DELAY_MS, authStatePath = env.AUTH_STATE_PATH) {
+    this.instanceId = process.env.INSTANCE_ID || 'omnizap-instance';
     this.initialBackoffDelayMs = initialBackoffDelayMs;
     this.maxBackoffDelayMs = maxBackoffDelayMs;
     this.mysqlDbManager = mysqlDbManager;
@@ -146,8 +149,17 @@ class ConnectionManager {
     this.reconnectionAttempts = 0;
     this.maxReconnectionAttempts = 10;
     this.isReconnecting = false;
+    this.eventEmitter = new EventEmitter();
 
     this.initializeRedisClient();
+  }
+
+  /**
+   * @method getEventEmitter
+   * @returns {EventEmitter} Retorna a instância do EventEmitter para escutar eventos customizados, como 'message:upsert:received'.
+   */
+  getEventEmitter() {
+    return this.eventEmitter;
   }
 
   /**
@@ -228,16 +240,15 @@ class ConnectionManager {
       markOnlineOnConnect: false,
       printQRInTerminal: false,
       cachedGroupMetadata: async (jid) => {
-        const cacheKey = `group:${jid}`;
         try {
           const data = await this.redisClient.get(`${REDIS_PREFIX_GROUP}${jid}`);
           if (data) {
-            logger.debug(`Cache HIT para metadados do grupo ${jid}`, { label: 'RedisCache' });
+            logger.debug(`Cache HIT para metadados do grupo ${jid}`, { label: 'RedisCache', instanceId: this.instanceId });
             return JSON.parse(data);
           }
-          logger.debug(`Cache MISS para metadados do grupo ${jid}`, { label: 'RedisCache' });
+          logger.debug(`Cache MISS para metadados do grupo ${jid}`, { label: 'RedisCache', instanceId: this.instanceId });
         } catch (error) {
-          logger.error(`Erro ao ler metadados do grupo ${jid} do cache Redis: ${error.message}`, { label: 'RedisCache', error });
+          logger.error(`Erro ao ler metadados do grupo ${jid} do cache Redis para cachedGroupMetadata: ${error.message}`, { label: 'RedisCache', jid, error: error.message, stack: error.stack, instanceId: this.instanceId });
         }
         return undefined;
       },
@@ -437,29 +448,84 @@ class ConnectionManager {
     for (const msg of messages) {
       const messageContentType = msg.message ? getContentType(msg.message) : null;
 
+      const { key: messageKey } = msg;
+
       if (messageContentType) {
-        logger.debug(`Tipo de conteúdo da mensagem ${msg.key?.id}: ${messageContentType}`, { label: 'ConnectionManager', messageKey: msg.key, contentType: messageContentType });
+        logger.debug(`Tipo de conteúdo da mensagem ${messageKey?.id}: ${messageContentType}`, { label: 'ConnectionManager', messageKey, contentType: messageContentType, instanceId: this.instanceId });
       } else {
-        logger.debug(`Não foi possível determinar o tipo de conteúdo para a mensagem ${msg.key?.id}`, { label: 'ConnectionManager', messageKey: msg.key });
+        logger.debug(`Não foi possível determinar o tipo de conteúdo para a mensagem ${messageKey?.id}`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId });
       }
 
-      if (msg.key && msg.key.remoteJid && msg.key.id) {
-        const cacheKey = `${REDIS_PREFIX_MESSAGE}${msg.key.remoteJid}:${msg.key.id}`;
+      if (messageKey && messageKey.remoteJid && messageKey.id) {
+        const redisMessageCacheKey = `${REDIS_PREFIX_MESSAGE}${messageKey.remoteJid}:${messageKey.id}`;
         try {
-          const messageToStore = { ...msg, receipts: {}, messageContentType }; // Store the determined content type
-          await this.redisClient.set(cacheKey, JSON.stringify(messageToStore), 'EX', REDIS_TTL_MESSAGE);
-          logger.info(`Mensagem ${msg.key.id} de ${msg.key.remoteJid} salva no Redis.`, { label: 'RedisCache', messageKey: msg.key });
+          const messageToStore = {
+            ...msg,
+            receipts: msg.receipts || {},
+            messageContentType,
+            instanceId: this.instanceId,
+          };
+          await this.redisClient.set(redisMessageCacheKey, JSON.stringify(messageToStore), 'EX', REDIS_TTL_MESSAGE);
+          logger.info(`Mensagem ${messageKey.id} de ${messageKey.remoteJid} salva no Redis.`, { label: 'RedisCache', messageKey, instanceId: this.instanceId });
+
+          let dataForEvent = { ...messageToStore };
+
+          const isGroupMessage = messageKey.remoteJid?.endsWith('@g.us');
+          if (isGroupMessage) {
+            const groupJid = messageKey.remoteJid;
+            let groupMetadata = null;
+            const groupCacheKey = `${REDIS_PREFIX_GROUP}${groupJid}`;
+            try {
+              const cachedGroupData = await this.redisClient.get(groupCacheKey);
+              if (cachedGroupData) {
+                groupMetadata = JSON.parse(cachedGroupData);
+                logger.debug(`Metadados do grupo ${groupJid} obtidos do cache Redis para enriquecimento da mensagem ${messageKey.id}.`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
+              } else {
+                logger.debug(`Cache MISS para metadados do grupo ${groupJid} (enriquecimento da mensagem ${messageKey.id}). Tentando buscar via API...`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
+                groupMetadata = await this.client.groupMetadata(groupJid);
+                if (groupMetadata) {
+                  await this.redisClient.set(groupCacheKey, JSON.stringify(groupMetadata), 'EX', REDIS_TTL_METADATA_SHORT);
+                  logger.info(`Metadados do grupo ${groupJid} buscados via API e salvos no Redis para enriquecimento da mensagem ${messageKey.id}.`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
+                } else {
+                  logger.warn(`Não foi possível obter metadados para o grupo ${groupJid} via API (ex: bot não está no grupo) para enriquecimento da mensagem ${messageKey.id}.`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
+                }
+              }
+            } catch (groupError) {
+              logger.warn(`Erro ao buscar/processar metadados do grupo ${groupJid} para enriquecimento da mensagem ${messageKey.id}: ${groupError.message}`, { label: 'ConnectionManager', messageKey, groupJid, error: groupError.message, stack: groupError.stack, instanceId: this.instanceId });
+            }
+            if (groupMetadata) {
+              dataForEvent.groupMetadata = groupMetadata;
+            }
+          }
 
           if (this.mysqlDbManager) {
-            await this.mysqlDbManager.upsertMessage(messageToStore);
+            try {
+              const dbPersistedMessage = await this.mysqlDbManager.upsertMessage(messageToStore);
+              if (dbPersistedMessage && typeof dbPersistedMessage === 'object') {
+                dataForEvent = { ...dataForEvent, ...dbPersistedMessage };
+                logger.debug(`Mensagem ${messageKey.id} processada pelo MySQL. Dados do DB adicionados ao payload do evento.`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId });
+              } else {
+                logger.debug(`Mensagem ${messageKey.id} processada pelo MySQL, mas não retornou dados adicionais (ou retornou tipo inesperado). Evento usará dados pré-DB (com possível groupMetadata).`, { label: 'ConnectionManager', messageKey, dbReturn: dbPersistedMessage, instanceId: this.instanceId });
+              }
+            } catch (dbError) {
+              logger.error(`Erro durante upsertMessage no MySQL para mensagem ${messageKey.id}: ${dbError.message}`, {
+                label: 'SyncError',
+                messageKey,
+                error: dbError.message,
+                stack: dbError.stack,
+                instanceId: this.instanceId,
+              });
+            }
           }
+          this.eventEmitter.emit('message:upsert:received', dataForEvent);
+          logger.debug(`Evento 'message:upsert:received' emitido para a mensagem ${messageKey.id}`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId, eventPayloadKeys: Object.keys(dataForEvent) });
         } catch (error) {
-          logger.error(`Erro ao salvar mensagem ${msg.key.id} no Redis ou MySQL: ${error.message}`, { label: 'SyncError', messageKey: msg.key, error: error.message });
+          logger.error(`Erro ao processar mensagem ${messageKey.id} (Redis, enriquecimento ou emissão de evento): ${error.message}`, { label: 'SyncError', messageKey, error: error.message, stack: error.stack, instanceId: this.instanceId });
         }
       } else {
-        logger.warn('Mensagem recebida sem chave completa, não foi possível salvar no cache.', { label: 'ConnectionManager', message: msg });
+        logger.warn('Mensagem recebida sem chave completa, não foi possível processar.', { label: 'ConnectionManager', message: msg, instanceId: this.instanceId });
       }
-      logger.debug(`Conteúdo da mensagem: ${JSON.stringify(msg)}`, { label: 'ConnectionManager', messageDetails: msg });
+      logger.debug(`Conteúdo da mensagem original: ${messageKey?.id}`, { label: 'ConnectionManager', messageKey, messageDetails: msg, instanceId: this.instanceId });
     }
   }
 
@@ -609,7 +675,7 @@ class ConnectionManager {
             await this.mysqlDbManager.upsertChat(chat);
           }
         } catch (error) {
-          logger.error(`Erro ao salvar chat ${chat.id} do histórico no Redis ou MySQL: ${error.message}`, { label: 'SyncError', jid: chat.id, error: error.message });
+          logger.error(`Erro ao salvar chat ${chat.id} do histórico no Redis ou MySQL: ${error.message}`, { label: 'SyncError', jid: chat.id, errorMessage: error.message, errorStack: error.stack, chatObject: JSON.stringify(chat) });
         }
       }
     }

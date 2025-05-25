@@ -1,6 +1,6 @@
 const mysql = require('mysql2/promise');
 const path = require('path');
-const { cleanEnv, num, str, host, port } = require('envalid');
+const { cleanEnv, str, host, port } = require('envalid');
 const { getContentType } = require('baileys');
 const logger = require('../utils/logs/logger');
 
@@ -342,10 +342,10 @@ class MySQLDBManager {
         name = IF(VALUES(name) IS NOT NULL, VALUES(name), Chats.name),
         unread_count = VALUES(unread_count), -- Assume-se que o valor passado (chat.unreadCount || 0) é o desejado
         last_message_timestamp = CASE
-                                   WHEN VALUES(last_message_timestamp) IS NOT NULL AND (Chats.last_message_timestamp IS NULL OR VALUES(last_message_timestamp) > Chats.last_message_timestamp)
-                                   THEN VALUES(last_message_timestamp)
-                                   ELSE Chats.last_message_timestamp
-                                 END,
+        WHEN VALUES(last_message_timestamp) IS NOT NULL AND (Chats.last_message_timestamp IS NULL OR VALUES(last_message_timestamp) > Chats.last_message_timestamp)
+        THEN VALUES(last_message_timestamp)
+        ELSE Chats.last_message_timestamp
+        END,
         is_group = VALUES(is_group), -- Assume-se que o valor passado é o desejado
         pinned_timestamp = VALUES(pinned_timestamp), -- Assume-se que o valor passado é o desejado
         mute_until_timestamp = VALUES(mute_until_timestamp), -- Permite definir como NULL para remover o mute
