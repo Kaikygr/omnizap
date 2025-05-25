@@ -71,8 +71,8 @@ run_nvm_command() {
     # Se nvm_script_path estiver vazio, a função implicitamente retorna string vazia (sem saída)
 }
 
-# Função para exibir informações do sistema
-display_system_info() {
+# Função para exibir informações do sistema e projeto
+display_system_info_and_project() {
     type_echo "🔍 Verificando informações do ambiente..." "${BRIGHT_MAGENTA}${BOLD}"
 
     local os_info kernel_info arch_info
@@ -179,13 +179,150 @@ display_system_info() {
     else
         type_echo "   Conexão Internet:  ${BRIGHT_RED}Inativa ou instável ❌${RESET}"
     fi
+
+    # GitHub Project Info
+    type_echo "   Informações do Projeto (GitHub: Kaikygr/omnizap):" "${BRIGHT_MAGENTA}${BOLD}"
+    if command -v curl >/dev/null 2>&1; then
+        if command -v jq >/dev/null 2>&1; then
+            local api_url="https://api.github.com/repos/Kaikygr/omnizap"
+            local github_data
+            # Adicionado -L para seguir redirecionamentos e timeouts
+            github_data=$(curl -s -L --connect-timeout 5 -m 10 "$api_url")
+            local curl_exit_code=$?
+
+            # Verifica se curl foi bem sucedido E se o JSON não contém uma mensagem de erro da API
+            if [ $curl_exit_code -eq 0 ] && [ -n "$github_data" ] && ! echo "$github_data" | jq -e '.message' > /dev/null 2>&1; then
+                local description stars forks pushed_at_raw pushed_at_formatted
+                description=$(echo "$github_data" | jq -r '.description // "N/A"')
+                stars=$(echo "$github_data" | jq -r '.stargazers_count // "N/A"')
+                forks=$(echo "$github_data" | jq -r '.forks_count // "N/A"')
+                pushed_at_raw=$(echo "$github_data" | jq -r '.pushed_at // "N/A"')
+
+                if [ "$pushed_at_raw" != "N/A" ]; then
+                    # Tenta formatar a data se 'date -d' for capaz
+                    if date -d "$pushed_at_raw" > /dev/null 2>&1; then
+                        pushed_at_formatted=$(date -d "$pushed_at_raw" +"%d/%m/%Y às %H:%M:%S %Z")
+                    else
+                        pushed_at_formatted="$pushed_at_raw (formato original)"
+                    fi
+                else
+                    pushed_at_formatted="N/A"
+                fi
+
+                type_echo "     Descrição: ${BRIGHT_BLUE}${description}${RESET}"
+                type_echo "     Estrelas:  ⭐ ${BRIGHT_YELLOW}${stars}${RESET}"
+                type_echo "     Forks:     🍴 ${BRIGHT_YELLOW}${forks}${RESET}"
+                type_echo "     Últ. Push: 🕒 ${BRIGHT_CYAN}${pushed_at_formatted}${RESET}"
+            elif [ $curl_exit_code -ne 0 ]; then
+                type_echo "     ${BRIGHT_RED}Falha ao buscar dados do GitHub (curl erro: $curl_exit_code). Verifique a conexão.${RESET}"
+            else # A API retornou uma mensagem de erro (ex: limite de taxa, não encontrado)
+                 local error_message
+                 error_message=$(echo "$github_data" | jq -r '.message // "Erro desconhecido da API"')
+                 type_echo "     ${BRIGHT_RED}Erro da API do GitHub: $error_message${RESET}"
+            fi
+        else
+            type_echo "     ${BRIGHT_YELLOW}jq não encontrado. Não é possível buscar detalhes do projeto GitHub.${RESET}"
+        fi
+    else
+        type_echo "     ${BRIGHT_YELLOW}curl não encontrado. Não é possível buscar dados do projeto GitHub.${RESET}"
+    fi
     echo ""
+}
+
+# Função para ações Git interativas
+interactive_git_actions() {
+    if ! command -v git >/dev/null 2>&1; then
+        return # Git não está instalado, não faz nada
+    fi
+    if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+        type_echo "Nota: Não está em um repositório Git. Ações Git puladas." "${BRIGHT_BLUE}"
+        echo ""
+        return # Não está dentro de um repositório Git
+    fi
+
+    echo "" # Espaçamento
+    type_echo "🔧 Ações Git disponíveis para o repositório atual:" "${BRIGHT_MAGENTA}${BOLD}"
+
+    local git_action_prompt
+    git_action_prompt="${BOLD}${BRIGHT_YELLOW}Escolha uma ação Git ou 'Continuar': ${RESET}"
+    local git_options=("Pull (branch atual)" "Mudar de Branch" "Ver Status" "Continuar sem ações Git")
+    local current_branch_for_prompt # Definida antes do loop para ser atualizada
+
+    while true; do
+        current_branch_for_prompt=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
+        type_echo "   Branch atual: ${BRIGHT_CYAN}${current_branch_for_prompt}${RESET}"
+
+        PS3="$git_action_prompt"
+        select git_opt in "${git_options[@]}"; do
+            case $git_opt in
+                "Pull (branch atual)")
+                    type_echo "   Executando 'git pull' para a branch '${current_branch_for_prompt}'..." "${BRIGHT_BLUE}"
+                    if git pull; then
+                        type_echo "   'git pull' concluído com sucesso." "${BRIGHT_GREEN}"
+                    else
+                        type_echo "   'git pull' falhou ou teve avisos. Verifique a saída acima." "${BRIGHT_RED}"
+                    fi
+                    break # Volta para o menu de ações Git
+                    ;;
+                "Mudar de Branch")
+                    local branches_list=()
+                    while IFS= read -r branch_item; do branches_list+=("$branch_item"); done < <(git for-each-ref --format='%(refname:short)' refs/heads/)
+                    
+                    if [ ${#branches_list[@]} -eq 0 ]; then
+                        type_echo "   Nenhuma branch local encontrada." "${BRIGHT_YELLOW}"
+                        break # Volta para o menu de ações Git
+                    fi
+
+                    branches_list+=("Cancelar mudança de branch")
+                    local branch_select_prompt="${BOLD}${BRIGHT_YELLOW}Selecione a branch para checkout: ${RESET}"
+                    
+                    type_echo "   Branches locais disponíveis:" "${BRIGHT_BLUE}"
+                    local old_ps3="$PS3" # Salva PS3 atual
+                    PS3="$branch_select_prompt"
+                    select new_branch in "${branches_list[@]}"; do
+                        if [ "$new_branch" == "Cancelar mudança de branch" ]; then
+                            type_echo "   Mudança de branch cancelada." "${BRIGHT_YELLOW}"
+                            break
+                        elif [ -n "$new_branch" ]; then
+                            type_echo "   Tentando checkout para a branch '${new_branch}'..." "${BRIGHT_BLUE}"
+                            if git checkout "$new_branch"; then
+                                type_echo "   Checkout para '${new_branch}' realizado com sucesso." "${BRIGHT_GREEN}"
+                            else
+                                type_echo "   Falha ao fazer checkout para '${new_branch}'. Verifique a saída e seu working directory." "${BRIGHT_RED}"
+                            fi
+                            break 
+                        else
+                            echo -e "${BRIGHT_RED}Opção inválida. Tente novamente.${RESET}"
+                        fi
+                    done
+                    PS3="$old_ps3" # Restaura PS3 do menu de ações Git
+                    break # Volta para o menu de ações Git
+                    ;;
+                "Ver Status")
+                    type_echo "   Status do Git (git status -sb):" "${BRIGHT_BLUE}"
+                    git status -sb # -s para short, -b para branch info
+                    echo "" 
+                    break # Volta para o menu de ações Git
+                    ;;
+                "Continuar sem ações Git")
+                    type_echo "   Continuando para a configuração do ambiente..." "${BRIGHT_GREEN}"
+                    echo ""
+                    return # Sai da função interactive_git_actions
+                    ;;
+                *)
+                    echo -e "${BRIGHT_RED}Opção inválida '$REPLY'. Tente novamente.${RESET}"
+                    ;;
+            esac
+        done
+        echo "" # Espaçamento antes de mostrar o menu de ações Git novamente ou sair
+    done
 }
 
 type_echo "Bem-vindo ao inicializador do OmniZap!" "${BRIGHT_CYAN}${BOLD}"
 type_echo "Este script irá configurar o NODE_ENV e, em seguida, tentará executar o script de inicialização." "${BRIGHT_BLUE}"
 echo ""
-display_system_info # Chama a função para exibir as informações
+display_system_info_and_project # Chama a função para exibir as informações
+interactive_git_actions # Chama a função para ações Git interativas
 
 # Verifica se NODE_ENV foi passado como argumento
 PRESET_NODE_ENV=""
