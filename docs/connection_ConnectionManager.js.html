@@ -80,6 +80,13 @@ const env = cleanEnv(process.env, {
   REDIS_DB: num({ default: 0 }),
 });
 
+// Constantes para status de conexão
+const STATUS = {
+  CONNECTED: 'open',
+  DISCONNECTED: 'close',
+  CONNECTING: 'connecting',
+};
+
 /**
  * @const {string}
  * @description Prefixo utilizado para chaves de metadados de grupo no Redis.
@@ -183,6 +190,79 @@ class ConnectionManager {
     this.eventEmitter = new EventEmitter();
 
     this.initializeRedisClient();
+  }
+
+  /**
+   * @method setCacheWithLog
+   * @private
+   * Método utilitário para salvar dados no cache Redis com logging.
+   * @param {string} key - A chave para o cache.
+   * @param {any} data - Os dados a serem salvos (serão stringificados).
+   * @param {number} ttl - O Time To Live (TTL) em segundos.
+   * @param {string} [context=''] - Contexto da operação para logging.
+   * @returns {Promise&lt;boolean>} True se salvo com sucesso, false caso contrário.
+   */
+  async setCacheWithLog(key, data, ttl, context = '') {
+    try {
+      if (this.redisClient) {
+        await this.redisClient.set(key, JSON.stringify(data), 'EX', ttl);
+        logger.debug(`Dados salvos no cache: ${key}`, {
+          label: 'RedisCache',
+          context,
+          key,
+          instanceId: this.instanceId,
+        });
+        return true;
+      }
+      logger.warn(`Cliente Redis não disponível. Não foi possível salvar no cache: ${key}`, {
+        label: 'RedisCache',
+        context,
+        key,
+        instanceId: this.instanceId,
+      });
+      return false;
+    } catch (error) {
+      logger.error(`Erro ao salvar no cache: ${key}. Erro: ${error.message}`, {
+        label: 'RedisCache',
+        error: error.message,
+        stack: error.stack,
+        context,
+        key,
+        instanceId: this.instanceId,
+      });
+      return false;
+    }
+  }
+
+  /**
+   * @method emitEvent
+   * @private
+   * Método utilitário para emitir eventos com logging.
+   * @param {string} eventName - O nome do evento a ser emitido.
+   * @param {any} data - Os dados a serem emitidos com o evento.
+   * @param {string} [context=''] - Contexto da emissão para logging.
+   */
+  emitEvent(eventName, data, context = '') {
+    try {
+      this.eventEmitter.emit(eventName, data);
+      logger.debug(`Evento '${eventName}' emitido`, {
+        label: 'EventEmitter',
+        context,
+        eventName,
+        dataKeys: typeof data === 'object' &amp;&amp; data !== null ? Object.keys(data) : undefined,
+        dataType: typeof data,
+        instanceId: this.instanceId,
+      });
+    } catch (error) {
+      logger.error(`Erro ao emitir evento '${eventName}': ${error.message}`, {
+        label: 'EventEmitter',
+        error: error.message,
+        stack: error.stack,
+        context,
+        eventName,
+        instanceId: this.instanceId,
+      });
+    }
   }
 
   /**
@@ -343,12 +423,12 @@ class ConnectionManager {
       qrcode.generate(qr, { small: true });
     }
 
-    if (connection === 'open') {
+    if (connection === STATUS.CONNECTED) {
       logger.info('Conexão com o WhatsApp estabelecida com sucesso!', { label: 'ConnectionManager' });
       this.resetReconnectionState();
     }
 
-    if (connection === 'close') {
+    if (connection === STATUS.DISCONNECTED) {
       const statusCode = lastDisconnect?.error?.output?.statusCode;
       logger.warn(`Conexão fechada. Razão: ${DisconnectReason[statusCode] || 'Desconhecida'} (Código: ${statusCode})`, { label: 'ConnectionManager' });
 
@@ -481,8 +561,8 @@ class ConnectionManager {
             receipts: msg.receipts || {},
             messageContentType,
             instanceId: this.instanceId,
-          };
-          await this.redisClient.set(redisMessageCacheKey, JSON.stringify(messageToStore), 'EX', REDIS_TTL_MESSAGE);
+          }; // prettier-ignore
+          await this.setCacheWithLog(redisMessageCacheKey, messageToStore, REDIS_TTL_MESSAGE, 'messages.upsert');
           logger.info(`Mensagem ${messageKey.id} de ${messageKey.remoteJid} salva no Redis.`, { label: 'RedisCache', messageKey, instanceId: this.instanceId });
 
           let dataForEvent = { ...messageToStore };
@@ -501,7 +581,7 @@ class ConnectionManager {
                 logger.debug(`Cache MISS para metadados do grupo ${groupJid} (enriquecimento da mensagem ${messageKey.id}). Tentando buscar via API...`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
                 groupMetadata = await this.client.groupMetadata(groupJid);
                 if (groupMetadata) {
-                  if (this.redisClient) await this.redisClient.set(groupCacheKey, JSON.stringify(groupMetadata), 'EX', REDIS_TTL_METADATA_SHORT);
+                  await this.setCacheWithLog(groupCacheKey, groupMetadata, REDIS_TTL_METADATA_SHORT, 'messages.upsert.groupMetadataEnrichment');
                   logger.info(`Metadados do grupo ${groupJid} buscados via API e salvos no Redis para enriquecimento da mensagem ${messageKey.id}.`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
                 } else {
                   logger.warn(`Não foi possível obter metadados para o grupo ${groupJid} via API (ex: bot não está no grupo) para enriquecimento da mensagem ${messageKey.id}.`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
@@ -534,8 +614,7 @@ class ConnectionManager {
               });
             }
           }
-          this.eventEmitter.emit('message:upsert:received', dataForEvent);
-          logger.debug(`Evento 'message:upsert:received' emitido para a mensagem ${messageKey.id}`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId, eventPayloadKeys: Object.keys(dataForEvent) });
+          this.emitEvent('message:upsert:received', dataForEvent, 'messages.upsert');
         } catch (error) {
           logger.error(`Erro ao processar mensagem ${messageKey?.id} (Redis, enriquecimento ou emissão de evento): ${error.message}`, { label: 'SyncError', messageKey, error: error.message, stack: error.stack, instanceId: this.instanceId });
         }
@@ -543,6 +622,104 @@ class ConnectionManager {
         logger.warn('Mensagem recebida sem chave completa, não foi possível processar.', { label: 'ConnectionManager', message: msg, instanceId: this.instanceId });
       }
       logger.debug(`Conteúdo da mensagem original: ${messageKey?.id}`, { label: 'ConnectionManager', messageKey, messageDetails: msg, instanceId: this.instanceId });
+    }
+  }
+
+  /**
+   * @method validateGroupMetadata
+   * @private
+   * Valida se o objeto de metadados do grupo é minimamente válido.
+   * @param {GroupMetadata|null|undefined} metadata - O objeto de metadados do grupo.
+   * @returns {boolean} True se os metadados forem válidos, false caso contrário.
+   */
+  validateGroupMetadata(metadata) {
+    return metadata &amp;&amp; typeof metadata === 'object' &amp;&amp; typeof metadata.id === 'string' &amp;&amp; metadata.id.endsWith('@g.us');
+  }
+
+  /**
+   * @method updateGroupMetadata
+   * @private
+   * Método utilitário para buscar e atualizar metadados de grupo no Redis e MySQL.
+   * @param {string} jid - O JID do grupo.
+   * @param {GroupMetadata} [existingMetadata=null] - Metadados existentes do grupo (opcional).
+   * @param {string} [context=''] - Contexto da atualização para logging.
+   * @returns {Promise&lt;GroupMetadata|null>} Os metadados atualizados do grupo ou null se não for possível obtê-los.
+   */
+  async updateGroupMetadata(jid, existingMetadata = null, context = '') {
+    try {
+      if (!jid || !jid.endsWith('@g.us')) {
+        logger.warn(`JID inválido fornecido para atualização de metadados de grupo: ${jid}${context ? ` (${context})` : ''}.`, {
+          label: 'ConnectionManager',
+          jid,
+          context,
+        });
+        return null;
+      }
+
+      // Verificar cache primeiro se existingMetadata não for fornecido
+      if (!existingMetadata &amp;&amp; this.redisClient) {
+        const cacheKey = `${REDIS_PREFIX_GROUP}${jid}`;
+        const cachedData = await this.redisClient.get(cacheKey);
+        if (cachedData) {
+          existingMetadata = JSON.parse(cachedData);
+          logger.debug(`Usando metadados em cache para grupo ${jid} no contexto '${context}'.`, {
+            label: 'RedisCache',
+            jid,
+            context,
+          });
+        }
+      }
+
+      let finalMetadata = existingMetadata;
+      if (!finalMetadata &amp;&amp; this.client) {
+        // Fetch from API if not provided or from cache
+        finalMetadata = await this.client.groupMetadata(jid);
+      }
+
+      if (!this.validateGroupMetadata(finalMetadata)) {
+        logger.warn(`Metadados de grupo inválidos ou não obtidos para ${jid} no contexto '${context}'.`, {
+          label: 'ConnectionManager',
+          jid,
+          metadataAttempted: finalMetadata, // Log the attempted metadata
+          context,
+        });
+        return null;
+      }
+
+      if (finalMetadata) {
+        // Redundant check due to validateGroupMetadata, but safe
+        const cacheKey = `${REDIS_PREFIX_GROUP}${jid}`;
+        await this.setCacheWithLog(cacheKey, finalMetadata, REDIS_TTL_METADATA_SHORT, context);
+
+        if (this.mysqlDbManager) {
+          await this.mysqlDbManager.upsertGroup(finalMetadata);
+          logger.debug(`Metadados do grupo ${jid} atualizados no MySQL${context ? ` (${context})` : ''}.`, {
+            label: 'MySQLSync',
+            jid,
+            context,
+          });
+        }
+        // Emitir evento após atualização bem-sucedida
+        this.emitEvent('group:metadata:updated', { jid, metadata: finalMetadata, context }, context);
+        return finalMetadata;
+      }
+      // This part should ideally not be reached if validateGroupMetadata works correctly
+      // and finalMetadata is null/undefined. Kept for safety, but the log above is more specific.
+      logger.warn(`Metadados do grupo ${jid} não puderam ser obtidos (após validação)${context ? ` (${context})` : ''}.`, {
+        label: 'ConnectionManager',
+        jid,
+        context,
+      });
+      return null;
+    } catch (error) {
+      logger.error(`Erro ao atualizar metadados do grupo ${jid}${context ? ` (${context})` : ''}: ${error.message}`, {
+        label: 'SyncError',
+        jid,
+        error: error.message,
+        stack: error.stack,
+        context,
+      });
+      return null;
     }
   }
 
@@ -560,29 +737,17 @@ class ConnectionManager {
    * 4. Se `this.mysqlDbManager` estiver configurado, os metadados do grupo também são salvos (upsert) no banco de dados MySQL.
    * 5. Erros durante o processo são registrados.
    */
-  handleGroupsUpdate(updates) {
-    logger.debug(`Evento 'groups.update' recebido. Número de atualizações: ${updates.length}`, { label: 'ConnectionManager', count: updates.length });
-    updates.forEach(async (groupUpdate) => {
+  async handleGroupsUpdate(updates) {
+    logger.debug(`Evento 'groups.update' recebido. Número de atualizações: ${updates.length}`, {
+      label: 'ConnectionManager',
+      count: updates.length,
+    });
+    for (const groupUpdate of updates) {
       const jid = groupUpdate.id;
       if (jid) {
-        try {
-          const metadata = await this.client.groupMetadata(jid);
-          if (metadata) {
-            const cacheKey = `${REDIS_PREFIX_GROUP}${jid}`;
-            if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(metadata), 'EX', REDIS_TTL_METADATA_SHORT);
-            logger.info(`Metadados do grupo ${jid} atualizados no Redis.`, { label: 'RedisCache' });
-
-            if (this.mysqlDbManager) {
-              await this.mysqlDbManager.upsertGroup(metadata);
-            }
-          } else {
-            logger.warn(`Metadados do grupo ${jid} não puderam ser obtidos (groups.update). O grupo não será atualizado no DB.`, { label: 'ConnectionManager', jid });
-          }
-        } catch (error) {
-          logger.error(`Erro ao atualizar metadados do grupo ${jid} no Redis ou MySQL (groups.update): ${error.message}`, { label: 'SyncError', jid, error: error.message });
-        }
+        await this.updateGroupMetadata(jid, null, 'groups.update');
       }
-    });
+    }
   }
 
   /**
@@ -602,23 +767,14 @@ class ConnectionManager {
    */
   async handleGroupParticipantsUpdate(event) {
     const { id: jid, action, participants } = event;
-    logger.debug(`Evento 'group-participants.update' recebido para o grupo ${jid}. Ação: ${action}. Participantes: ${participants.join(', ')}`, { label: 'ConnectionManager', jid, action });
-    try {
-      const metadata = await this.client.groupMetadata(jid);
-      if (metadata) {
-        const cacheKey = `${REDIS_PREFIX_GROUP}${jid}`;
-        if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(metadata), 'EX', REDIS_TTL_METADATA_SHORT);
-        logger.info(`Metadados do grupo ${jid} atualizados no Redis (participantes).`, { label: 'RedisCache' });
+    logger.debug(`Evento 'group-participants.update' recebido para o grupo ${jid}. Ação: ${action}. Participantes: ${participants.join(', ')}`, {
+      label: 'ConnectionManager',
+      jid,
+      action,
+      participants,
+    });
 
-        if (this.mysqlDbManager) {
-          await this.mysqlDbManager.upsertGroup(metadata);
-        }
-      } else {
-        logger.warn(`Metadados do grupo ${jid} não puderam ser obtidos (group-participants.update). O grupo não será atualizado no DB.`, { label: 'ConnectionManager', jid });
-      }
-    } catch (error) {
-      logger.error(`Erro ao obter ou salvar metadados do grupo ${jid} no Redis ou MySQL (group-participants.update): ${error.message}`, { label: 'SyncError', jid, error: error.message });
-    }
+    await this.updateGroupMetadata(jid, null, 'group-participants.update');
   }
 
   /**
@@ -635,21 +791,14 @@ class ConnectionManager {
    * 3. Erros durante o processo são registrados.
    */
   async handleGroupsUpsert(groups) {
-    logger.debug(`Evento 'groups.upsert' recebido. Número de grupos: ${groups.length}`, { label: 'ConnectionManager', count: groups.length });
+    logger.debug(`Evento 'groups.upsert' recebido. Número de grupos: ${groups.length}`, {
+      label: 'ConnectionManager',
+      count: groups.length,
+    });
     for (const groupMetadata of groups) {
       const jid = groupMetadata.id;
       if (jid) {
-        try {
-          const cacheKey = `${REDIS_PREFIX_GROUP}${jid}`;
-          if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(groupMetadata), 'EX', REDIS_TTL_METADATA_SHORT);
-          logger.info(`Metadados do grupo ${jid} (upsert) salvos no Redis.`, { label: 'RedisCache', jid });
-
-          if (this.mysqlDbManager) {
-            await this.mysqlDbManager.upsertGroup(groupMetadata);
-          }
-        } catch (error) {
-          logger.error(`Erro ao salvar metadados do grupo ${jid} (upsert) no Redis ou MySQL: ${error.message}`, { label: 'SyncError', jid, error: error.message });
-        }
+        await this.updateGroupMetadata(jid, groupMetadata, 'groups.upsert');
       }
     }
   }
@@ -678,8 +827,7 @@ class ConnectionManager {
       if (chat.id) {
         try {
           // prettier-ignore
-          const cacheKey = `${REDIS_PREFIX_CHAT}${chat.id}`;
-          if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(chat), 'EX', REDIS_TTL_METADATA_SHORT);
+          await this.setCacheWithLog(`${REDIS_PREFIX_CHAT}${chat.id}`, chat, REDIS_TTL_METADATA_SHORT, 'messaging-history.set.chat');
           logger.debug(`Chat ${chat.id} do histórico salvo no Redis.`, { label: 'RedisCache', jid: chat.id });
 
           if (this.mysqlDbManager) {
@@ -694,8 +842,7 @@ class ConnectionManager {
     for (const contact of contacts) {
       if (contact.id) {
         try {
-          const cacheKey = `${REDIS_PREFIX_CONTACT}${contact.id}`;
-          if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(contact), 'EX', REDIS_TTL_METADATA_LONG);
+          await this.setCacheWithLog(`${REDIS_PREFIX_CONTACT}${contact.id}`, contact, REDIS_TTL_METADATA_LONG, 'messaging-history.set.contact');
           logger.debug(`Contato ${contact.id} do histórico salvo no Redis.`, { label: 'RedisCache', jid: contact.id });
         } catch (error) {
           logger.error(`Erro ao salvar contato ${contact.id} do histórico no Redis: ${error.message}`, { label: 'RedisCache', jid: contact.id, error: error.message });
@@ -707,10 +854,9 @@ class ConnectionManager {
       logger.debug(`Mensagem do histórico recebida: ${msg.key?.id} de ${msg.key?.remoteJid}`, { label: 'ConnectionManager', messageKey: msg.key });
       if (msg.key &amp;&amp; msg.key.remoteJid &amp;&amp; msg.key.id &amp;&amp; this.redisClient) {
         const messageContentType = msg.message ? getContentType(msg.message) : null;
-        const cacheKey = `${REDIS_PREFIX_MESSAGE}${msg.key.remoteJid}:${msg.key.id}`;
         try {
           const messageToStore = { ...msg, receipts: msg.receipts || {}, messageContentType };
-          if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(messageToStore), 'EX', REDIS_TTL_MESSAGE);
+          await this.setCacheWithLog(`${REDIS_PREFIX_MESSAGE}${msg.key.remoteJid}:${msg.key.id}`, messageToStore, REDIS_TTL_MESSAGE, 'messaging-history.set.message');
           logger.info(`Mensagem do histórico ${msg.key.id} salva no Redis.`, { label: 'RedisCache', messageKey: msg.key });
 
           if (this.mysqlDbManager) {
@@ -807,11 +953,8 @@ class ConnectionManager {
               timestamp: receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp,
             };
             const ttl = await this.redisClient.ttl(messageCacheKey);
-            if (ttl !== null &amp;&amp; ttl > 0) {
-              await this.redisClient.set(messageCacheKey, JSON.stringify(messageData), 'EX', ttl);
-            } else {
-              await this.redisClient.set(messageCacheKey, JSON.stringify(messageData), 'EX', REDIS_TTL_MESSAGE);
-            } // prettier-ignore
+            const finalTTL = (ttl !== null &amp;&amp; ttl > 0) ? ttl : REDIS_TTL_MESSAGE; // prettier-ignore
+            await this.setCacheWithLog(messageCacheKey, messageData, finalTTL, 'message-receipt.update');
             logger.info(`Recibo para mensagem ${key.id} (usuário ${receipt.userJid}, tipo ${receipt.type}) atualizado no Redis.`, { label: 'RedisCache', messageKey: key, userJid: receipt.userJid, receiptType: receipt.type });
 
             if (this.mysqlDbManager) {
@@ -846,8 +989,7 @@ class ConnectionManager {
     for (const chat of chats) {
       if (chat.id) {
         try {
-          const cacheKey = `${REDIS_PREFIX_CHAT}${chat.id}`;
-          if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(chat), 'EX', REDIS_TTL_METADATA_SHORT);
+          await this.setCacheWithLog(`${REDIS_PREFIX_CHAT}${chat.id}`, chat, REDIS_TTL_METADATA_SHORT, 'chats.upsert');
           logger.info(`Chat ${chat.id} (upsert) salvo no Redis.`, { label: 'RedisCache', jid: chat.id });
 
           if (this.mysqlDbManager) {
@@ -877,8 +1019,7 @@ class ConnectionManager {
     for (const chatUpdate of updates) {
       if (chatUpdate.id) {
         try {
-          const cacheKey = `${REDIS_PREFIX_CHAT}${chatUpdate.id}`;
-          if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(chatUpdate), 'EX', REDIS_TTL_METADATA_SHORT);
+          await this.setCacheWithLog(`${REDIS_PREFIX_CHAT}${chatUpdate.id}`, chatUpdate, REDIS_TTL_METADATA_SHORT, 'chats.update');
           logger.info(`Chat ${chatUpdate.id} (update) atualizado no Redis.`, { label: 'RedisCache', jid: chatUpdate.id });
 
           if (this.mysqlDbManager) {
@@ -936,8 +1077,7 @@ class ConnectionManager {
     for (const contact of contacts) {
       if (contact.id) {
         try {
-          const cacheKey = `${REDIS_PREFIX_CONTACT}${contact.id}`;
-          if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(contact), 'EX', REDIS_TTL_METADATA_LONG);
+          await this.setCacheWithLog(`${REDIS_PREFIX_CONTACT}${contact.id}`, contact, REDIS_TTL_METADATA_LONG, 'contacts.upsert');
           logger.info(`Contato ${contact.id} (upsert) salvo no Redis.`, { label: 'RedisCache', jid: contact.id });
         } catch (error) {
           logger.error(`Erro ao salvar contato ${contact.id} (upsert) no Redis: ${error.message}`, { label: 'RedisCache', jid: contact.id, error: error.message });
@@ -970,8 +1110,7 @@ class ConnectionManager {
     for (const contactUpdate of updates) {
       if (contactUpdate.id) {
         try {
-          const cacheKey = `${REDIS_PREFIX_CONTACT}${contactUpdate.id}`;
-          if (this.redisClient) await this.redisClient.set(cacheKey, JSON.stringify(contactUpdate), 'EX', REDIS_TTL_METADATA_LONG);
+          await this.setCacheWithLog(`${REDIS_PREFIX_CONTACT}${contactUpdate.id}`, contactUpdate, REDIS_TTL_METADATA_LONG, 'contacts.update');
           logger.info(`Contato ${contactUpdate.id} (update) atualizado no Redis.`, { label: 'RedisCache', jid: contactUpdate.id });
         } catch (error) {
           logger.error(`Erro ao atualizar contato ${contactUpdate.id} (update) no Redis: ${error.message}`, { label: 'RedisCache', jid: contactUpdate.id, error: error.message });
@@ -1161,7 +1300,7 @@ Determina se a reconexão deve ser tentada com base no motivo da desconexão.</a
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 17:52:33 GMT-0400 (Horário Padrão do Amazonas)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 18:27:25 GMT-0400 (Horário Padrão do Amazonas)
 </footer>
 
 <script> prettyPrint(); </script>
