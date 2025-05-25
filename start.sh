@@ -407,7 +407,7 @@ show_advanced_settings() {
     echo ""
     type_echo "⚙️ Menu de Configurações Avançadas:" "${BRIGHT_MAGENTA}${BOLD}"
     
-    local adv_options=("Limpar cache NPM" "Reinstalar dependências" "Criar .env de .env.example" "Voltar ao fluxo principal")
+    local adv_options=("Limpar cache NPM" "Reinstalar dependências" "Criar .env de .env.example" "Criar Backup do Projeto" "Voltar ao fluxo principal")
     local adv_ps3_prompt="${BOLD}${BRIGHT_YELLOW}Escolha uma opção avançada: ${RESET}"
     
     PS3="$adv_ps3_prompt"
@@ -445,6 +445,30 @@ show_advanced_settings() {
                     type_echo "   ⚠️  Arquivo .env.example não encontrado." "${BRIGHT_YELLOW}"
                 fi
                 ;;
+            "Criar Backup do Projeto")
+                local backup_dir_name="project_backups"
+                local project_name
+                project_name=$(basename "$PWD") # Pega o nome do diretório atual como nome do projeto
+                local timestamp
+                timestamp=$(date +"%Y%m%d_%H%M%S")
+                local backup_filename="${project_name}_backup_${timestamp}.tar.gz"
+                local backup_full_path="../${backup_dir_name}/${backup_filename}" # Salva um nível acima do projeto
+
+                type_echo "   📦 Criando backup do projeto '${project_name}'..." "${BRIGHT_BLUE}"
+                type_echo "   O backup será salvo em: ${BRIGHT_CYAN}${backup_full_path}${RESET}"
+                
+                # Cria o diretório de backup um nível acima, se não existir
+                mkdir -p "../${backup_dir_name}"
+
+                # Cria o arquivo tar.gz do diretório atual ('.')
+                # Exclui node_modules, .git, e o próprio diretório de backups se estivesse dentro do projeto.
+                # Como estamos salvando um nível acima, não precisamos excluir o backup_dir_name daqui.
+                if tar -czvf "${backup_full_path}" --exclude="./node_modules" --exclude="./.git" --exclude="./logs" --exclude="./${backup_dir_name}" . ; then
+                    type_echo "   ✅ Backup '${backup_filename}' criado com sucesso em '../${backup_dir_name}/'!" "${BRIGHT_GREEN}"
+                else
+                    type_echo "   ❌ Falha ao criar o backup do projeto." "${BRIGHT_RED}"
+                fi
+                ;;
             "Voltar ao fluxo principal")
                 type_echo "   Retornando ao fluxo principal..." "${BRIGHT_GREEN}"
                 echo ""
@@ -480,10 +504,87 @@ log_execution() {
     } >> "$log_file"
 }
 
+# Função para verificar dependências do projeto
+check_project_dependencies() {
+    if [ ! -f "package.json" ]; then
+        type_echo "   ⚠️ Arquivo package.json não encontrado. Pulando verificação de dependências." "${BRIGHT_YELLOW}"
+        echo ""
+        return
+    fi
+
+    type_echo "📦 Analisando dependências do projeto..." "${BRIGHT_MAGENTA}${BOLD}"
+    
+    # Verifica se jq está instalado para parsing do JSON
+    if ! command -v jq >/dev/null 2>&1; then
+        type_echo "   ⚠️ 'jq' não está instalado. Necessário para análise detalhada de dependências. Pulando." "${BRIGHT_YELLOW}"
+        echo ""
+        return
+    fi
+    
+    # Verifica se npm está instalado
+    if ! command -v npm >/dev/null 2>&1; then
+        type_echo "   ⚠️ 'npm' não está instalado. Necessário para análise de dependências. Pulando." "${BRIGHT_YELLOW}"
+        echo ""
+        return
+    fi
+
+    type_echo "   🔍 Verificando versões das dependências (npm outdated)..." "${BRIGHT_BLUE}"
+    
+    # Verifica dependências desatualizadas
+    # A saída JSON do npm outdated é mais confiável para parsear
+    local outdated_deps_json
+    outdated_deps_json=$(npm outdated --json 2>/dev/null) # Suprime stderr para não poluir
+    
+    if [ $? -eq 0 ] && [ -n "$outdated_deps_json" ] && [ "$outdated_deps_json" != "{}" ]; then
+        type_echo "   📊 Status das dependências desatualizadas:" "${BRIGHT_CYAN}"
+        # Formata a saída JSON para ser mais legível
+        echo "$outdated_deps_json" | jq -r 'to_entries | .[] | "     📦 \(.key): \(.value.current) (wanted: \(.value.wanted), latest: \(.value.latest))"'
+
+        echo -n -e "\n${BRIGHT_YELLOW}   Deseja tentar atualizar as dependências para as versões 'wanted' (npm update)? (s/N): ${RESET}"
+        read -r update_choice
+        if [[ "$update_choice" =~ ^[SsYy]$ ]]; then
+            type_echo "   🔄 Atualizando dependências (npm update)..." "${BRIGHT_BLUE}"
+            if npm update; then
+                type_echo "   ✅ Dependências atualizadas com sucesso para as versões 'wanted'!" "${BRIGHT_GREEN}"
+            else
+                type_echo "   ❌ Erro ao atualizar dependências. Verifique a saída." "${BRIGHT_RED}"
+            fi
+        fi
+    else
+        type_echo "   ✅ Todas as dependências parecem estar atualizadas ou não há informações de desatualização." "${BRIGHT_GREEN}"
+    fi
+
+    # Verifica vulnerabilidades
+    type_echo "\n   🔒 Verificando vulnerabilidades (npm audit)..." "${BRIGHT_BLUE}"
+    local audit_json
+    audit_json=$(npm audit --json 2>/dev/null) # Suprime stderr
+    local total_vulns
+    total_vulns=$(echo "$audit_json" | jq '.metadata.vulnerabilities.total // 0') # Padrão para 0 se não encontrado
+        
+    if [ "$total_vulns" -gt 0 ]; then
+        type_echo "   ⚠️ Encontradas ${BRIGHT_YELLOW}${total_vulns}${RESET} vulnerabilidades."
+        echo "$audit_json" | jq -r '([.vulnerabilities | to_entries[] | {name: .key, severity: .value.severity, via: (.value.via[] | if type=="string" then . else .name end )}] | group_by(.severity) | .[] | "     \(.[0].severity | ascii_upcase): \(map(.name) | unique | join(", "))")' | sed 's/^/     /'
+        echo -n -e "${BRIGHT_YELLOW}   Deseja tentar corrigir vulnerabilidades automaticamente (npm audit fix)? (s/N): ${RESET}"
+        read -r fix_choice
+        if [[ "$fix_choice" =~ ^[SsYy]$ ]]; then
+            type_echo "   🛠️ Executando 'npm audit fix'..." "${BRIGHT_BLUE}"
+            if npm audit fix; then
+                type_echo "   ✅ Tentativa de correção de vulnerabilidades concluída." "${BRIGHT_GREEN}"
+            else
+                type_echo "   ⚠️  'npm audit fix' falhou ou algumas vulnerabilidades podem requerer atenção manual." "${BRIGHT_YELLOW}"
+            fi
+        fi
+    else
+        type_echo "   ✅ Nenhuma vulnerabilidade encontrada ou não foi possível verificar." "${BRIGHT_GREEN}"
+    fi
+    echo ""
+}
+
 type_echo "Bem-vindo ao inicializador do OmniZap!" "${BRIGHT_CYAN}${BOLD}"
 type_echo "Este script irá configurar o NODE_ENV e, em seguida, tentará executar o script de inicialização." "${BRIGHT_BLUE}"
 echo ""
 display_system_info_and_project # Chama a função para exibir as informações
+check_project_dependencies # Verifica e analisa as dependências do projeto
 check_repository_updates # Verifica atualizações do Git
 interactive_git_actions # Chama a função para ações Git interativas
 show_advanced_settings # Oferece menu de configurações avançadas
