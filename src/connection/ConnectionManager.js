@@ -8,6 +8,7 @@ const Redis = require('ioredis');
 const EventEmitter = require('events');
 
 const logger = require('../utils/logs/logger');
+require('dotenv').config();
 
 /**
  * JSDoc type definitions for Baileys and other external types.
@@ -48,7 +49,7 @@ const env = cleanEnv(process.env, {
   AUTH_STATE_PATH: str({ default: path.join(__dirname, 'temp', 'auth_state_minimal') }),
   REDIS_HOST: str({ default: 'localhost' }),
   REDIS_PORT: num({ default: 6379 }),
-  REDIS_PASSWORD: str({ default: '' }),
+  REDIS_PASSWORD: str({ default: '275818' }),
   REDIS_DB: num({ default: 0 }),
 });
 

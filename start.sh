@@ -19,11 +19,15 @@ BRIGHT_CYAN=$'\033[1;96m'
 # Flag para controle do cursor
 CURSOR_HIDDEN=""
 
+# Variável global para o caminho do script de inicialização, usada no logging
+INIT_SCRIPT_PATH=""
+
 # Função de cleanup para restaurar o cursor em caso de interrupção
 cleanup() {
     if [ -n "$CURSOR_HIDDEN" ] && command -v tput >/dev/null 2>&1; then
         tput cnorm # Restaura o cursor
     fi
+    log_execution $? # Log com o código de saída real
 }
 trap cleanup EXIT INT TERM
 # Funções de Animação e Utilidades Visuais
@@ -50,605 +54,6 @@ type_echo() {
     fi
 }
 
-# Helper para executar comandos NVM em um subshell com NVM carregado
-# Retorna a saída do comando nvm ou string vazia em caso de falha/nvm não encontrado.
-run_nvm_command() {
-    local nvm_script_path=""
-    # Prioriza NVM_DIR se estiver definido, caso contrário, o caminho padrão.
-    if [ -n "$NVM_DIR" ] && [ -s "$NVM_DIR/nvm.sh" ]; then
-        nvm_script_path="$NVM_DIR/nvm.sh"
-    elif [ -s "$HOME/.nvm/nvm.sh" ]; then
-        nvm_script_path="$HOME/.nvm/nvm.sh"
-    fi
-
-    if [ -n "$nvm_script_path" ]; then
-        ( # Abre subshell
-        # shellcheck source=/dev/null
-        . "$nvm_script_path" --no-use # Carrega NVM sem ativar .nvmrc automaticamente
-        nvm "$@" # Executa o comando nvm passado como argumento (ex: nvm current, nvm version x.y.z)
-        ) 2>/dev/null # Suprime erros do nvm ou do source, retorna apenas a saída padrão
-    fi
-    # Se nvm_script_path estiver vazio, a função implicitamente retorna string vazia (sem saída)
-}
-
-# Função para verificar requisitos básicos do sistema
-check_system_requirements_inline() {
-    type_echo "   Verificando requisitos básicos do sistema..." "${BRIGHT_MAGENTA}"
-    
-    # Verificar memória disponível (em GB)
-    if command -v free >/dev/null 2>&1 && command -v awk >/dev/null 2>&1; then
-        local mem_available
-        mem_available=$(free -m | awk 'NR==2{printf "%.1f", $7/1024}')
-        type_echo "     💾 Memória disponível (aprox.): ${BRIGHT_BLUE}${mem_available}GB${RESET}"
-    else
-        type_echo "     💾 Memória disponível: ${BRIGHT_YELLOW}Não foi possível verificar (free/awk não encontrados)${RESET}"
-    fi
-    
-    # Verificar espaço em disco disponível no diretório atual
-    if command -v df >/dev/null 2>&1 && command -v awk >/dev/null 2>&1; then
-        local disk_space
-        disk_space=$(df -h . | awk 'NR==2{print $4}')
-        type_echo "     💿 Espaço em disco (partição atual): ${BRIGHT_BLUE}${disk_space}${RESET}"
-    else
-        type_echo "     💿 Espaço em disco: ${BRIGHT_YELLOW}Não foi possível verificar (df/awk não encontrados)${RESET}"
-    fi
-    
-    # Verificar núcleos de CPU
-    if command -v nproc >/dev/null 2>&1; then
-        local cpu_cores
-        cpu_cores=$(nproc)
-        type_echo "     🔧 Núcleos de CPU: ${BRIGHT_BLUE}${cpu_cores}${RESET}"
-    else
-        type_echo "     🔧 Núcleos de CPU: ${BRIGHT_YELLOW}Não foi possível verificar (nproc não encontrado)${RESET}"
-    fi
-}
-
-# Função para exibir informações do sistema e projeto
-display_system_info_and_project() {
-    type_echo "🔍 Verificando informações do ambiente..." "${BRIGHT_MAGENTA}${BOLD}"
-    check_system_requirements_inline # Adiciona verificação de requisitos do sistema aqui
-
-    # Node.js e NVM
-    if command -v node >/dev/null 2>&1; then
-        local node_version
-        node_version=$(node -v)
-        type_echo "   Versão do Node.js:   ${BRIGHT_GREEN}${node_version}${RESET}"
-
-        local nvm_current_node
-        nvm_current_node=$(run_nvm_command current)
-
-        if [ -n "$nvm_current_node" ] && [ "$nvm_current_node" != "none" ] && [ "$nvm_current_node" != "system" ]; then
-            type_echo "   NVM Node Ativo:    ${BRIGHT_CYAN}${nvm_current_node}${RESET}"
-            if [ "$node_version" != "$nvm_current_node" ]; then
-                 type_echo "   ${BRIGHT_YELLOW}Nota: 'node -v' (${node_version}) difere de 'nvm current' (${nvm_current_node}). Verifique sua configuração NVM/PATH.${RESET}"
-            fi
-        elif [ -n "$nvm_current_node" ]; then # NVM detectado, mas 'current' é 'system' ou 'none'
-            type_echo "   NVM Detectado:     (nvm current: ${nvm_current_node})" "${BRIGHT_BLUE}"
-        fi
-
-        if [ -f .nvmrc ]; then
-            local nvmrc_content nvmrc_resolved_version current_resolved_version
-            nvmrc_content=$(cat .nvmrc | tr -d '[:space:]') # Remove espaços
-            type_echo "   Projeto .nvmrc:    ${BRIGHT_CYAN}Requer Node ~${nvmrc_content}${RESET}"
-
-            if [ -n "$nvm_current_node" ]; then # Só faz sentido comparar se NVM está ativo
-                nvmrc_resolved_version=$(run_nvm_command version "$nvmrc_content")
-                current_resolved_version=$(run_nvm_command version current) # 'nvm version current' resolve alias como 'default' para a versão real
-
-                if [ -n "$nvmrc_resolved_version" ] && [ -n "$current_resolved_version" ] && [ "$nvmrc_resolved_version" != "$current_resolved_version" ]; then
-                    type_echo "   ${BRIGHT_YELLOW}Atenção: NVM Node ativo (${current_resolved_version}) difere do .nvmrc (~${nvmrc_content} -> ${nvmrc_resolved_version}).${RESET}"
-                    type_echo "   ${BRIGHT_YELLOW}Considere executar 'nvm use' ou 'nvm install ${nvmrc_content}'.${RESET}"
-                elif [ -z "$nvmrc_resolved_version" ] && [ "$nvm_current_node" != "none" ] && [ "$nvm_current_node" != "system" ]; then # nvmrc não resolvido pelo nvm
-                    type_echo "   ${BRIGHT_YELLOW}Atenção: Versão do .nvmrc (~${nvmrc_content}) não reconhecida/instalada via NVM.${RESET}"
-                fi
-            fi
-        fi
-    else
-        type_echo "   Versão do Node.js:   ${BRIGHT_YELLOW}Não encontrado${RESET}"
-        if [ -f .nvmrc ]; then type_echo "   Projeto .nvmrc:    ${BRIGHT_CYAN}Requer Node ~$(cat .nvmrc | tr -d '[:space:]') (Node.js não encontrado)${RESET}"; fi
-    fi
-
-    # Verificar package.json e dependências
-    if [ -f "package.json" ]; then
-        type_echo "   Verificando dependências do projeto (package.json)..." "${BRIGHT_MAGENTA}"
-        
-        if [ ! -d "node_modules" ]; then
-            echo -n -e "${BRIGHT_YELLOW}   ⚠️  node_modules não encontrado. Deseja instalar as dependências agora? (s/N): ${RESET}"
-            read -r install_deps
-            if [[ "$install_deps" =~ ^[SsYy]$ ]]; then
-                type_echo "   🔄 Instalando dependências (npm install)..." "${BRIGHT_BLUE}"
-                if npm install; then
-                    type_echo "   ✅ Dependências instaladas com sucesso!" "${BRIGHT_GREEN}"
-                else
-                    type_echo "   ❌ Falha ao instalar dependências. Verifique os erros acima." "${BRIGHT_RED}"
-                fi
-            else
-                type_echo "   Skipping dependency installation." "${BRIGHT_YELLOW}"
-            fi
-        else
-            type_echo "   ✅ node_modules encontrado." "${BRIGHT_GREEN}"
-        fi
-    fi
-
-    if command -v npm >/dev/null 2>&1; then
-        local npm_version
-        npm_version=$(npm -v)
-        type_echo "   Versão do NPM:       ${BRIGHT_GREEN}${npm_version}${RESET}"
-
-        # Verificar e oferecer atualização do NPM
-        local latest_npm_version
-        # Silenciar erros do npm view caso não haja conexão ou npm esteja quebrado
-        latest_npm_version=$(npm view npm version 2>/dev/null)
-
-        if [[ -n "$latest_npm_version" && "$npm_version" != "$latest_npm_version" ]]; then
-            type_echo "   Nova versão do NPM disponível: ${BRIGHT_YELLOW}${latest_npm_version}${RESET}"
-            
-            # Usar echo -e para o prompt do read para garantir a interpretação das cores
-            echo -n -e "${BOLD}${BRIGHT_CYAN}Deseja atualizar o NPM para a versão ${latest_npm_version}? (s/N): ${RESET}"
-            read -r confirm_npm_update
-
-            if [[ "$confirm_npm_update" =~ ^[SsYy]$ ]]; then
-                type_echo "   Atualizando NPM... (Isso pode levar um momento e pode exigir privilégios de administrador)" "${BRIGHT_MAGENTA}"
-                if npm install -g npm@"$latest_npm_version"; then # Tenta instalar a versão específica mais recente
-                    local new_npm_version
-                    new_npm_version=$(npm -v) # Pega a versão atualizada
-                    type_echo "   NPM atualizado com sucesso para: ${BRIGHT_GREEN}${new_npm_version}${RESET}"
-                else
-                    type_echo "   Falha ao atualizar o NPM. Verifique os erros acima ou tente manualmente (ex: sudo npm install -g npm@latest)." "${BRIGHT_RED}"
-                fi
-            else
-                type_echo "   Atualização do NPM ignorada." "${BRIGHT_YELLOW}"
-            fi
-        fi
-    else
-        type_echo "   Versão do NPM:       ${BRIGHT_YELLOW}Não encontrado${RESET}"
-    fi
-
-    if command -v git >/dev/null 2>&1; then
-        local git_version
-        git_version=$(git --version)
-        type_echo "   Versão do Git:       ${BRIGHT_GREEN}${git_version}${RESET}"
-
-        # Informações adicionais do Git se estiver em um repositório
-        if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-            local current_branch remote_url
-            current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null) # Lida com detached HEAD
-            type_echo "   Git Branch Atual:    ${BRIGHT_CYAN}${current_branch}${RESET}"
-            remote_url=$(git config --get remote.origin.url 2>/dev/null)
-            if [ -n "$remote_url" ]; then
-                type_echo "   Git Remote (origin): ${BRIGHT_CYAN}${remote_url}${RESET}"
-            fi
-        fi
-    else
-        type_echo "   Versão do Git:       ${BRIGHT_YELLOW}Não encontrado${RESET}"
-    fi
-
-    if ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1; then
-        type_echo "   Conexão Internet:  ${BRIGHT_GREEN}Ativa ✅${RESET}"
-    else
-        type_echo "   Conexão Internet:  ${BRIGHT_RED}Inativa ou instável ❌${RESET}"
-    fi
-
-    # GitHub Project Info
-    type_echo "   Informações do Projeto (GitHub: Kaikygr/omnizap):" "${BRIGHT_MAGENTA}${BOLD}"
-    if command -v curl >/dev/null 2>&1; then
-        if command -v jq >/dev/null 2>&1; then
-            local api_url="https://api.github.com/repos/Kaikygr/omnizap"
-            local github_data
-            # Adicionado -L para seguir redirecionamentos e timeouts
-            github_data=$(curl -s -L --connect-timeout 5 -m 10 "$api_url")
-            local curl_exit_code=$?
-
-            # Verifica se curl foi bem sucedido E se o JSON não contém uma mensagem de erro da API
-            if [ $curl_exit_code -eq 0 ] && [ -n "$github_data" ] && ! echo "$github_data" | jq -e '.message' > /dev/null 2>&1; then
-                local description stars forks pushed_at_raw pushed_at_formatted
-                description=$(echo "$github_data" | jq -r '.description // "N/A"')
-                stars=$(echo "$github_data" | jq -r '.stargazers_count // "N/A"')
-                forks=$(echo "$github_data" | jq -r '.forks_count // "N/A"')
-                pushed_at_raw=$(echo "$github_data" | jq -r '.pushed_at // "N/A"')
-
-                if [ "$pushed_at_raw" != "N/A" ]; then
-                    # Tenta formatar a data se 'date -d' for capaz
-                    if date -d "$pushed_at_raw" > /dev/null 2>&1; then
-                        pushed_at_formatted=$(date -d "$pushed_at_raw" +"%d/%m/%Y às %H:%M:%S %Z")
-                    else
-                        pushed_at_formatted="$pushed_at_raw (formato original)"
-                    fi
-                else
-                    pushed_at_formatted="N/A"
-                fi
-
-                type_echo "     Descrição: ${BRIGHT_BLUE}${description}${RESET}"
-                type_echo "     Estrelas:  ⭐ ${BRIGHT_YELLOW}${stars}${RESET}"
-                type_echo "     Forks:     🍴 ${BRIGHT_YELLOW}${forks}${RESET}"
-                type_echo "     Últ. Push: 🕒 ${BRIGHT_CYAN}${pushed_at_formatted}${RESET}"
-            elif [ $curl_exit_code -ne 0 ]; then
-                type_echo "     ${BRIGHT_RED}Falha ao buscar dados do GitHub (curl erro: $curl_exit_code). Verifique a conexão.${RESET}"
-            else # A API retornou uma mensagem de erro (ex: limite de taxa, não encontrado)
-                 local error_message
-                 error_message=$(echo "$github_data" | jq -r '.message // "Erro desconhecido da API"')
-                 type_echo "     ${BRIGHT_RED}Erro da API do GitHub: $error_message${RESET}"
-            fi
-        else
-            type_echo "     ${BRIGHT_YELLOW}jq não encontrado. Não é possível buscar detalhes do projeto GitHub.${RESET}"
-        fi
-    else
-        type_echo "     ${BRIGHT_YELLOW}curl não encontrado. Não é possível buscar dados do projeto GitHub.${RESET}"
-    fi
-    echo ""
-}
-
-# Função para verificar atualizações do repositório Git
-check_repository_updates() {
-    if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        type_echo "🔄 Verificando atualizações do repositório Git..." "${BRIGHT_MAGENTA}${BOLD}"
-        
-        type_echo "   Atualizando informações do remote (git remote update)..." "${BRIGHT_BLUE}"
-        if git remote update >/dev/null 2>&1; then
-            local current_git_branch commits_behind
-            current_git_branch=$(git rev-parse --abbrev-ref HEAD) # Mais portável que --show-current
-            
-            # Tenta verificar contra origin/branch_atual. Pode falhar se a branch não existir no remote.
-            commits_behind=$(git rev-list HEAD.."origin/${current_git_branch}" --count 2>/dev/null) 
-            
-            if [[ -n "$commits_behind" && "$commits_behind" -gt 0 ]]; then
-                type_echo "   ⚠️  Existem ${BRIGHT_YELLOW}${commits_behind}${RESET} commits disponíveis na branch remota 'origin/${current_git_branch}'."
-                echo -n -e "${BRIGHT_CYAN}   Deseja atualizar o projeto (git pull) agora? (s/N): ${RESET}"
-                read -r update_repo
-                if [[ "$update_repo" =~ ^[SsYy]$ ]]; then
-                    type_echo "   Executando 'git pull'..." "${BRIGHT_BLUE}"
-                    if git pull; then
-                        type_echo "   ✅ Projeto atualizado com sucesso!" "${BRIGHT_GREEN}"
-                    else
-                        type_echo "   ❌ Falha ao atualizar o projeto (git pull). Verifique os erros." "${BRIGHT_RED}"
-                    fi
-                fi
-            else
-                type_echo "   ✅ Projeto parece estar atualizado com 'origin/${current_git_branch}' ou não foi possível verificar." "${BRIGHT_GREEN}"
-            fi
-        else
-            type_echo "   ⚠️ Não foi possível executar 'git remote update'. Verifique a conexão e configuração do remote." "${BRIGHT_YELLOW}"
-        fi
-        echo ""
-    fi
-}
-
-# Função para ações Git interativas
-interactive_git_actions() {
-    if ! command -v git >/dev/null 2>&1; then
-        return # Git não está instalado, não faz nada
-    fi
-    if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-        type_echo "Nota: Não está em um repositório Git. Ações Git puladas." "${BRIGHT_BLUE}"
-        echo ""
-        return # Não está dentro de um repositório Git
-    fi
-
-    echo "" # Espaçamento
-    type_echo "🔧 Ações Git disponíveis para o repositório atual:" "${BRIGHT_MAGENTA}${BOLD}"
-
-    local git_action_prompt
-    git_action_prompt="${BOLD}${BRIGHT_YELLOW}Escolha uma ação Git ou 'Continuar': ${RESET}"
-    local git_options=("Pull (branch atual)" "Mudar de Branch" "Ver Status" "Continuar sem ações Git")
-    local current_branch_for_prompt # Definida antes do loop para ser atualizada
-
-    while true; do
-        current_branch_for_prompt=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
-        type_echo "   Branch atual: ${BRIGHT_CYAN}${current_branch_for_prompt}${RESET}"
-
-        PS3="$git_action_prompt"
-        select git_opt in "${git_options[@]}"; do
-            case $git_opt in
-                "Pull (branch atual)")
-                    type_echo "   Executando 'git pull' para a branch '${current_branch_for_prompt}'..." "${BRIGHT_BLUE}"
-                    if git pull; then
-                        type_echo "   'git pull' concluído com sucesso." "${BRIGHT_GREEN}"
-                    else
-                        type_echo "   'git pull' falhou ou teve avisos. Verifique a saída acima." "${BRIGHT_RED}"
-                    fi
-                    break # Volta para o menu de ações Git
-                    ;;
-                "Mudar de Branch")
-                    local branches_list=()
-                    while IFS= read -r branch_item; do branches_list+=("$branch_item"); done < <(git for-each-ref --format='%(refname:short)' refs/heads/)
-                    
-                    if [ ${#branches_list[@]} -eq 0 ]; then
-                        type_echo "   Nenhuma branch local encontrada." "${BRIGHT_YELLOW}"
-                        break # Volta para o menu de ações Git
-                    fi
-
-                    branches_list+=("Cancelar mudança de branch")
-                    local branch_select_prompt="${BOLD}${BRIGHT_YELLOW}Selecione a branch para checkout: ${RESET}"
-                    
-                    type_echo "   Branches locais disponíveis:" "${BRIGHT_BLUE}"
-                    local old_ps3="$PS3" # Salva PS3 atual
-                    PS3="$branch_select_prompt"
-                    select new_branch in "${branches_list[@]}"; do
-                        if [ "$new_branch" == "Cancelar mudança de branch" ]; then
-                            type_echo "   Mudança de branch cancelada." "${BRIGHT_YELLOW}"
-                            break
-                        elif [ -n "$new_branch" ]; then
-                            type_echo "   Tentando checkout para a branch '${new_branch}'..." "${BRIGHT_BLUE}"
-                            if git checkout "$new_branch"; then
-                                type_echo "   Checkout para '${new_branch}' realizado com sucesso." "${BRIGHT_GREEN}"
-                            else
-                                type_echo "   Falha ao fazer checkout para '${new_branch}'. Verifique a saída e seu working directory." "${BRIGHT_RED}"
-                            fi
-                            break 
-                        else
-                            echo -e "${BRIGHT_RED}Opção inválida. Tente novamente.${RESET}"
-                        fi
-                    done
-                    PS3="$old_ps3" # Restaura PS3 do menu de ações Git
-                    break # Volta para o menu de ações Git
-                    ;;
-                "Ver Status")
-                    type_echo "   Status do Git (git status -sb):" "${BRIGHT_BLUE}"
-                    git status -sb # -s para short, -b para branch info
-                    echo "" 
-                    break # Volta para o menu de ações Git
-                    ;;
-                "Continuar sem ações Git")
-                    type_echo "   Continuando para a configuração do ambiente..." "${BRIGHT_GREEN}"
-                    echo ""
-                    return # Sai da função interactive_git_actions
-                    ;;
-                *)
-                    echo -e "${BRIGHT_RED}Opção inválida '$REPLY'. Tente novamente.${RESET}"
-                    ;;
-            esac
-        done
-        echo "" # Espaçamento antes de mostrar o menu de ações Git novamente ou sair
-    done
-}
-
-# Função para menu de Configurações Avançadas
-show_advanced_settings() {
-    echo ""
-    type_echo "⚙️ Menu de Configurações Avançadas:" "${BRIGHT_MAGENTA}${BOLD}"
-    
-    local adv_options=("Limpar cache NPM" "Reinstalar dependências" "Criar .env de .env.example" "Criar Backup do Projeto" "Voltar ao fluxo principal")
-    local adv_ps3_prompt="${BOLD}${BRIGHT_YELLOW}Escolha uma opção avançada: ${RESET}"
-    
-    PS3="$adv_ps3_prompt"
-    select adv_opt in "${adv_options[@]}"; do
-        case $adv_opt in
-            "Limpar cache NPM")
-                type_echo "   🧹 Limpando cache do NPM (npm cache clean --force)..." "${BRIGHT_BLUE}"
-                if npm cache clean --force; then
-                    type_echo "   ✅ Cache do NPM limpo com sucesso!" "${BRIGHT_GREEN}"
-                else
-                    type_echo "   ❌ Falha ao limpar o cache do NPM." "${BRIGHT_RED}"
-                fi
-                # Não quebra, permite mais ações avançadas ou voltar
-                ;;
-            "Reinstalar dependências")
-                type_echo "   🔄 Reinstalando dependências (removendo node_modules e package-lock.json)..." "${BRIGHT_BLUE}"
-                rm -rf node_modules package-lock.json
-                if npm install; then
-                    type_echo "   ✅ Dependências reinstaladas com sucesso!" "${BRIGHT_GREEN}"
-                else
-                    type_echo "   ❌ Falha ao reinstalar dependências." "${BRIGHT_RED}"
-                fi
-                ;;
-            "Criar .env de .env.example")
-                if [ -f ".env.example" ]; then
-                    type_echo "   📝 Tentando criar .env a partir de .env.example (sem sobrescrever)..." "${BRIGHT_BLUE}"
-                    if cp -n .env.example .env; then # -n para não sobrescrever se .env já existir
-                        if [ -f ".env" ]; then # Verifica se foi criado ou já existia
-                             type_echo "   ✅ Arquivo .env está presente. Se foi criado agora, configure-o." "${BRIGHT_GREEN}"
-                        fi
-                    else
-                        type_echo "   ❌ Falha ao copiar .env.example. Verifique as permissões." "${BRIGHT_RED}"
-                    fi
-                else
-                    type_echo "   ⚠️  Arquivo .env.example não encontrado." "${BRIGHT_YELLOW}"
-                fi
-                ;;
-            "Criar Backup do Projeto")
-                local backup_dir_name="project_backups"
-                local project_name
-                project_name=$(basename "$PWD") # Pega o nome do diretório atual como nome do projeto
-                local timestamp
-                timestamp=$(date +"%Y%m%d_%H%M%S")
-                local backup_filename="${project_name}_backup_${timestamp}.tar.gz"
-                local backup_full_path="../${backup_dir_name}/${backup_filename}" # Salva um nível acima do projeto
-
-                type_echo "   📦 Criando backup do projeto '${project_name}'..." "${BRIGHT_BLUE}"
-                type_echo "   O backup será salvo em: ${BRIGHT_CYAN}${backup_full_path}${RESET}"
-                
-                # Cria o diretório de backup um nível acima, se não existir
-                mkdir -p "../${backup_dir_name}"
-
-                # Cria o arquivo tar.gz do diretório atual ('.')
-                # Exclui node_modules, .git, e o próprio diretório de backups se estivesse dentro do projeto.
-                # Como estamos salvando um nível acima, não precisamos excluir o backup_dir_name daqui.
-                if tar -czvf "${backup_full_path}" --exclude="./node_modules" --exclude="./.git" --exclude="./logs" --exclude="./${backup_dir_name}" . ; then
-                    type_echo "   ✅ Backup '${backup_filename}' criado com sucesso em '../${backup_dir_name}/'!" "${BRIGHT_GREEN}"
-                else
-                    type_echo "   ❌ Falha ao criar o backup do projeto." "${BRIGHT_RED}"
-                fi
-                ;;
-            "Voltar ao fluxo principal")
-                type_echo "   Retornando ao fluxo principal..." "${BRIGHT_GREEN}"
-                echo ""
-                return
-                ;;
-            *) 
-                echo -e "${BRIGHT_RED}Opção inválida '$REPLY'. Tente novamente.${RESET}"
-                ;;
-        esac
-        # Após cada ação (exceto Voltar), o menu é reexibido.
-        # Para reexibir o prompt corretamente após uma ação:
-        echo -e "\n${adv_ps3_prompt}"
-    done
-}
-
-# Função para Log de Execuções
-log_execution() {
-    local exit_c="${1:-?}" # Usa o argumento ou o exit status do último comando se não fornecido
-    local log_dir="logs"
-    local log_file="$log_dir/start_script.log"
-    
-    # Criar diretório de logs se não existir
-    mkdir -p "$log_dir"
-    
-    # Registrar execução
-    {
-        echo "=== Execução em $(date) ==="
-        echo "NODE_ENV: ${NODE_ENV:-Nao definido}"
-        echo "Script de Inicialização: ${INIT_SCRIPT_PATH:-Nao definido}"
-        echo "Código de Saída Final: $exit_c"
-        echo "=========================="
-        echo ""
-    } >> "$log_file"
-}
-
-# Função para verificar dependências do projeto
-check_project_dependencies() {
-    if [ ! -f "package.json" ]; then
-        type_echo "   ⚠️ Arquivo package.json não encontrado. Pulando verificação de dependências." "${BRIGHT_YELLOW}"
-        echo ""
-        return
-    fi
-
-    type_echo "📦 Analisando dependências do projeto..." "${BRIGHT_MAGENTA}${BOLD}"
-    
-    # Verifica se jq está instalado para parsing do JSON
-    if ! command -v jq >/dev/null 2>&1; then
-        type_echo "   ⚠️ 'jq' não está instalado. Necessário para análise detalhada de dependências. Pulando." "${BRIGHT_YELLOW}"
-        echo ""
-        return
-    fi
-    
-    # Verifica se npm está instalado
-    if ! command -v npm >/dev/null 2>&1; then
-        type_echo "   ⚠️ 'npm' não está instalado. Necessário para análise de dependências. Pulando." "${BRIGHT_YELLOW}"
-        echo ""
-        return
-    fi
-
-    type_echo "   🔍 Verificando versões das dependências (npm outdated)..." "${BRIGHT_BLUE}"
-    
-    # Verifica dependências desatualizadas
-    # A saída JSON do npm outdated é mais confiável para parsear
-    local outdated_deps_json
-    outdated_deps_json=$(npm outdated --json 2>/dev/null) # Suprime stderr para não poluir
-    
-    if [ $? -eq 0 ] && [ -n "$outdated_deps_json" ] && [ "$outdated_deps_json" != "{}" ]; then
-        type_echo "   📊 Status das dependências desatualizadas:" "${BRIGHT_CYAN}"
-        # Formata a saída JSON para ser mais legível
-        echo "$outdated_deps_json" | jq -r 'to_entries | .[] | "     📦 \(.key): \(.value.current) (wanted: \(.value.wanted), latest: \(.value.latest))"'
-
-        echo -n -e "\n${BRIGHT_YELLOW}   Deseja tentar atualizar as dependências para as versões 'wanted' (npm update)? (s/N): ${RESET}"
-        read -r update_choice
-        if [[ "$update_choice" =~ ^[SsYy]$ ]]; then
-            type_echo "   🔄 Atualizando dependências (npm update)..." "${BRIGHT_BLUE}"
-            if npm update; then
-                type_echo "   ✅ Dependências atualizadas com sucesso para as versões 'wanted'!" "${BRIGHT_GREEN}"
-            else
-                type_echo "   ❌ Erro ao atualizar dependências. Verifique a saída." "${BRIGHT_RED}"
-            fi
-        fi
-    else
-        type_echo "   ✅ Todas as dependências parecem estar atualizadas ou não há informações de desatualização." "${BRIGHT_GREEN}"
-    fi
-
-    # Verifica vulnerabilidades
-    type_echo "\n   🔒 Verificando vulnerabilidades (npm audit)..." "${BRIGHT_BLUE}"
-    local audit_json
-    audit_json=$(npm audit --json 2>/dev/null) # Suprime stderr
-    local total_vulns
-    total_vulns=$(echo "$audit_json" | jq '.metadata.vulnerabilities.total // 0') # Padrão para 0 se não encontrado
-        
-    if [ "$total_vulns" -gt 0 ]; then
-        type_echo "   ⚠️ Encontradas ${BRIGHT_YELLOW}${total_vulns}${RESET} vulnerabilidades."
-        echo "$audit_json" | jq -r '([.vulnerabilities | to_entries[] | {name: .key, severity: .value.severity, via: (.value.via[] | if type=="string" then . else .name end )}] | group_by(.severity) | .[] | "     \(.[0].severity | ascii_upcase): \(map(.name) | unique | join(", "))")' | sed 's/^/     /'
-        echo -n -e "${BRIGHT_YELLOW}   Deseja tentar corrigir vulnerabilidades automaticamente (npm audit fix)? (s/N): ${RESET}"
-        read -r fix_choice
-        if [[ "$fix_choice" =~ ^[SsYy]$ ]]; then
-            type_echo "   🛠️ Executando 'npm audit fix'..." "${BRIGHT_BLUE}"
-            if npm audit fix; then
-                type_echo "   ✅ Tentativa de correção de vulnerabilidades concluída." "${BRIGHT_GREEN}"
-            else
-                type_echo "   ⚠️  'npm audit fix' falhou ou algumas vulnerabilidades podem requerer atenção manual." "${BRIGHT_YELLOW}"
-            fi
-        fi
-    else
-        type_echo "   ✅ Nenhuma vulnerabilidade encontrada ou não foi possível verificar." "${BRIGHT_GREEN}"
-    fi
-    echo ""
-}
-
-type_echo "Bem-vindo ao inicializador do OmniZap!" "${BRIGHT_CYAN}${BOLD}"
-type_echo "Este script irá configurar o NODE_ENV e, em seguida, tentará executar o script de inicialização." "${BRIGHT_BLUE}"
-echo ""
-display_system_info_and_project # Chama a função para exibir as informações
-check_project_dependencies # Verifica e analisa as dependências do projeto
-check_repository_updates # Verifica atualizações do Git
-interactive_git_actions # Chama a função para ações Git interativas
-show_advanced_settings # Oferece menu de configurações avançadas
-
-# Verifica se NODE_ENV foi passado como argumento
-PRESET_NODE_ENV=""
-if [ -n "$1" ]; then
-    case "$1" in
-        development|production)
-            PRESET_NODE_ENV="$1"
-            export NODE_ENV="$PRESET_NODE_ENV"
-            type_echo "NODE_ENV definido via argumento: ${BRIGHT_GREEN}${BOLD}$NODE_ENV${RESET}"
-            ;;
-        *)
-            type_echo "Argumento inválido para NODE_ENV: '$1'. Ignorando e mostrando o menu." "${BRIGHT_YELLOW}"
-            ;;
-    esac
-fi
-
-# Se NODE_ENV não foi definido por argumento, mostra o menu de seleção
-if [ -z "$NODE_ENV" ]; then
-    PS3="${BOLD}${BRIGHT_YELLOW}🚀 Por favor, escolha o modo de início para NODE_ENV: ${RESET}"
-    options=("development" "production" "Cancelar")
-    select opt in "${options[@]}"
-    do
-        case $opt in
-            "development")
-                export NODE_ENV="development"
-                echo -e "${BRIGHT_GREEN}NODE_ENV foi definido como: ${BOLD}$NODE_ENV${RESET}"
-                break
-                ;;
-            "production")
-                export NODE_ENV="production"
-                echo -e "${BRIGHT_GREEN}NODE_ENV foi definido como: ${BOLD}$NODE_ENV${RESET}"
-                break
-                ;;
-            "Cancelar")
-                log_execution 0 # Log de cancelamento pelo usuário como saída normal
-                echo -e "${BRIGHT_YELLOW}Operação cancelada pelo usuário.${RESET}"
-                exit 0
-                ;;
-            *)
-                # A variável $REPLY contém a entrada do usuário se não corresponder a um número de opção
-                echo -e "${BRIGHT_RED}Opção inválida '$REPLY'. Tente novamente.${RESET}"
-                # O loop select continuará
-                ;;
-        esac
-    done
-
-    # Verifica se NODE_ENV foi definido (caso o usuário pressione Ctrl+D ou outra interrupção no select)
-    if [ -z "$NODE_ENV" ]; then
-        echo -e "${BRIGHT_RED}Nenhum ambiente foi selecionado. Saindo sem inicializar.${RESET}"
-        log_execution 1
-        exit 1
-    fi
-fi
-
-echo ""
-type_echo "Preparando para inicializar o índice..." "${BRIGHT_BLUE}${BOLD}"
-
-# Caminho para o script de inicialização. Pode ser sobrescrito pela variável de ambiente OMNIZAP_INIT_SCRIPT.
-DEFAULT_INIT_SCRIPT_PATH="./src/connection/index.js"
-INIT_SCRIPT_PATH="${OMNIZAP_INIT_SCRIPT:-$DEFAULT_INIT_SCRIPT_PATH}"
-
 # Função Spinner
 spinner() {
     local pid=$1
@@ -674,41 +79,95 @@ spinner() {
     fi
 }
 
+# --- Função de Execução Principal e Seleção de NODE_ENV ---
+run_application_with_selected_env() {
+    local selected_node_env=""
+    PS3="${BOLD}${BRIGHT_YELLOW}🚀 Por favor, escolha o modo de início para NODE_ENV: ${RESET}"
+    local options_env=("development" "production" "Cancelar")
+    select opt_env in "${options_env[@]}"; do
+        case $opt_env in
+            "development"|"production")
+                selected_node_env="$opt_env"
+                export NODE_ENV="$selected_node_env"
+                echo -e "${BRIGHT_GREEN}NODE_ENV foi definido como: ${BOLD}$NODE_ENV${RESET}"
+                break
+                ;;
+            "Cancelar")
+                type_echo "Operação cancelada pelo usuário." "${BRIGHT_YELLOW}"
+                exit 0
+                ;;
+            *)
+                echo -e "${BRIGHT_RED}Opção inválida '$REPLY'. Tente novamente.${RESET}"
+                ;;
+        esac
+    done
+
+    if [ -z "$NODE_ENV" ]; then
+        type_echo "Nenhum ambiente foi selecionado. Saindo." "${BRIGHT_RED}"
+        exit 1
+    fi
+
+    echo ""
+    type_echo "Preparando para inicializar o aplicativo..." "${BRIGHT_BLUE}${BOLD}"
+
+    local DEFAULT_INIT_SCRIPT_PATH="./src/connection/index.js"
+    # INIT_SCRIPT_PATH é global para ser acessível pela função de log no trap EXIT
+    INIT_SCRIPT_PATH="${OMNIZAP_INIT_SCRIPT:-$DEFAULT_INIT_SCRIPT_PATH}"
+
 # Verifica se Node.js está instalado
 if ! command -v node >/dev/null 2>&1; then
     type_echo "Erro: Node.js não encontrado. Por favor, instale o Node.js para continuar." "${BRIGHT_RED}${BOLD}"
-    log_execution 1
     exit 1
 fi
 
-if [ -f "$INIT_SCRIPT_PATH" ]; then
+    if [ -f "$INIT_SCRIPT_PATH" ]; then
     echo -n -e "${BRIGHT_CYAN}🚀 Executando: node $INIT_SCRIPT_PATH (NODE_ENV=${BOLD}$NODE_ENV${RESET}${BRIGHT_CYAN})... ${RESET}"
 
     # O 'export NODE_ENV' acima garante que o processo filho (node) herde a variável.
     node "$INIT_SCRIPT_PATH" &
-    NODE_PID=$!
+    local NODE_PID=$!
 
     spinner $NODE_PID # Mostra o spinner enquanto o node executa
 
     wait $NODE_PID # Aguarda o processo node terminar
-    exit_code=$?
+    local exit_code=$?
 
     if [ $exit_code -eq 0 ]; then
-        # echo -e "${BRIGHT_GREEN}${BOLD}✓ Sucesso!${RESET}" # Removido para evitar duplicidade com type_echo
-        type_echo "Script de inicialização do índice concluído." "${BRIGHT_GREEN}"
+        type_echo "Aplicativo concluído com sucesso." "${BRIGHT_GREEN}"
+        exit 0
     else
-        # echo -e "${BRIGHT_RED}${BOLD}✗ Falha!${RESET}" # Removido para evitar duplicidade com type_echo
-        type_echo "Script de inicialização do índice falhou com o código de saída: $exit_code." "${BRIGHT_RED}"
-        log_execution "$exit_code"
-        exit $exit_code # Propaga o código de erro
+        type_echo "Aplicativo falhou com o código de saída: $exit_code." "${BRIGHT_RED}"
+        exit "$exit_code"
     fi
-else
+    else
     type_echo "Erro: Script de inicialização não encontrado em '$INIT_SCRIPT_PATH'." "${BRIGHT_RED}${BOLD}"
     type_echo "Verifique o caminho, o nome do arquivo ou a variável de ambiente OMNIZAP_INIT_SCRIPT." "${BRIGHT_YELLOW}"
-    echo -e "${BRIGHT_RED}Nenhuma ação de inicialização foi executada.${RESET}"
-    log_execution 1
-    exit 1 # Sair com erro se o script não for encontrado
-fi
+        exit 1
+    fi
+}
 
-log_execution 0 # Log de saída bem-sucedida
-exit 0 
+# Função para Log de Execuções
+log_execution() {
+    local exit_c="${1:-$?}" # Usa o argumento ou o exit status do último comando
+    local log_dir="logs"
+    local log_file="$log_dir/start_script.log"
+    mkdir -p "$log_dir"
+    {
+        echo "=== Execução em $(date) ==="
+        echo "NODE_ENV: ${NODE_ENV:-Nao definido}"
+        echo "Script de Inicialização: ${INIT_SCRIPT_PATH:-Nao definido}" # INIT_SCRIPT_PATH pode não estar setado globalmente aqui
+        echo "Código de Saída do Script: $exit_c"
+        echo "=========================="
+        echo ""
+    } >> "$log_file"
+}
+
+# --- Loop Principal do Menu ---
+main_loop() {
+    type_echo "Bem-vindo ao inicializador do OmniZap!" "${BRIGHT_CYAN}${BOLD}"
+    type_echo "Este script irá configurar o NODE_ENV e executar o aplicativo." "${BRIGHT_BLUE}"
+    echo ""
+    run_application_with_selected_env
+}
+
+main_loop
