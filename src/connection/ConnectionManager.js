@@ -49,7 +49,7 @@ const env = cleanEnv(process.env, {
   AUTH_STATE_PATH: str({ default: path.join(__dirname, 'temp', 'auth_state_minimal') }),
   REDIS_HOST: str({ default: 'localhost' }),
   REDIS_PORT: num({ default: 6379 }),
-  REDIS_PASSWORD: str({ default: '275818' }),
+  REDIS_PASSWORD: str({ default: ' ' }),
   REDIS_DB: num({ default: 0 }),
 });
 
@@ -538,36 +538,7 @@ class ConnectionManager {
           await this.setCacheWithLog(redisMessageCacheKey, messageToStore, REDIS_TTL_MESSAGE, 'messages.upsert');
           logger.info(`Mensagem ${messageKey.id} de ${messageKey.remoteJid} salva no Redis.`, { label: 'RedisCache', messageKey, instanceId: this.instanceId });
 
-          let dataForEvent = { ...messageToStore };
-
-          const isGroupMessage = messageKey.remoteJid?.endsWith('@g.us');
-          if (isGroupMessage) {
-            const groupJid = messageKey.remoteJid;
-            let groupMetadata = null;
-            const groupCacheKey = `${REDIS_PREFIX_GROUP}${groupJid}`;
-            try {
-              const cachedGroupData = this.redisClient ? await this.redisClient.get(groupCacheKey) : null;
-              if (cachedGroupData) {
-                groupMetadata = JSON.parse(cachedGroupData);
-                logger.debug(`Metadados do grupo ${groupJid} obtidos do cache Redis para enriquecimento da mensagem ${messageKey.id}.`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
-              } else {
-                logger.debug(`Cache MISS para metadados do grupo ${groupJid} (enriquecimento da mensagem ${messageKey.id}). Tentando buscar via API...`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
-                groupMetadata = await this.client.groupMetadata(groupJid);
-                if (groupMetadata) {
-                  await this.setCacheWithLog(groupCacheKey, groupMetadata, REDIS_TTL_METADATA_SHORT, 'messages.upsert.groupMetadataEnrichment');
-                  logger.info(`Metadados do grupo ${groupJid} buscados via API e salvos no Redis para enriquecimento da mensagem ${messageKey.id}.`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
-                } else {
-                  logger.warn(`Não foi possível obter metadados para o grupo ${groupJid} via API (ex: bot não está no grupo) para enriquecimento da mensagem ${messageKey.id}.`, { label: 'ConnectionManager', messageKey, groupJid, instanceId: this.instanceId });
-                }
-              }
-            } catch (groupError) {
-              logger.warn(`Erro ao buscar/processar metadados do grupo ${groupJid} para enriquecimento da mensagem ${messageKey.id}: ${groupError.message}`, { label: 'ConnectionManager', messageKey, groupJid, error: groupError.message, stack: groupError.stack, instanceId: this.instanceId });
-            }
-            if (groupMetadata) {
-              dataForEvent.groupMetadata = groupMetadata;
-            }
-          }
-
+          let dataForEvent = { ...messageToStore }; // Manter a estrutura base do evento
           if (this.mysqlDbManager) {
             try {
               const dbPersistedMessage = await this.mysqlDbManager.upsertMessage(messageToStore);

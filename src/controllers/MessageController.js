@@ -110,8 +110,6 @@ async function processIncomingMessage(message, baileysClient) {
     instanceId,
   });
 
-  console.log(message);
-
   if (isFromMe) {
     logger.debug(`[MessageController] Mensagem ID: ${messageId} é de mim mesmo, ignorando para respostas automáticas.`, { label: 'MessageController', messageId, instanceId });
   } else {
