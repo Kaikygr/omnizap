@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Script para inicializar o index dentro de connection,
