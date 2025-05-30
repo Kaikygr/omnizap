@@ -94,2159 +94,6 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="DEFAULT_LOG_LEVEL"><span class="type-signature">(constant) </span>DEFAULT_LOG_LEVEL<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Nível de log padrão para a aplicação, determinado pela configuração de ambiente.
-Obtido diretamente de `env.LOG_LEVEL` após validação.
-Este valor é usado como o nível de log para novas instâncias de logger, a menos que seja sobrescrito.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line66">line 66</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="ECOSYSTEM_NAME"><span class="type-signature">(constant) </span>ECOSYSTEM_NAME<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Nome do serviço ou ecossistema ao qual a aplicação pertence, conforme definido
-pela variável de ambiente `ECOSYSTEM_NAME`.
-Este nome é usado para categorizar logs e é incluído nos metadados padrão de cada log,
-facilitando a filtragem e análise de logs em sistemas centralizados.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line85">line 85</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="INSTANCE_ID"><span class="type-signature">(constant) </span>INSTANCE_ID<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Identificador único para a instância da aplicação, utilizado para diferenciar logs
-em ambientes com múltiplas instâncias rodando simultaneamente (ex: em um cluster ou PM2).
-Deriva de `env.ECOSYSTEM_NAME`. Se `env.ECOSYSTEM_NAME` for 'system' (o padrão),
-`INSTANCE_ID` será 'local', indicando uma execução local ou não clusterizada.
-Caso contrário, `INSTANCE_ID` assume o valor de `env.ECOSYSTEM_NAME`.
-Este ID é incluído automaticamente nos metadados padrão de cada mensagem de log.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line74">line 74</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="IS_PRODUCTION"><span class="type-signature">(constant) </span>IS_PRODUCTION<span class="type-signature"> :boolean</span></h4>
-
-
-
-
-<div class="description">
-    Indica se o ambiente atual é de produção.
-É `true` se `env.NODE_ENV` for 'production', caso contrário `false`.
-Utilizado para lógicas condicionais baseadas no ambiente.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">boolean</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line58">line 58</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="LOG_COLORS"><span class="type-signature">(constant) </span>LOG_COLORS<span class="type-signature"> :Object.&lt;string, string></span></h4>
-
-
-
-
-<div class="description">
-    Mapeamento de níveis de log para cores, usado pelo Winston para colorir a saída no console.
-Facilita a visualização e distinção dos níveis de log durante o desenvolvimento.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object.&lt;string, string></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line155">line 155</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="LOG_DEFAULTS"><span class="type-signature">(constant) </span>LOG_DEFAULTS<span class="type-signature"> :Object</span></h4>
-
-
-
-
-<div class="description">
-    Define as configurações padrão para os arquivos de log.
-Estas configurações são usadas ao criar os transportes de arquivo do Winston,
-a menos que sejam sobrescritas.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>LOG_DIR</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Caminho absoluto para o diretório onde os arquivos de log serão armazenados.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>APP_LOG_FILENAME</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Padrão de nome para os arquivos de log da aplicação. Inclui `%DATE%` para rotação diária.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ERROR_LOG_FILENAME</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Padrão de nome para os arquivos de log de erros. Inclui `%DATE%`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>WARN_LOG_FILENAME</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Padrão de nome para os arquivos de log de avisos. Inclui `%DATE%`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>DATE_PATTERN</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Padrão de data usado para a rotação dos arquivos de log (ex: 'YYYY-MM-DD').</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ZIPPED_ARCHIVE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Define se os arquivos de log arquivados devem ser compactados (gzip).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>MAX_SIZE_APP</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Tamanho máximo para os arquivos de log da aplicação antes da rotação (ex: '20m' para 20MB).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>MAX_FILES_APP</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Número máximo de dias para manter os arquivos de log da aplicação (ex: '14d' para 14 dias).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>MAX_SIZE_ERROR</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Tamanho máximo para os arquivos de log de erros.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>MAX_FILES_ERROR</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Número máximo de dias para manter os arquivos de log de erros.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>MAX_SIZE_WARN</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Tamanho máximo para os arquivos de log de avisos.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>MAX_FILES_WARN</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Número máximo de dias para manter os arquivos de log de avisos.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>FILE_PERMISSIONS</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Permissões (em octal) para os arquivos de log criados.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>DIR_PERMISSIONS</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Permissões (em octal) para o diretório de log, se for criado.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line118">line 118</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="LOG_DIR_PATH"><span class="type-signature">(constant) </span>LOG_DIR_PATH<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Caminho absoluto para o diretório onde os arquivos de log serão armazenados.
-Formado pela junção de `PROJECT_ROOT` com o subdiretório 'logs'.
-Este é o diretório que a função `ensureLogDirectoryExists` tentará criar se não existir.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line110">line 110</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="LOG_LEVELS"><span class="type-signature">(constant) </span>LOG_LEVELS<span class="type-signature"> :Object.&lt;string, number></span></h4>
-
-
-
-
-<div class="description">
-    Mapeamento dos níveis de log para seus valores numéricos correspondentes.
-Utilizado pelo Winston para definir a prioridade dos logs.
-Níveis mais baixos indicam maior prioridade (ex: 'error' é mais prioritário que 'debug').
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object.&lt;string, number></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line9">line 9</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="LOG_LEVEL_NAMES"><span class="type-signature">(constant) </span>LOG_LEVEL_NAMES<span class="type-signature"> :Array.&lt;string></span></h4>
-
-
-
-
-<div class="description">
-    Array contendo os nomes dos níveis de log disponíveis.
-Derivado das chaves do objeto `LOG_LEVELS`.
-Utilizado para validação da variável de ambiente `LOG_LEVEL`.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Array.&lt;string></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line25">line 25</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="NODE_ENV"><span class="type-signature">(constant) </span>NODE_ENV<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Ambiente de execução atual da aplicação (ex: 'development', 'production', 'test').
-Obtido diretamente de `env.NODE_ENV` após validação.
-Este valor influencia o comportamento do logger (ex: nível de log padrão, formatação)
-e é incluído nos metadados padrão de cada log.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line94">line 94</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="PROJECT_ROOT"><span class="type-signature">(constant) </span>PROJECT_ROOT<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Caminho absoluto para o diretório raiz do projeto.
-Determinado resolvendo o caminho a partir do diretório do arquivo atual (`__dirname`),
-subindo três níveis na estrutura de diretórios (`../../../`).
-Utilizado como base para construir outros caminhos, como o diretório de logs.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line102">line 102</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_PREFIX_CHAT"><span class="type-signature">(constant) </span>REDIS_PREFIX_CHAT<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Prefixo utilizado para chaves de dados de chat no Redis.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line71">line 71</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_PREFIX_CONTACT"><span class="type-signature">(constant) </span>REDIS_PREFIX_CONTACT<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Prefixo utilizado para chaves de dados de contato no Redis.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line76">line 76</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_PREFIX_GROUP"><span class="type-signature">(constant) </span>REDIS_PREFIX_GROUP<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Prefixo utilizado para chaves de metadados de grupo no Redis.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line66">line 66</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_PREFIX_MESSAGE"><span class="type-signature">(constant) </span>REDIS_PREFIX_MESSAGE<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    Prefixo utilizado para chaves de dados de mensagem no Redis.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line81">line 81</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_TTL_MESSAGE"><span class="type-signature">(constant) </span>REDIS_TTL_MESSAGE<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    TTL (Time To Live) em segundos para mensagens no Redis. (7 dias)
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line97">line 97</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_TTL_METADATA_LONG"><span class="type-signature">(constant) </span>REDIS_TTL_METADATA_LONG<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    TTL (Time To Live) em segundos para metadados de longa duração no Redis (e.g., contatos). (24 horas)
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line92">line 92</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_TTL_METADATA_SHORT"><span class="type-signature">(constant) </span>REDIS_TTL_METADATA_SHORT<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    TTL (Time To Live) em segundos para metadados de curta duração no Redis (e.g., grupos, chats). (1 hora)
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line87">line 87</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="REDIS_TTL_RECEIPT"><span class="type-signature">(constant) </span>REDIS_TTL_RECEIPT<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    TTL (Time To Live) em segundos para recibos de mensagem no Redis (usado como fallback se o TTL da mensagem original não puder ser determinado). (7 dias)
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line102">line 102</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="consoleFormat"><span class="type-signature">(constant) </span>consoleFormat<span class="type-signature"> :winston.Logform.Format</span></h4>
-
-
-
-
-<div class="description">
-    Formato customizado para logs exibidos no console.
-Inclui timestamp, colorização, tratamento de `splat` (interpolação de strings),
-extração de metadados e formatação customizada da string de log.
-A formatação visa clareza e legibilidade, incluindo informações como serviço, instância e label.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">winston.Logform.Format</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line171">line 171</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="env"><span class="type-signature">(constant) </span>env<span class="type-signature"> :object</span></h4>
-
-
-
-
-<div class="description">
-    Objeto contendo as variáveis de ambiente validadas e processadas pelo `envalid`.
-Este objeto fornece acesso seguro e tipado às configurações do ambiente.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">object</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>NODE_ENV</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O ambiente atual da aplicação (development, production, test).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>LOG_LEVEL</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O nível de log configurado para a aplicação.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ECOSYSTEM_NAME</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Nome do serviço ou aplicação, usado para identificar a origem dos logs.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line33">line 33</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="fileFormat"><span class="type-signature">(constant) </span>fileFormat<span class="type-signature"> :winston.Logform.Format</span></h4>
-
-
-
-
-<div class="description">
-    Formato customizado para logs armazenados em arquivos.
-Inclui timestamp, tratamento de `splat`, serialização de erros (incluindo stack trace),
-extração de metadados e formatação final em JSON para fácil parseamento e análise posterior.
-O JSON é indentado para melhor legibilidade humana quando inspecionado diretamente.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">winston.Logform.Format</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line205">line 205</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="logger"><span class="type-signature">(constant) </span>logger<span class="type-signature"> :winston.Logger</span></h4>
-
-
-
-
-<div class="description">
-    Instância principal do logger Winston, configurada com as definições padrão.
-Este é o logger exportado e deve ser usado em toda a aplicação para registrar mensagens.
-Ele é inicializado chamando `createLoggerInstance()` sem argumentos,
-utilizando assim as configurações derivadas das variáveis de ambiente e dos `LOG_DEFAULTS`.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">winston.Logger</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line409">line 409</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const logger = require('./logger'); // Supondo que este arquivo seja logger.js
-logger.info('Aplicação iniciada com sucesso.', { port: 3000 });
-logger.error('Falha ao conectar ao banco de dados.', { error: new Error('DB Timeout') });</code></pre>
-
-
-
-        
-    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -2501,7 +348,7 @@ o método não faz nada além de registrar um aviso (se aplicável).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line987">line 987</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line799">line 799</a>
     </li></ul></dd>
     
 
@@ -2595,9 +442,9 @@ logger.info('Aplicação encerrada.');</code></pre>
     
 
     
-    <h4 class="name" id="connectConecta-seaoWhatsAppusandooestadodeautentica%C3%A7%C3%A3ocarregado.ConfiguraosocketBaileyscomasop%C3%A7%C3%B5esnecess%C3%A1rias,incluindologger,informa%C3%A7%C3%B5esdonavegador,eafun%C3%A7%C3%A3o%60cachedGroupMetadata%60paraotimizarocarregamentodemetadadosdegrupoapartirdoRedis."><span class="type-signature"></span>connect
+    <h4 class="name" id="connectConecta-seaoWhatsAppusandooestadodeautentica%C3%A7%C3%A3ocarregado.ConfiguraosocketBaileyscomasop%C3%A7%C3%B5esnecess%C3%A1rias,incluindologgereinforma%C3%A7%C3%B5esdonavegador."><span class="type-signature"></span>connect
 Conecta-se ao WhatsApp usando o estado de autenticação carregado.
-Configura o socket Baileys com as opções necessárias, incluindo logger, informações do navegador, e a função `cachedGroupMetadata` para otimizar o carregamento de metadados de grupo a partir do Redis.<span class="signature">()</span><span class="type-signature"></span></h4>
+Configura o socket Baileys com as opções necessárias, incluindo logger e informações do navegador.<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -2645,7 +492,7 @@ Configura o socket Baileys com as opções necessárias, incluindo logger, infor
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line310">line 310</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line188">line 188</a>
     </li></ul></dd>
     
 
@@ -2672,394 +519,6 @@ Configura o socket Baileys com as opções necessárias, incluindo logger, infor
 
 
 
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="createLoggerInstance"><span class="type-signature"></span>createLoggerInstance<span class="signature">(overrideOptions<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {winston.Logger}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Cria e configura uma nova instância do logger Winston.
-Esta função é o núcleo da configuração do sistema de logging.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>overrideOptions</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    {}
-                
-                </td>
-            
-
-            <td class="description last">Um objeto opcional para sobrescrever as configurações padrão do logger.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>level</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Nível de log a ser usado. Se não fornecido, usa `DEFAULT_LOG_LEVEL`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>transports</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;winston.transport></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Um array de transportes Winston já instanciados.
-                                                                 Se fornecido, ignora `transportDefinitions`.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>transportDefinitions</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;Object></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Um array de definições de transporte, similar ao
-                                                                retornado por `getDefaultTransportDefinitions`.
-                                                                Usado se `overrideOptions.transports` não for fornecido.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>defaultMeta</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Metadados padrão a serem adicionados a todas as mensagens de log
-                                                desta instância. Estes são mesclados com os metadados base
-                                                (service, instanceId, environment).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line318">line 318</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Propaga erros de `ensureLogDirectoryExists` se o diretório de log não puder ser acessado/criado.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Uma instância configurada do logger Winston.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">winston.Logger</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Criar logger com configurações padrão
-const defaultLogger = createLoggerInstance();
-defaultLogger.info("Mensagem de log padrão.");
-
-// Criar logger com nível 'error' e metadados customizados
-const errorOnlyLogger = createLoggerInstance({
-  level: 'error',
-  defaultMeta: { component: 'payment-gateway' }
-});
-errorOnlyLogger.error("Falha crítica no gateway.", { transactionId: '123' });</code></pre>
 
 
 
@@ -3176,7 +635,7 @@ A remoção é em cascata devido às chaves estrangeiras `ON DELETE CASCADE`:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line787">line 787</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line763">line 763</a>
     </li></ul></dd>
     
 
@@ -3432,7 +891,7 @@ O padrão é um array vazio se não houver parâmetros.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line252">line 252</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line237">line 237</a>
     </li></ul></dd>
     
 
@@ -3532,172 +991,6 @@ console.log('ID do log inserido:', result.insertId);</code></pre>
     
 
     
-    <h4 class="name" id="getDefaultTransportDefinitions"><span class="type-signature"></span>getDefaultTransportDefinitions<span class="signature">(level)</span><span class="type-signature"> &rarr; {Array.&lt;Object>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Retorna um array com as definições padrão dos transportes do Winston.
-Estas definições são usadas para criar instâncias de transporte para console e arquivos de log rotacionados.
-Inclui um transporte para console e três transportes de arquivo: um para todos os logs (nível configurado),
-um específico para erros e outro específico para avisos.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>level</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O nível de log mínimo para o transporte principal da aplicação (console e arquivo geral).
-                        Os transportes de erro e aviso terão seus níveis fixos ('error' e 'warn', respectivamente).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logs_logger.js.html">utils/logs/logger.js</a>, <a href="utils_logs_logger.js.html#line224">line 224</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Um array de objetos, onde cada objeto representa a definição de um transporte.
-  Cada definição contém:
-  - `type`: {string} O tipo de transporte ('console' ou 'dailyRotateFile').
-  - `options`: {Object} As opções de configuração para o respectivo transporte.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Array.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id="getEventEmitter"><span class="type-signature"></span>getEventEmitter<span class="signature">()</span><span class="type-signature"> &rarr; {EventEmitter}</span></h4>
     
 
@@ -3746,7 +1039,7 @@ um específico para erros e outro específico para avisos.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line240">line 240</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -3860,7 +1153,7 @@ Este é o método preferencial para obter acesso ao `MySQLDBManager`.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line1031">line 1031</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line842">line 842</a>
     </li></ul></dd>
     
 
@@ -4113,7 +1406,7 @@ Este evento é disparado quando a lista de bloqueio é definida ou sincronizada 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1094">line 1094</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1151">line 1151</a>
     </li></ul></dd>
     
 
@@ -4332,7 +1625,7 @@ Este evento é disparado quando um JID é adicionado ou removido da lista de blo
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1111">line 1111</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1173">line 1173</a>
     </li></ul></dd>
     
 
@@ -4483,7 +1776,7 @@ Cada objeto de chamada pode conter:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1130">line 1130</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1198">line 1198</a>
     </li></ul></dd>
     
 
@@ -4541,7 +1834,7 @@ Este evento é disparado quando chats são deletados (evento 'chats.delete').<sp
 
 <div class="description">
     Para cada JID de chat excluído:
-1. Se o cliente Redis estiver disponível, remove o chat do cache Redis usando a chave `chat:<jid>`.
+1. (Lógica de remoção do cache Redis foi removida).
 2. Se `this.mysqlDbManager` estiver configurado, chama `this.mysqlDbManager.deleteChatData(jid)` para remover os dados associados ao chat do banco de dados MySQL.
 3. Erros durante o processo são registrados.
 </div>
@@ -4636,7 +1929,7 @@ Este evento é disparado quando chats são deletados (evento 'chats.delete').<sp
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1007">line 1007</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1036">line 1036</a>
     </li></ul></dd>
     
 
@@ -4683,7 +1976,7 @@ Este evento é disparado quando propriedades de um chat existente são alteradas
 
 <div class="description">
     Para cada atualização de chat:
-1. Se o cliente Redis estiver disponível, salva o objeto de atualização do chat no cache Redis com a chave `chat:<id>` e TTL `REDIS_TTL_METADATA_SHORT`. (Nota: Isso pode sobrescrever o chat completo com um objeto parcial se não for tratado com cuidado ao ler do cache).
+1. Prepara a atualização do chat para persistência.
 2. Se `this.mysqlDbManager` estiver configurado, salva (upsert) a atualização do chat no banco de dados MySQL.
 3. Erros durante o processo são registrados.
 </div>
@@ -4778,7 +2071,7 @@ Este evento é disparado quando propriedades de um chat existente são alteradas
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line977">line 977</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line980">line 980</a>
     </li></ul></dd>
     
 
@@ -4825,7 +2118,7 @@ Este evento é disparado quando novos chats são criados ou chats existentes sã
 
 <div class="description">
     Para cada chat:
-1. Se o cliente Redis estiver disponível, salva o objeto do chat no cache Redis com a chave `chat:<id>` e TTL `REDIS_TTL_METADATA_SHORT`.
+1. Prepara o objeto do chat para persistência.
 2. Se `this.mysqlDbManager` estiver configurado, salva (upsert) o chat no banco de dados MySQL.
 3. Erros durante o processo são registrados.
 </div>
@@ -4920,7 +2213,7 @@ Este evento é disparado quando novos chats são criados ou chats existentes sã
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line947">line 947</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line924">line 924</a>
     </li></ul></dd>
     
 
@@ -5188,7 +2481,7 @@ Este método é chamado quando o estado da conexão com o WhatsApp muda (evento 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line376">line 376</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line241">line 241</a>
     </li></ul></dd>
     
 
@@ -5224,9 +2517,9 @@ Este método é chamado quando o estado da conexão com o WhatsApp muda (evento 
     
 
     
-    <h4 class="name" id="handleContactsUpdateManipulaaatualiza%C3%A7%C3%A3odecontatosnosistema.Respons%C3%A1velporatualizarasinforma%C3%A7%C3%B5esdecontatonocacheRedis.Esteevento%C3%A9disparadoquandopropriedadesdeumcontatoexistentes%C3%A3oalteradas(ex:nome,notifica%C3%A7%C3%A3opush)(evento'contacts.update')."><span class="type-signature"></span>handleContactsUpdate
-Manipula a atualização de contatos no sistema.
-Responsável por atualizar as informações de contato no cache Redis.
+    <h4 class="name" id="handleContactsUpdateManipulaaatualiza%C3%A7%C3%A3odecontatos.(L%C3%B3gicadecacheRedisfoiremovida).Esteevento%C3%A9disparadoquandopropriedadesdeumcontatoexistentes%C3%A3oalteradas(ex:nome,notifica%C3%A7%C3%A3opush)(evento'contacts.update')."><span class="type-signature"></span>handleContactsUpdate
+Manipula a atualização de contatos.
+(Lógica de cache Redis foi removida).
 Este evento é disparado quando propriedades de um contato existente são alteradas (ex: nome, notificação push) (evento 'contacts.update').<span class="signature">(updates)</span><span class="type-signature"></span></h4>
     
 
@@ -5330,7 +2623,7 @@ Este evento é disparado quando propriedades de um contato existente são altera
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1061">line 1061</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1117">line 1117</a>
     </li></ul></dd>
     
 
@@ -5387,8 +2680,8 @@ Este evento é disparado quando novos contatos são adicionados ou contatos exis
 
 <div class="description">
     Para cada contato:
-1. Se o cliente Redis estiver disponível, salva o objeto do contato no cache Redis com a chave `contact:<id>` e TTL `REDIS_TTL_METADATA_LONG`.
-2. Erros durante o salvamento no Redis são registrados. (Atualmente, não há persistência de contatos no MySQL neste handler).
+1. (Lógica de cache Redis foi removida).
+2. (Atualmente, não há persistência de contatos no MySQL neste handler, apenas log).
 </div>
 
 
@@ -5481,7 +2774,7 @@ Este evento é disparado quando novos contatos são adicionados ou contatos exis
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1036">line 1036</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1090">line 1090</a>
     </li></ul></dd>
     
 
@@ -5568,7 +2861,7 @@ Salva as novas credenciais usando `this.auth.saveCreds()`.<span class="signature
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line486">line 486</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line386">line 386</a>
     </li></ul></dd>
     
 
@@ -5805,7 +3098,7 @@ Chamado quando participantes entram, saem, são promovidos ou rebaixados em um g
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line725">line 725</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line616">line 616</a>
     </li></ul></dd>
     
 
@@ -5854,7 +3147,7 @@ Este método é chamado quando há atualizações nos metadados de grupos existe
     Para cada atualização de grupo:
 1. Obtém o JID do grupo.
 2. Busca os metadados completos do grupo usando `this.client.groupMetadata(jid)`.
-3. Se os metadados forem obtidos com sucesso e o cliente Redis estiver disponível, eles são salvos no cache Redis com a chave `group:<jid>` e TTL `REDIS_TTL_METADATA_SHORT`.
+3. Se os metadados forem obtidos com sucesso, eles são preparados para persistência.
 4. Se `this.mysqlDbManager` estiver configurado, os metadados do grupo também são salvos (upsert) no banco de dados MySQL.
 5. Erros durante o processo são registrados.
 </div>
@@ -5949,7 +3242,7 @@ Este método é chamado quando há atualizações nos metadados de grupos existe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line698">line 698</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line588">line 588</a>
     </li></ul></dd>
     
 
@@ -5997,7 +3290,7 @@ ou quando o usuário entra em um novo grupo (evento 'groups.upsert').<span class
 
 <div class="description">
     Para cada metadado de grupo recebido:
-1. Se o cliente Redis estiver disponível, salva os metadados no cache Redis com a chave `group:<jid>` e TTL `REDIS_TTL_METADATA_SHORT`.
+1. Prepara os metadados para persistência.
 2. Se `this.mysqlDbManager` estiver configurado, os metadados do grupo também são salvos (upsert) no banco de dados MySQL.
 3. Erros durante o processo são registrados.
 </div>
@@ -6092,7 +3385,7 @@ ou quando o usuário entra em um novo grupo (evento 'groups.upsert').<span class
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line752">line 752</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line644">line 644</a>
     </li></ul></dd>
     
 
@@ -6232,7 +3525,7 @@ Reseta o estado de reconexão.<span class="signature">(statusCode)</span><span c
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line461">line 461</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line356">line 356</a>
     </li></ul></dd>
     
 
@@ -6281,12 +3574,9 @@ Este evento é disparado quando o status de entrega/leitura de uma mensagem é a
 <div class="description">
     Para cada atualização de recibo:
 1. Verifica se a chave da mensagem, os detalhes do recibo são válidos e se o cliente Redis está disponível.
-2. Tenta buscar a mensagem correspondente no cache Redis.
-3. Se a mensagem for encontrada:
-   a. Atualiza o objeto `receipts` dentro dos dados da mensagem com as novas informações do recibo.
-   b. Salva a mensagem atualizada de volta no Redis, preservando o TTL original se possível, ou usando `REDIS_TTL_MESSAGE` como fallback.
-   c. Se `this.mysqlDbManager` estiver configurado, salva (upsert) o recibo no banco de dados MySQL.
-4. Se a mensagem não for encontrada no cache (ou Redis não estiver disponível), registra um aviso.
+2. Prepara os dados do recibo.
+3. Se `this.mysqlDbManager` estiver configurado, salva (upsert) o recibo no banco de dados MySQL.
+4. (Lógica de atualização de objeto de mensagem em cache foi removida com o Redis).
 5. Erros durante o processo são registrados.
 </div>
 
@@ -6386,7 +3676,7 @@ Cada objeto contém:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line887">line 887</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line848">line 848</a>
     </li></ul></dd>
     
 
@@ -6529,7 +3819,7 @@ Pode ser um objeto se for `deleteAll`, ou um array de `WAMessageKey` para mensag
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line860">line 860</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line807">line 807</a>
     </li></ul></dd>
     
 
@@ -6669,7 +3959,7 @@ Cada objeto contém a `key` da mensagem original e a `reaction` (com texto, etc.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line872">line 872</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line824">line 824</a>
     </li></ul></dd>
     
 
@@ -6809,7 +4099,7 @@ Cada objeto contém a `key` da mensagem e o `update` com os campos alterados.</t
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line845">line 845</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line782">line 782</a>
     </li></ul></dd>
     
 
@@ -6857,8 +4147,8 @@ Este método é chamado quando novas mensagens são recebidas ou mensagens exist
 <div class="description">
     Para cada mensagem:
 1. Determina o tipo de conteúdo da mensagem usando `getContentType`.
-2. Se a mensagem tiver uma chave válida (`remoteJid` e `id`) e o cliente Redis estiver disponível, ela é processada.
-3. A mensagem, junto com seu tipo de conteúdo e um objeto `receipts` inicializado, é salva no cache Redis com um TTL definido por `REDIS_TTL_MESSAGE`.
+2. Se a mensagem tiver uma chave válida (`remoteJid` e `id`), ela é processada.
+3. A mensagem, junto com seu tipo de conteúdo e um objeto `receipts` inicializado, é preparada.
 4. Se `this.mysqlDbManager` estiver configurado, a mensagem também é salva (upsert) no banco de dados MySQL.
 5. Erros durante o salvamento no Redis ou MySQL são registrados.
 </div>
@@ -7025,7 +4315,7 @@ Este método é chamado quando novas mensagens são recebidas ou mensagens exist
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line497">line 497</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line401">line 401</a>
     </li></ul></dd>
     
 
@@ -7072,9 +4362,9 @@ fornecendo um conjunto de chats, contatos e mensagens.<span class="signature">(d
 
 
 <div class="description">
-    - Para cada chat: Se o cliente Redis estiver disponível, salva no Redis (chave `chat:<id>`, TTL `REDIS_TTL_METADATA_SHORT`) e no MySQL (via `this.mysqlDbManager.upsertChat`).
-- Para cada contato: Se o cliente Redis estiver disponível, salva no Redis (chave `contact:<id>`, TTL `REDIS_TTL_METADATA_LONG`). (Atualmente não salva contatos no MySQL neste handler).
-- Para cada mensagem: Determina o tipo de conteúdo. Se o cliente Redis estiver disponível, salva no Redis (chave `message:<remoteJid>:<id>`, TTL `REDIS_TTL_MESSAGE`) e no MySQL (via `this.mysqlDbManager.upsertMessage`).
+    - Para cada chat: Salva no MySQL (via `this.mysqlDbManager.upsertChat`).
+- Para cada contato: (Atualmente não salva contatos no MySQL neste handler, apenas loga).
+- Para cada mensagem: Determina o tipo de conteúdo. Salva no MySQL (via `this.mysqlDbManager.upsertMessage`).
 Erros durante o salvamento são registrados.
 </div>
 
@@ -7263,7 +4553,7 @@ Erros durante o salvamento são registrados.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line778">line 778</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line671">line 671</a>
     </li></ul></dd>
     
 
@@ -7472,7 +4762,7 @@ Registra e monitora alterações no status de presença (online, offline, digita
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1155">line 1155</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line1230">line 1230</a>
     </li></ul></dd>
     
 
@@ -7584,7 +4874,7 @@ Este método deve ser chamado antes de qualquer outra operação de banco de dad
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line83">line 83</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line68">line 68</a>
     </li></ul></dd>
     
 
@@ -7731,7 +5021,7 @@ tenta estabelecer a conexão com o WhatsApp.<span class="signature">()</span><sp
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line276">line 276</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -7762,123 +5052,6 @@ tenta estabelecer a conexão com o WhatsApp.<span class="signature">()</span><sp
     <dt>
         <div class="param-desc">
         Propaga erros que podem ocorrer durante `loadAuthState` ou `connect`.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="initializeRedisClientInicializaoclienteRedisparacachededados.Configuraconex%C3%A3o,eventosetratamentodeerrosdoRedis.Osdetalhesdaconex%C3%A3o(host,porta,senha,db)s%C3%A3oobtidosdasvari%C3%A1veisdeambiente.Registralistenersparaoseventos'connect','ready'e'error'doclienteRedis."><span class="type-signature"></span>initializeRedisClient
-Inicializa o cliente Redis para cache de dados.
-Configura conexão, eventos e tratamento de erros do Redis.
-Os detalhes da conexão (host, porta, senha, db) são obtidos das variáveis de ambiente.
-Registra listeners para os eventos 'connect', 'ready' e 'error' do cliente Redis.<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line248">line 248</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Pode lançar um erro se a biblioteca `ioredis` não conseguir instanciar o cliente, embora a conexão em si seja assíncrona.
         </div>
     </dt>
     <dd></dd>
@@ -7964,7 +5137,7 @@ Utiliza `useMultiFileAuthState` da biblioteca Baileys para gerenciar as credenci
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line289">line 289</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line167">line 167</a>
     </li></ul></dd>
     
 
@@ -8016,168 +5189,6 @@ Utiliza `useMultiFileAuthState` da biblioteca Baileys para gerenciar as credenci
 
 
     
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="processIncomingMessage"><span class="type-signature">(async) </span>processIncomingMessage<span class="signature">(message, baileysClient)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Processa uma mensagem recebida do WhatsApp.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>message</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">O objeto da mensagem, conforme preparado pelo ConnectionManager.
-                          Espera-se que contenha propriedades como:
-                          - key: { remoteJid, fromMe, id, participant }
-                          - messageTimestamp: timestamp da mensagem
-                          - pushName: nome do remetente
-                          - message: { conversation, extendedTextMessage: { text }, ... }
-                          - instanceId: ID da instância que recebeu a mensagem
-                          - ... (outras propriedades relevantes)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>baileysClient</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_MessageController.js.html">controllers/MessageController.js</a>, <a href="controllers_MessageController.js.html#line49">line 49</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -8296,7 +5307,7 @@ Se a reconexão falhar, e ainda for permitido tentar novamente, chama a si mesmo
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line428">line 428</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line309">line 309</a>
     </li></ul></dd>
     
 
@@ -8383,7 +5394,7 @@ e `this.isReconnecting` para `false`.<span class="signature">()</span><span clas
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line474">line 474</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line374">line 374</a>
     </li></ul></dd>
     
 
@@ -8471,7 +5482,7 @@ Cada evento é vinculado ao método correspondente nesta classe.<span class="sig
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line341">line 341</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line206">line 206</a>
     </li></ul></dd>
     
 
@@ -8608,7 +5619,7 @@ Determina se a reconexão deve ser tentada com base no motivo da desconexão.<sp
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line416">line 416</a>
+        <a href="connection_ConnectionManager.js.html">connection/ConnectionManager.js</a>, <a href="connection_ConnectionManager.js.html#line297">line 297</a>
     </li></ul></dd>
     
 
@@ -8680,8 +5691,6 @@ e o número de tentativas de reconexão (`this.reconnectionAttempts`) for menor 
 Este script orquestra a inicialização dos componentes chave:
 1. Inicializa o `MySQLDBManager` para interação com o banco de dados.
 2. Inicializa o `ConnectionManager`, passando a instância do `mysqlDbManager`, para conectar ao WhatsApp.
-3. Realiza uma sincronização inicial de dados do Redis para o MySQL, se o `redisClient` no `ConnectionManager`
-   estiver disponível e conectado.
 </div>
 
 
@@ -8781,226 +5790,6 @@ Este script orquestra a inicialização dos componentes chave:
 
 
 
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="syncFromRedis"><span class="type-signature">(async) </span>syncFromRedis<span class="signature">(redisClient)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Sincroniza dados (chats, grupos, mensagens e recibos de mensagens) de um cache Redis
-para o banco de dados MySQL. Este método é útil para popular o MySQL com dados
-que podem ter sido acumulados no Redis enquanto o MySQL estava indisponível ou
-durante uma inicialização.
-
-A sincronização ocorre em etapas:
-1. **Chats**: Varre chaves no Redis com prefixo `this.REDIS_PREFIX_CHAT`. Para cada chave,
-   obtém os dados do chat, parseia o JSON e chama `this.upsertChat()`.
-2. **Grupos**: Similarmente, varre chaves com prefixo `this.REDIS_PREFIX_GROUP` e chama
-   `this.upsertGroup()`.
-3. **Mensagens e Recibos**: Varre chaves com prefixo `this.REDIS_PREFIX_MESSAGE`. Para cada
-   mensagem:
-   a. Chama `this.upsertMessage()`.
-   b. Se a mensagem tiver um campo `receipts`, itera sobre os recibos e chama
-      `this.upsertMessageReceipt()` para cada um.
-
-Utiliza `redisClient.scan()` para iterar sobre as chaves de forma eficiente, evitando
-o bloqueio do servidor Redis que `KEYS *` causaria.
-`Promise.allSettled` é usado para processar lotes de upserts, permitindo que a
-sincronização continue mesmo que algumas entradas individuais falhem. Erros são registrados.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>redisClient</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">IORedisClient</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Uma instância do cliente ioredis conectada
-ao servidor Redis de onde os dados serão lidos.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line827">line 827</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Erros durante as operações de varredura do Redis ou falhas críticas
-podem ser registrados, mas o método tenta completar o máximo possível da sincronização.
-Não propaga erros diretamente, mas registra-os extensivamente.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Uma promessa que resolve quando todas as etapas de sincronização
-são concluídas.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Supondo que `redisClient` seja uma instância de ioredis conectada
-// e `dbManager` seja uma instância de MySQLDBManager.
-if (connectionManager.redisClient) { // connectionManager é onde o redisClient pode estar
-  await dbManager.syncFromRedis(connectionManager.redisClient);
-}</code></pre>
 
 
 
@@ -9142,7 +5931,7 @@ A operação é transacional:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line479">line 479</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line461">line 461</a>
     </li></ul></dd>
     
 
@@ -9754,7 +6543,7 @@ A lógica de atualização (`ON DUPLICATE KEY UPDATE`) é projetada para:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line293">line 293</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line278">line 278</a>
     </li></ul></dd>
     
 
@@ -10336,7 +7125,7 @@ e um aviso é registrado.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line364">line 364</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line349">line 349</a>
     </li></ul></dd>
     
 
@@ -11022,7 +7811,7 @@ conteúdo completo da mensagem Baileys (`msg.message`) é armazenado como JSON n
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line544">line 544</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line524">line 524</a>
     </li></ul></dd>
     
 
@@ -11428,7 +8217,7 @@ Deve conter `id` (ID da mensagem) e `remoteJid` (JID do chat).</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line719">line 719</a>
+        <a href="database_MySQLDBManager.js.html">database/MySQLDBManager.js</a>, <a href="database_MySQLDBManager.js.html#line666">line 666</a>
     </li></ul></dd>
     
 
@@ -11615,9 +8404,9 @@ to support 'import()' type expressions.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConnectionManager.html">ConnectionManager</a></li><li><a href="MySQLDBManager.html">MySQLDBManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DEFAULT_LOG_LEVEL">DEFAULT_LOG_LEVEL</a></li><li><a href="global.html#ECOSYSTEM_NAME">ECOSYSTEM_NAME</a></li><li><a href="global.html#INSTANCE_ID">INSTANCE_ID</a></li><li><a href="global.html#IS_PRODUCTION">IS_PRODUCTION</a></li><li><a href="global.html#LOG_COLORS">LOG_COLORS</a></li><li><a href="global.html#LOG_DEFAULTS">LOG_DEFAULTS</a></li><li><a href="global.html#LOG_DIR_PATH">LOG_DIR_PATH</a></li><li><a href="global.html#LOG_LEVELS">LOG_LEVELS</a></li><li><a href="global.html#LOG_LEVEL_NAMES">LOG_LEVEL_NAMES</a></li><li><a href="global.html#NODE_ENV">NODE_ENV</a></li><li><a href="global.html#PROJECT_ROOT">PROJECT_ROOT</a></li><li><a href="global.html#REDIS_PREFIX_CHAT">REDIS_PREFIX_CHAT</a></li><li><a href="global.html#REDIS_PREFIX_CONTACT">REDIS_PREFIX_CONTACT</a></li><li><a href="global.html#REDIS_PREFIX_GROUP">REDIS_PREFIX_GROUP</a></li><li><a href="global.html#REDIS_PREFIX_MESSAGE">REDIS_PREFIX_MESSAGE</a></li><li><a href="global.html#REDIS_TTL_MESSAGE">REDIS_TTL_MESSAGE</a></li><li><a href="global.html#REDIS_TTL_METADATA_LONG">REDIS_TTL_METADATA_LONG</a></li><li><a href="global.html#REDIS_TTL_METADATA_SHORT">REDIS_TTL_METADATA_SHORT</a></li><li><a href="global.html#REDIS_TTL_RECEIPT">REDIS_TTL_RECEIPT</a></li><li><a href="global.html#_extractTextFromMessageObject">_extractTextFromMessageObject</a></li><li><a href="global.html#closePool">closePool</a></li><li><a href="global.html#connectConecta-seaoWhatsAppusandooestadodeautentica%25C3%25A7%25C3%25A3ocarregado.ConfiguraosocketBaileyscomasop%25C3%25A7%25C3%25B5esnecess%25C3%25A1rias,incluindologger,informa%25C3%25A7%25C3%25B5esdonavegador,eafun%25C3%25A7%25C3%25A3o%2560cachedGroupMetadata%2560paraotimizarocarregamentodemetadadosdegrupoapartirdoRedis.">connect
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConnectionManager.html">ConnectionManager</a></li><li><a href="MySQLDBManager.html">MySQLDBManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_extractTextFromMessageObject">_extractTextFromMessageObject</a></li><li><a href="global.html#closePool">closePool</a></li><li><a href="global.html#connectConecta-seaoWhatsAppusandooestadodeautentica%25C3%25A7%25C3%25A3ocarregado.ConfiguraosocketBaileyscomasop%25C3%25A7%25C3%25B5esnecess%25C3%25A1rias,incluindologgereinforma%25C3%25A7%25C3%25B5esdonavegador.">connect
 Conecta-se ao WhatsApp usando o estado de autenticação carregado.
-Configura o socket Baileys com as opções necessárias, incluindo logger, informações do navegador, e a função `cachedGroupMetadata` para otimizar o carregamento de metadados de grupo a partir do Redis.</a></li><li><a href="global.html#consoleFormat">consoleFormat</a></li><li><a href="global.html#createLoggerInstance">createLoggerInstance</a></li><li><a href="global.html#deleteChatData">deleteChatData</a></li><li><a href="global.html#env">env</a></li><li><a href="global.html#executeQuery">executeQuery</a></li><li><a href="global.html#fileFormat">fileFormat</a></li><li><a href="global.html#getDefaultTransportDefinitions">getDefaultTransportDefinitions</a></li><li><a href="global.html#getEventEmitter">getEventEmitter</a></li><li><a href="global.html#getInstance">getInstance</a></li><li><a href="global.html#handleBlocklistSetProcessaoeventodedefini%25C3%25A7%25C3%25A3odalistadebloqueio.Registraosn%25C3%25BAmerosqueest%25C3%25A3onalistadebloqueiodoWhatsApp.Esteevento%25C3%25A9disparadoquandoalistadebloqueio%25C3%25A9definidaousincronizada(evento'blocklist.set').">handleBlocklistSet
+Configura o socket Baileys com as opções necessárias, incluindo logger e informações do navegador.</a></li><li><a href="global.html#deleteChatData">deleteChatData</a></li><li><a href="global.html#executeQuery">executeQuery</a></li><li><a href="global.html#getEventEmitter">getEventEmitter</a></li><li><a href="global.html#getInstance">getInstance</a></li><li><a href="global.html#handleBlocklistSetProcessaoeventodedefini%25C3%25A7%25C3%25A3odalistadebloqueio.Registraosn%25C3%25BAmerosqueest%25C3%25A3onalistadebloqueiodoWhatsApp.Esteevento%25C3%25A9disparadoquandoalistadebloqueio%25C3%25A9definidaousincronizada(evento'blocklist.set').">handleBlocklistSet
 Processa o evento de definição da lista de bloqueio.
 Registra os números que estão na lista de bloqueio do WhatsApp.
 Este evento é disparado quando a lista de bloqueio é definida ou sincronizada (evento 'blocklist.set').</a></li><li><a href="global.html#handleBlocklistUpdateProcessaatualiza%25C3%25A7%25C3%25B5esnalistadebloqueiodoWhatsApp.Registraaltera%25C3%25A7%25C3%25B5es(adi%25C3%25A7%25C3%25B5es/remo%25C3%25A7%25C3%25B5es)nalistadecontatosbloqueados.Esteevento%25C3%25A9disparadoquandoumJID%25C3%25A9adicionadoouremovidodalistadebloqueio(evento'blocklist.update').">handleBlocklistUpdate
@@ -11634,9 +8423,9 @@ Este evento é disparado quando propriedades de um chat existente são alteradas
 Manipula inserção/atualização de chats.
 Este evento é disparado quando novos chats são criados ou chats existentes são sincronizados (evento 'chats.upsert').</a></li><li><a href="global.html#handleConnectionUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdeconex%25C3%25A3odoclienteWhatsApp.Estem%25C3%25A9todo%25C3%25A9chamadoquandooestadodaconex%25C3%25A3ocomoWhatsAppmuda(evento%2560connection.update%2560).">handleConnectionUpdate
 Manipula atualizações de conexão do cliente WhatsApp.
-Este método é chamado quando o estado da conexão com o WhatsApp muda (evento `connection.update`).</a></li><li><a href="global.html#handleContactsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecontatosnosistema.Respons%25C3%25A1velporatualizarasinforma%25C3%25A7%25C3%25B5esdecontatonocacheRedis.Esteevento%25C3%25A9disparadoquandopropriedadesdeumcontatoexistentes%25C3%25A3oalteradas(ex:nome,notifica%25C3%25A7%25C3%25A3opush)(evento'contacts.update').">handleContactsUpdate
-Manipula a atualização de contatos no sistema.
-Responsável por atualizar as informações de contato no cache Redis.
+Este método é chamado quando o estado da conexão com o WhatsApp muda (evento `connection.update`).</a></li><li><a href="global.html#handleContactsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecontatos.(L%25C3%25B3gicadecacheRedisfoiremovida).Esteevento%25C3%25A9disparadoquandopropriedadesdeumcontatoexistentes%25C3%25A3oalteradas(ex:nome,notifica%25C3%25A7%25C3%25A3opush)(evento'contacts.update').">handleContactsUpdate
+Manipula a atualização de contatos.
+(Lógica de cache Redis foi removida).
 Este evento é disparado quando propriedades de um contato existente são alteradas (ex: nome, notificação push) (evento 'contacts.update').</a></li><li><a href="global.html#handleContactsUpsertManipulainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odecontatos.Esteevento%25C3%25A9disparadoquandonovoscontatoss%25C3%25A3oadicionadosoucontatosexistentess%25C3%25A3osincronizados(evento'contacts.upsert').">handleContactsUpsert
 Manipula inserção/atualização de contatos.
 Este evento é disparado quando novos contatos são adicionados ou contatos existentes são sincronizados (evento 'contacts.upsert').</a></li><li><a href="global.html#handleCredsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecredenciais.Estem%25C3%25A9todo%25C3%25A9chamadoporBaileysquandoascredenciaisdeautentica%25C3%25A7%25C3%25A3os%25C3%25A3oatualizadas(porexemplo,ap%25C3%25B3sescanearoQRcodeouduranteareconex%25C3%25A3o).Salvaasnovascredenciaisusando%2560this.auth.saveCreds()%2560.">handleCredsUpdate
@@ -11672,14 +8461,10 @@ Processa atualizações de presença dos contatos.
 Registra e monitora alterações no status de presença (online, offline, digitando, gravando áudio) e última visualização (evento 'presence.update').</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#initializeInicializaaconex%25C3%25A3oprincipalcomoWhatsApp.Estem%25C3%25A9todoorquestraocarregamentodoestadodeautentica%25C3%25A7%25C3%25A3oe,emseguida,tentaestabeleceraconex%25C3%25A3ocomoWhatsApp.">initialize
 Inicializa a conexão principal com o WhatsApp.
 Este método orquestra o carregamento do estado de autenticação e, em seguida,
-tenta estabelecer a conexão com o WhatsApp.</a></li><li><a href="global.html#initializeRedisClientInicializaoclienteRedisparacachededados.Configuraconex%25C3%25A3o,eventosetratamentodeerrosdoRedis.Osdetalhesdaconex%25C3%25A3o(host,porta,senha,db)s%25C3%25A3oobtidosdasvari%25C3%25A1veisdeambiente.Registralistenersparaoseventos'connect','ready'e'error'doclienteRedis.">initializeRedisClient
-Inicializa o cliente Redis para cache de dados.
-Configura conexão, eventos e tratamento de erros do Redis.
-Os detalhes da conexão (host, porta, senha, db) são obtidos das variáveis de ambiente.
-Registra listeners para os eventos 'connect', 'ready' e 'error' do cliente Redis.</a></li><li><a href="global.html#loadAuthStateCarregaoestadodeautentica%25C3%25A7%25C3%25A3ododiret%25C3%25B3rioespecificadoem%2560this.authStatePath%2560.Seodiret%25C3%25B3rion%25C3%25A3oexistir,eleser%25C3%25A1criado.Utiliza%2560useMultiFileAuthState%2560dabibliotecaBaileysparagerenciarascredenciais.">loadAuthState
+tenta estabelecer a conexão com o WhatsApp.</a></li><li><a href="global.html#loadAuthStateCarregaoestadodeautentica%25C3%25A7%25C3%25A3ododiret%25C3%25B3rioespecificadoem%2560this.authStatePath%2560.Seodiret%25C3%25B3rion%25C3%25A3oexistir,eleser%25C3%25A1criado.Utiliza%2560useMultiFileAuthState%2560dabibliotecaBaileysparagerenciarascredenciais.">loadAuthState
 Carrega o estado de autenticação do diretório especificado em `this.authStatePath`.
 Se o diretório não existir, ele será criado.
-Utiliza `useMultiFileAuthState` da biblioteca Baileys para gerenciar as credenciais.</a></li><li><a href="global.html#logger">logger</a></li><li><a href="global.html#processIncomingMessage">processIncomingMessage</a></li><li><a href="global.html#reconnectWithBackoffReconectaaoWhatsAppcombackoffexponencial.Incrementaocontadordetentativasdereconex%25C3%25A3oecalculaopr%25C3%25B3ximoatrasodeformaexponencial,limitadopelo%2560maxBackoffDelayMs%2560.Agendaumanovatentativadeconex%25C3%25A3o(%2560this.connect()%2560)ap%25C3%25B3soatrasocalculado.Seareconex%25C3%25A3ofalhar,eaindaforpermitidotentarnovamente,chamaasimesmorecursivamente.Casocontr%25C3%25A1rio,tratacomodesconex%25C3%25A3oirrecuper%25C3%25A1vel.">reconnectWithBackoff
+Utiliza `useMultiFileAuthState` da biblioteca Baileys para gerenciar as credenciais.</a></li><li><a href="global.html#reconnectWithBackoffReconectaaoWhatsAppcombackoffexponencial.Incrementaocontadordetentativasdereconex%25C3%25A3oecalculaopr%25C3%25B3ximoatrasodeformaexponencial,limitadopelo%2560maxBackoffDelayMs%2560.Agendaumanovatentativadeconex%25C3%25A3o(%2560this.connect()%2560)ap%25C3%25B3soatrasocalculado.Seareconex%25C3%25A3ofalhar,eaindaforpermitidotentarnovamente,chamaasimesmorecursivamente.Casocontr%25C3%25A1rio,tratacomodesconex%25C3%25A3oirrecuper%25C3%25A1vel.">reconnectWithBackoff
 Reconecta ao WhatsApp com backoff exponencial.
 Incrementa o contador de tentativas de reconexão e calcula o próximo atraso
 de forma exponencial, limitado pelo `maxBackoffDelayMs`.
@@ -11692,13 +8477,13 @@ Configura os manipuladores de eventos para o cliente WhatsApp (Baileys).
 Registra listeners para uma variedade de eventos, como atualizações de conexão,
 recebimento de mensagens, atualizações de grupos, chats, contatos, etc.
 Cada evento é vinculado ao método correspondente nesta classe.</a></li><li><a href="global.html#shouldReconnectDeterminaseareconex%25C3%25A3odevesertentadacombasenomotivodadesconex%25C3%25A3o.">shouldReconnect
-Determina se a reconexão deve ser tentada com base no motivo da desconexão.</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#syncFromRedis">syncFromRedis</a></li><li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li><li><a href="global.html#upsertChat">upsertChat</a></li><li><a href="global.html#upsertGroup">upsertGroup</a></li><li><a href="global.html#upsertMessage">upsertMessage</a></li><li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li></ul>
+Determina se a reconexão deve ser tentada com base no motivo da desconexão.</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li><li><a href="global.html#upsertChat">upsertChat</a></li><li><a href="global.html#upsertGroup">upsertGroup</a></li><li><a href="global.html#upsertMessage">upsertMessage</a></li><li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 18:27:25 GMT-0400 (Horário Padrão do Amazonas)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 30 2025 16:47:27 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

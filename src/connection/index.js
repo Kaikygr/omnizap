@@ -1,7 +1,7 @@
 const ConnectionManager = require('./ConnectionManager');
 const { getInstance: getMySQLDBManagerInstance } = require('./../database/MySQLDBManager');
 const logger = require('./../utils/logs/logger');
-const messageController = require('../controllers/MessageController'); // Importar o controller
+const messageController = require('../controllers/MessageController');
 
 /**
  * @async

@@ -3,7 +3,7 @@ const pino = require('pino');
 const path = require('path');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
-const { cleanEnv, num, str } = require('envalid'); // Redis foi removido
+const { cleanEnv, num, str } = require('envalid');
 const EventEmitter = require('events');
 
 const logger = require('../utils/logs/logger');
@@ -47,7 +47,6 @@ const env = cleanEnv(process.env, {
   AUTH_STATE_PATH: str({ default: path.join(__dirname, 'temp', 'auth_state_minimal') }),
 });
 
-// Constantes para status de conexão
 const STATUS = {
   CONNECTED: 'open',
   DISCONNECTED: 'close',
@@ -540,7 +539,6 @@ class ConnectionManager {
       }
 
       if (finalMetadata) {
-
         if (this.mysqlDbManager) {
           try {
             await this.mysqlDbManager.upsertGroup(finalMetadata);
@@ -882,31 +880,31 @@ class ConnectionManager {
         try {
           // A lógica de buscar e atualizar a mensagem no cache Redis foi removida.
           // Agora, apenas persistimos o recibo no MySQL.
-            if (this.mysqlDbManager) {
-              try {
-                const timestamp = receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp;
-                await this.mysqlDbManager.upsertMessageReceipt(key, receipt.userJid, receipt.type, timestamp);
-                logger.info(`[METRIC] Message receipt for ${key.id} (user ${receipt.userJid}) upserted to MySQL.`, {
-                  label: 'MySQLSync',
-                  metricName: 'message.receipt.mysql.upserted',
-                  messageId: key.id,
-                  remoteJid: key.remoteJid,
-                  userJid: receipt.userJid,
-                  receiptType: receipt.type,
-                  instanceId: this.instanceId,
-                });
-              } catch (dbError) {
-                logger.error(`[METRIC] Error upserting message receipt for ${key.id} to MySQL: ${dbError.message}`, {
-                  label: 'MySQLSyncError',
-                  metricName: 'message.receipt.mysql.error',
-                  messageKey: key,
-                  userJid: receipt.userJid,
-                  error: dbError.message,
-                  stack: dbError.stack,
-                  instanceId: this.instanceId,
-                });
-              }
+          if (this.mysqlDbManager) {
+            try {
+              const timestamp = receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp;
+              await this.mysqlDbManager.upsertMessageReceipt(key, receipt.userJid, receipt.type, timestamp);
+              logger.info(`[METRIC] Message receipt for ${key.id} (user ${receipt.userJid}) upserted to MySQL.`, {
+                label: 'MySQLSync',
+                metricName: 'message.receipt.mysql.upserted',
+                messageId: key.id,
+                remoteJid: key.remoteJid,
+                userJid: receipt.userJid,
+                receiptType: receipt.type,
+                instanceId: this.instanceId,
+              });
+            } catch (dbError) {
+              logger.error(`[METRIC] Error upserting message receipt for ${key.id} to MySQL: ${dbError.message}`, {
+                label: 'MySQLSyncError',
+                metricName: 'message.receipt.mysql.error',
+                messageKey: key,
+                userJid: receipt.userJid,
+                error: dbError.message,
+                stack: dbError.stack,
+                instanceId: this.instanceId,
+              });
             }
+          }
           // O else que tratava "mensagem não encontrada no cache" foi removido.
         } catch (error) {
           logger.error(`[METRIC] Error processing message receipt for ${key.id} (DB/other): ${error.message}`, {
@@ -1056,7 +1054,6 @@ class ConnectionManager {
     });
     for (const jid of jids) {
       try {
-
         if (this.mysqlDbManager) {
           try {
             await this.mysqlDbManager.deleteChatData(jid);
