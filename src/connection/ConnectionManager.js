@@ -3,8 +3,7 @@ const pino = require('pino');
 const path = require('path');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
-const { cleanEnv, num, str } = require('envalid');
-const Redis = require('ioredis');
+const { cleanEnv, num, str } = require('envalid'); // Redis foi removido
 const EventEmitter = require('events');
 
 const logger = require('../utils/logs/logger');
@@ -18,7 +17,6 @@ require('dotenv').config();
  * to support 'import()' type expressions.
  * @typedef {Object} WASocket - Instância do cliente Baileys (socket WA).
  * @typedef {Object} RedisClient - Instância do cliente ioredis para Redis.
- * @typedef {Object} AuthenticationState - Estado de autenticação do Baileys.
  * @typedef {{ state: AuthenticationState, saveCreds: function(): Promise<void> }} AuthObject - Objeto retornado por `useMultiFileAuthState`, contendo o estado e a função para salvar credenciais.
  * @typedef {Object} ConnectionState - Objeto de atualização do estado da conexão Baileys.
  * @typedef {Object} Boom - Objeto de erro Boom.
@@ -47,10 +45,6 @@ const env = cleanEnv(process.env, {
   BACKOFF_INITIAL_DELAY_MS: num({ default: 5000 }),
   BACKOFF_MAX_DELAY_MS: num({ default: 60000 }),
   AUTH_STATE_PATH: str({ default: path.join(__dirname, 'temp', 'auth_state_minimal') }),
-  REDIS_HOST: str({ default: 'localhost' }),
-  REDIS_PORT: num({ default: 6379 }),
-  REDIS_PASSWORD: str({ default: ' ' }),
-  REDIS_DB: num({ default: 0 }),
 });
 
 // Constantes para status de conexão
@@ -61,61 +55,16 @@ const STATUS = {
 };
 
 /**
- * @const {string}
- * @description Prefixo utilizado para chaves de metadados de grupo no Redis.
- */
-const REDIS_PREFIX_GROUP = 'group:';
-/**
- * @const {string}
- * @description Prefixo utilizado para chaves de dados de chat no Redis.
- */
-const REDIS_PREFIX_CHAT = 'chat:';
-/**
- * @const {string}
- * @description Prefixo utilizado para chaves de dados de contato no Redis.
- */
-const REDIS_PREFIX_CONTACT = 'contact:';
-/**
- * @const {string}
- * @description Prefixo utilizado para chaves de dados de mensagem no Redis.
- */
-const REDIS_PREFIX_MESSAGE = 'message:';
-
-/**
- * @const {number}
- * @description TTL (Time To Live) em segundos para metadados de curta duração no Redis (e.g., grupos, chats). (1 hora)
- */
-const REDIS_TTL_METADATA_SHORT = 3600;
-/**
- * @const {number}
- * @description TTL (Time To Live) em segundos para metadados de longa duração no Redis (e.g., contatos). (24 horas)
- */
-const REDIS_TTL_METADATA_LONG = 24 * 3600;
-/**
- * @const {number}
- * @description TTL (Time To Live) em segundos para mensagens no Redis. (7 dias)
- */
-const REDIS_TTL_MESSAGE = 7 * 24 * 3600;
-/**
- * @const {number}
- * @description TTL (Time To Live) em segundos para recibos de mensagem no Redis (usado como fallback se o TTL da mensagem original não puder ser determinado). (7 dias)
- */
-const REDIS_TTL_RECEIPT = 7 * 24 * 3600;
-
-/**
  * @class ConnectionManager
  * @description
  * Gerencia a conexão com a API do WhatsApp Web, utilizando a biblioteca Baileys.
  * É responsável por estabelecer e manter a conexão, lidar com a autenticação,
  * gerenciar eventos de mensagens, grupos, contatos, e sincronizar esses dados
- * com um cache Redis e um banco de dados MySQL.
+ * com um banco de dados MySQL.
  * Implementa uma lógica de reconexão com backoff exponencial para lidar com
  * desconexões temporárias.
- *
  * @property {WASocket | null} client - A instância do cliente Baileys (socket) para interagir com o WhatsApp.
  * Inicializado como `null` e populado após a conexão bem-sucedida.
- * @property {RedisClient | null} redisClient - Cliente para interagir com o servidor Redis,
- * utilizado para cache de metadados, mensagens, chats e contatos.
  * @property {Object} mysqlDbManager - Instância do `MySQLDBManager`,
  * responsável pela persistência dos dados.
  * @property {AuthObject} auth - Objeto contendo o estado de autenticação (`state`) e o método `saveCreds`
@@ -142,7 +91,6 @@ class ConnectionManager {
    * @constructor
    * @description Cria uma nova instância do `ConnectionManager`.
    * Inicializa os parâmetros de configuração para a conexão, reconexão,
-   * e o cliente Redis.
    * @param {Object} mysqlDbManager - A instância do gerenciador do banco de dados MySQL (`MySQLDBManager`).
    * @param {number} [initialBackoffDelayMs=env.BACKOFF_INITIAL_DELAY_MS] - Atraso inicial para reconexão em milissegundos.
    * @param {number} [maxBackoffDelayMs=env.BACKOFF_MAX_DELAY_MS] - Atraso máximo para reconexão em milissegundos.
@@ -155,59 +103,11 @@ class ConnectionManager {
     this.mysqlDbManager = mysqlDbManager;
     this.authStatePath = authStatePath;
     this.currentBackoffDelayMs = initialBackoffDelayMs;
-    this.redisClient = null;
     this.client = null;
     this.reconnectionAttempts = 0;
     this.maxReconnectionAttempts = 10;
     this.isReconnecting = false;
     this.eventEmitter = new EventEmitter();
-
-    this.initializeRedisClient();
-  }
-
-  /**
-   * @method setCacheWithLog
-   * @private
-   * Método utilitário para salvar dados no cache Redis com logging.
-   * @param {string} key - A chave para o cache.
-   * @param {any} data - Os dados a serem salvos (serão stringificados).
-   * @param {number} ttl - O Time To Live (TTL) em segundos.
-   * @param {string} [context=''] - Contexto da operação para logging.
-   * @returns {Promise<boolean>} True se salvo com sucesso, false caso contrário.
-   */
-  async setCacheWithLog(key, data, ttl, context = '') {
-    try {
-      if (this.redisClient) {
-        await this.redisClient.set(key, JSON.stringify(data), 'EX', ttl);
-        logger.info(`[METRIC] Data saved to cache: ${key}`, {
-          label: 'RedisCache',
-          metricName: 'redis.cache.set.success',
-          context,
-          key,
-          instanceId: this.instanceId,
-        });
-        return true;
-      }
-      logger.warn(`[METRIC] Redis client not available. Cannot save to cache: ${key}`, {
-        label: 'RedisCache',
-        metricName: 'redis.cache.set.unavailable',
-        context,
-        key,
-        instanceId: this.instanceId,
-      });
-      return false;
-    } catch (error) {
-      logger.error(`[METRIC] Error saving to cache: ${key}. Error: ${error.message}`, {
-        label: 'RedisCache',
-        metricName: 'redis.cache.set.error',
-        error: error.message,
-        stack: error.stack,
-        context,
-        key,
-        instanceId: this.instanceId,
-      });
-      return false;
-    }
   }
 
   /**
@@ -248,37 +148,10 @@ class ConnectionManager {
    * @returns {EventEmitter} Retorna a instância do EventEmitter para escutar eventos customizados, como 'message:upsert:received'.
    */
   getEventEmitter() {
+    // Este método não precisa de try-catch, pois EventEmitter.emit já tem.
     return this.eventEmitter;
   }
 
-  /**
-   * @method initializeRedisClient
-   * Inicializa o cliente Redis para cache de dados.
-   * Configura conexão, eventos e tratamento de erros do Redis.
-   * Os detalhes da conexão (host, porta, senha, db) são obtidos das variáveis de ambiente.
-   * Registra listeners para os eventos 'connect', 'ready' e 'error' do cliente Redis.
-   * @throws {Error} Pode lançar um erro se a biblioteca `ioredis` não conseguir instanciar o cliente, embora a conexão em si seja assíncrona.
-   */
-  initializeRedisClient() {
-    this.redisClient = new Redis({
-      host: env.REDIS_HOST,
-      port: env.REDIS_PORT,
-      password: env.REDIS_PASSWORD || undefined,
-      db: env.REDIS_DB,
-    });
-
-    this.redisClient.on('connect', () => {
-      logger.info('Conectado ao servidor Redis com sucesso.', { label: 'RedisClient' });
-    });
-
-    this.redisClient.on('ready', () => {
-      logger.info('Cliente Redis pronto para uso.', { label: 'RedisClient' });
-    });
-
-    this.redisClient.on('error', (err) => {
-      logger.error('Erro na conexão com o Redis:', { label: 'RedisClient', message: err.message, stack: err.stack });
-    });
-  }
   /**
    * @method initialize
    * Inicializa a conexão principal com o WhatsApp.
@@ -316,7 +189,7 @@ class ConnectionManager {
   /**
    * @method connect
    * Conecta-se ao WhatsApp usando o estado de autenticação carregado.
-   * Configura o socket Baileys com as opções necessárias, incluindo logger, informações do navegador, e a função `cachedGroupMetadata` para otimizar o carregamento de metadados de grupo a partir do Redis.
+   * Configura o socket Baileys com as opções necessárias, incluindo logger e informações do navegador.
    */
   async connect() {
     const socketConfig = {
@@ -326,36 +199,6 @@ class ConnectionManager {
       syncFullHistory: true,
       markOnlineOnConnect: false,
       printQRInTerminal: false,
-      cachedGroupMetadata: async (jid) => {
-        try {
-          const data = await this.redisClient.get(`${REDIS_PREFIX_GROUP}${jid}`);
-          if (data && this.redisClient) {
-            logger.debug(`[METRIC] Group metadata cache HIT for ${jid}`, {
-              label: 'RedisCache',
-              metricName: 'group.metadata.cache.hit',
-              jid,
-              instanceId: this.instanceId,
-            });
-            return JSON.parse(data);
-          }
-          logger.debug(`[METRIC] Group metadata cache MISS for ${jid}`, {
-            label: 'RedisCache',
-            metricName: 'group.metadata.cache.miss',
-            jid,
-            instanceId: this.instanceId,
-          });
-        } catch (error) {
-          logger.error(`[METRIC] Error reading group metadata ${jid} from Redis for cachedGroupMetadata: ${error.message}`, {
-            label: 'RedisCache',
-            metricName: 'group.metadata.cache.error',
-            jid,
-            error: error.message,
-            stack: error.stack,
-            instanceId: this.instanceId,
-          });
-        }
-        return undefined;
-      },
     };
     this.client = makeWASocket(socketConfig);
     this.setupEventHandlers();
@@ -567,8 +410,8 @@ class ConnectionManager {
    * @description
    * Para cada mensagem:
    * 1. Determina o tipo de conteúdo da mensagem usando `getContentType`.
-   * 2. Se a mensagem tiver uma chave válida (`remoteJid` e `id`) e o cliente Redis estiver disponível, ela é processada.
-   * 3. A mensagem, junto com seu tipo de conteúdo e um objeto `receipts` inicializado, é salva no cache Redis com um TTL definido por `REDIS_TTL_MESSAGE`.
+   * 2. Se a mensagem tiver uma chave válida (`remoteJid` e `id`), ela é processada.
+   * 3. A mensagem, junto com seu tipo de conteúdo e um objeto `receipts` inicializado, é preparada.
    * 4. Se `this.mysqlDbManager` estiver configurado, a mensagem também é salva (upsert) no banco de dados MySQL.
    * 5. Erros durante o salvamento no Redis ou MySQL são registrados.
    */
@@ -593,8 +436,7 @@ class ConnectionManager {
         logger.debug(`Could not determine content type for message ${messageKey?.id}`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId });
       }
 
-      if (messageKey && messageKey.remoteJid && messageKey.id && this.redisClient) {
-        const redisMessageCacheKey = `${REDIS_PREFIX_MESSAGE}${messageKey.remoteJid}:${messageKey.id}`;
+      if (messageKey && messageKey.remoteJid && messageKey.id) {
         try {
           const messageToStore = {
             ...msg,
@@ -602,8 +444,6 @@ class ConnectionManager {
             messageContentType,
             instanceId: this.instanceId,
           };
-          await this.setCacheWithLog(redisMessageCacheKey, messageToStore, REDIS_TTL_MESSAGE, 'messages.upsert');
-          // Metric for redis save is handled by setCacheWithLog
 
           let dataForEvent = { ...messageToStore };
           if (this.mysqlDbManager) {
@@ -636,7 +476,7 @@ class ConnectionManager {
           this.emitEvent('message:upsert:received', dataForEvent, 'messages.upsert');
           // Metric for event emission is handled by emitEvent
         } catch (error) {
-          logger.error(`[METRIC] Error processing message ${messageKey?.id} (Redis, enrichment, or event emission): ${error.message}`, {
+          logger.error(`[METRIC] Error processing message ${messageKey?.id} (enrichment, DB, or event emission): ${error.message}`, {
             label: 'SyncError',
             metricName: 'messages.upsert.processing_error',
             messageId: messageKey?.id,
@@ -667,7 +507,7 @@ class ConnectionManager {
   /**
    * @method updateGroupMetadata
    * @private
-   * Método utilitário para buscar e atualizar metadados de grupo no Redis e MySQL.
+   * Método utilitário para buscar e atualizar metadados de grupo no MySQL.
    * @param {string} jid - O JID do grupo.
    * @param {GroupMetadata} [existingMetadata=null] - Metadados existentes do grupo (opcional).
    * @param {string} [context=''] - Contexto da atualização para logging.
@@ -682,19 +522,6 @@ class ConnectionManager {
           context,
         });
         return null;
-      }
-
-      if (!existingMetadata && this.redisClient) {
-        const cacheKey = `${REDIS_PREFIX_GROUP}${jid}`;
-        const cachedData = await this.redisClient.get(cacheKey);
-        if (cachedData) {
-          existingMetadata = JSON.parse(cachedData);
-          logger.debug(`Usando metadados em cache para grupo ${jid} no contexto '${context}'.`, {
-            label: 'RedisCache',
-            jid,
-            context,
-          });
-        }
       }
 
       let finalMetadata = existingMetadata;
@@ -713,9 +540,6 @@ class ConnectionManager {
       }
 
       if (finalMetadata) {
-        const cacheKey = `${REDIS_PREFIX_GROUP}${jid}`;
-        await this.setCacheWithLog(cacheKey, finalMetadata, REDIS_TTL_METADATA_SHORT, context);
-        // Metric for redis save is handled by setCacheWithLog
 
         if (this.mysqlDbManager) {
           try {
@@ -773,7 +597,7 @@ class ConnectionManager {
    * Para cada atualização de grupo:
    * 1. Obtém o JID do grupo.
    * 2. Busca os metadados completos do grupo usando `this.client.groupMetadata(jid)`.
-   * 3. Se os metadados forem obtidos com sucesso e o cliente Redis estiver disponível, eles são salvos no cache Redis com a chave `group:<jid>` e TTL `REDIS_TTL_METADATA_SHORT`.
+   * 3. Se os metadados forem obtidos com sucesso, eles são preparados para persistência.
    * 4. Se `this.mysqlDbManager` estiver configurado, os metadados do grupo também são salvos (upsert) no banco de dados MySQL.
    * 5. Erros durante o processo são registrados.
    */
@@ -828,7 +652,7 @@ class ConnectionManager {
    *
    * @description
    * Para cada metadado de grupo recebido:
-   * 1. Se o cliente Redis estiver disponível, salva os metadados no cache Redis com a chave `group:<jid>` e TTL `REDIS_TTL_METADATA_SHORT`.
+   * 1. Prepara os metadados para persistência.
    * 2. Se `this.mysqlDbManager` estiver configurado, os metadados do grupo também são salvos (upsert) no banco de dados MySQL.
    * 3. Erros durante o processo são registrados.
    */
@@ -857,9 +681,9 @@ class ConnectionManager {
    * @param {WAMessage[]} data.messages - Array de mensagens do histórico.
    *
    * @description
-   * - Para cada chat: Se o cliente Redis estiver disponível, salva no Redis (chave `chat:<id>`, TTL `REDIS_TTL_METADATA_SHORT`) e no MySQL (via `this.mysqlDbManager.upsertChat`).
-   * - Para cada contato: Se o cliente Redis estiver disponível, salva no Redis (chave `contact:<id>`, TTL `REDIS_TTL_METADATA_LONG`). (Atualmente não salva contatos no MySQL neste handler).
-   * - Para cada mensagem: Determina o tipo de conteúdo. Se o cliente Redis estiver disponível, salva no Redis (chave `message:<remoteJid>:<id>`, TTL `REDIS_TTL_MESSAGE`) e no MySQL (via `this.mysqlDbManager.upsertMessage`).
+   * - Para cada chat: Salva no MySQL (via `this.mysqlDbManager.upsertChat`).
+   * - Para cada contato: (Atualmente não salva contatos no MySQL neste handler, apenas loga).
+   * - Para cada mensagem: Determina o tipo de conteúdo. Salva no MySQL (via `this.mysqlDbManager.upsertMessage`).
    * Erros durante o salvamento são registrados.
    */
   async handleMessagingHistorySet(data) {
@@ -874,9 +698,6 @@ class ConnectionManager {
     for (const chat of chats) {
       if (chat.id) {
         try {
-          await this.setCacheWithLog(`${REDIS_PREFIX_CHAT}${chat.id}`, chat, REDIS_TTL_METADATA_SHORT, 'messaging-history.set.chat');
-          // Metric for redis save is handled by setCacheWithLog
-
           if (this.mysqlDbManager) {
             try {
               await this.mysqlDbManager.upsertChat(chat);
@@ -898,9 +719,9 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[METRIC] Error saving chat ${chat.id} from history to Redis: ${error.message}`, {
-            label: 'SyncError', // This error is specific to Redis if DB part is in try/catch
-            metricName: 'history.chat.redis.error', // More specific metric name
+          logger.error(`[METRIC] Error processing chat ${chat.id} from history (DB or other): ${error.message}`, {
+            label: 'SyncError',
+            metricName: 'history.chat.processing.error',
             jid: chat.id,
             error: error.message,
             stack: error.stack,
@@ -912,24 +733,18 @@ class ConnectionManager {
 
     for (const contact of contacts) {
       if (contact.id) {
-        try {
-          await this.setCacheWithLog(`${REDIS_PREFIX_CONTACT}${contact.id}`, contact, REDIS_TTL_METADATA_LONG, 'messaging-history.set.contact');
-          // Metric for redis save is handled by setCacheWithLog
-        } catch (error) {
-          // Error metric is handled by setCacheWithLog
-          logger.warn(`Failed to cache contact ${contact.id} from history due to Redis error. Details in previous log.`, { label: 'ConnectionManager', jid: contact.id, instanceId: this.instanceId });
-        }
+        // Originalmente, contatos do histórico eram apenas cacheados no Redis.
+        // Agora, apenas logamos, pois não há instrução para persisti-los no MySQL aqui.
+        logger.debug(`Contact from history received: ${contact.id}`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
       }
     }
 
     for (const msg of messages) {
       logger.debug(`History message received: ${msg.key?.id} from ${msg.key?.remoteJid}`, { label: 'ConnectionManager', messageKey: msg.key, instanceId: this.instanceId });
-      if (msg.key && msg.key.remoteJid && msg.key.id && this.redisClient) {
+      if (msg.key && msg.key.remoteJid && msg.key.id) {
         const messageContentType = msg.message ? getContentType(msg.message) : null;
         try {
           const messageToStore = { ...msg, receipts: msg.receipts || {}, messageContentType };
-          await this.setCacheWithLog(`${REDIS_PREFIX_MESSAGE}${msg.key.remoteJid}:${msg.key.id}`, messageToStore, REDIS_TTL_MESSAGE, 'messaging-history.set.message');
-          // Metric for redis save is handled by setCacheWithLog
 
           if (this.mysqlDbManager) {
             try {
@@ -952,9 +767,9 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[METRIC] Error saving history message ${msg.key.id} to Redis: ${error.message}`, {
-            label: 'SyncError', // Specific to Redis if DB is in inner try/catch
-            metricName: 'history.message.redis.error',
+          logger.error(`[METRIC] Error processing history message ${msg.key.id} (DB or other): ${error.message}`, {
+            label: 'SyncError',
+            metricName: 'history.message.processing.error',
             messageKey: msg.key,
             error: error.message,
             stack: error.stack,
@@ -1048,12 +863,9 @@ class ConnectionManager {
    * @description
    * Para cada atualização de recibo:
    * 1. Verifica se a chave da mensagem, os detalhes do recibo são válidos e se o cliente Redis está disponível.
-   * 2. Tenta buscar a mensagem correspondente no cache Redis.
-   * 3. Se a mensagem for encontrada:
-   *    a. Atualiza o objeto `receipts` dentro dos dados da mensagem com as novas informações do recibo.
-   *    b. Salva a mensagem atualizada de volta no Redis, preservando o TTL original se possível, ou usando `REDIS_TTL_MESSAGE` como fallback.
-   *    c. Se `this.mysqlDbManager` estiver configurado, salva (upsert) o recibo no banco de dados MySQL.
-   * 4. Se a mensagem não for encontrada no cache (ou Redis não estiver disponível), registra um aviso.
+   * 2. Prepara os dados do recibo.
+   * 3. Se `this.mysqlDbManager` estiver configurado, salva (upsert) o recibo no banco de dados MySQL.
+   * 4. (Lógica de atualização de objeto de mensagem em cache foi removida com o Redis).
    * 5. Erros durante o processo são registrados.
    */
   async handleMessageReceiptUpdate(receipts) {
@@ -1068,20 +880,8 @@ class ConnectionManager {
       const { key, receipt } = receiptUpdate;
       if (key && key.remoteJid && key.id && receipt && receipt.userJid) {
         try {
-          const messageCacheKey = `${REDIS_PREFIX_MESSAGE}${key.remoteJid}:${key.id}`;
-          const messageJSON = this.redisClient ? await this.redisClient.get(messageCacheKey) : null;
-          if (messageJSON && this.redisClient) {
-            const messageData = JSON.parse(messageJSON);
-            messageData.receipts = messageData.receipts || {};
-            messageData.receipts[receipt.userJid] = {
-              type: receipt.type,
-              timestamp: receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp,
-            };
-            const ttl = await this.redisClient.ttl(messageCacheKey);
-            const finalTTL = (ttl !== null && ttl > 0) ? ttl : REDIS_TTL_MESSAGE; // prettier-ignore
-            await this.setCacheWithLog(messageCacheKey, messageData, finalTTL, 'message-receipt.update');
-            // Metric for redis save is handled by setCacheWithLog
-
+          // A lógica de buscar e atualizar a mensagem no cache Redis foi removida.
+          // Agora, apenas persistimos o recibo no MySQL.
             if (this.mysqlDbManager) {
               try {
                 const timestamp = receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp;
@@ -1107,18 +907,11 @@ class ConnectionManager {
                 });
               }
             }
-          } else {
-            logger.warn(`[METRIC] Message ${key.id} not found in Redis cache (or Redis unavailable) to update receipt.`, {
-              label: 'RedisCache',
-              metricName: 'message.receipt.redis.miss',
-              messageKey: key,
-              instanceId: this.instanceId,
-            });
-          }
+          // O else que tratava "mensagem não encontrada no cache" foi removido.
         } catch (error) {
-          logger.error(`[METRIC] Error processing message receipt for ${key.id} (Redis/other): ${error.message}`, {
+          logger.error(`[METRIC] Error processing message receipt for ${key.id} (DB/other): ${error.message}`, {
             label: 'SyncError',
-            metricName: 'message.receipt.processing.error',
+            metricName: 'message.receipt.db.error', // Mais específico para erro de DB
             messageKey: key,
             error: error.message,
             stack: error.stack,
@@ -1138,7 +931,7 @@ class ConnectionManager {
    *
    * @description
    * Para cada chat:
-   * 1. Se o cliente Redis estiver disponível, salva o objeto do chat no cache Redis com a chave `chat:<id>` e TTL `REDIS_TTL_METADATA_SHORT`.
+   * 1. Prepara o objeto do chat para persistência.
    * 2. Se `this.mysqlDbManager` estiver configurado, salva (upsert) o chat no banco de dados MySQL.
    * 3. Erros durante o processo são registrados.
    */
@@ -1152,9 +945,6 @@ class ConnectionManager {
     for (const chat of chats) {
       if (chat.id) {
         try {
-          await this.setCacheWithLog(`${REDIS_PREFIX_CHAT}${chat.id}`, chat, REDIS_TTL_METADATA_SHORT, 'chats.upsert');
-          // Metric for redis save is handled by setCacheWithLog
-
           if (this.mysqlDbManager) {
             try {
               await this.mysqlDbManager.upsertChat(chat);
@@ -1176,10 +966,9 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          // This catch is now primarily for Redis errors if DB has its own try/catch
-          logger.error(`[METRIC] Error saving chat ${chat.id} (upsert) to Redis: ${error.message}`, {
-            label: 'SyncError', // Or RedisError
-            metricName: 'chat.redis.upsert.error',
+          logger.error(`[METRIC] Error processing chat ${chat.id} (upsert) (DB or other): ${error.message}`, {
+            label: 'SyncError',
+            metricName: 'chat.processing.upsert.error',
             jid: chat.id,
             error: error.message,
             stack: error.stack,
@@ -1198,7 +987,7 @@ class ConnectionManager {
    *
    * @description
    * Para cada atualização de chat:
-   * 1. Se o cliente Redis estiver disponível, salva o objeto de atualização do chat no cache Redis com a chave `chat:<id>` e TTL `REDIS_TTL_METADATA_SHORT`. (Nota: Isso pode sobrescrever o chat completo com um objeto parcial se não for tratado com cuidado ao ler do cache).
+   * 1. Prepara a atualização do chat para persistência.
    * 2. Se `this.mysqlDbManager` estiver configurado, salva (upsert) a atualização do chat no banco de dados MySQL.
    * 3. Erros durante o processo são registrados.
    */
@@ -1212,9 +1001,6 @@ class ConnectionManager {
     for (const chatUpdate of updates) {
       if (chatUpdate.id) {
         try {
-          await this.setCacheWithLog(`${REDIS_PREFIX_CHAT}${chatUpdate.id}`, chatUpdate, REDIS_TTL_METADATA_SHORT, 'chats.update');
-          // Metric for redis save is handled by setCacheWithLog
-
           if (this.mysqlDbManager) {
             try {
               await this.mysqlDbManager.upsertChat(chatUpdate); // Assuming upsertChat can handle partial updates
@@ -1236,9 +1022,9 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[METRIC] Error updating chat ${chatUpdate.id} (update) in Redis: ${error.message}`, {
-            label: 'SyncError', // Or RedisError
-            metricName: 'chat.redis.update.error',
+          logger.error(`[METRIC] Error processing chat update ${chatUpdate.id} (DB or other): ${error.message}`, {
+            label: 'SyncError',
+            metricName: 'chat.processing.update.error',
             jid: chatUpdate.id,
             error: error.message,
             stack: error.stack,
@@ -1257,7 +1043,7 @@ class ConnectionManager {
    *
    * @description
    * Para cada JID de chat excluído:
-   * 1. Se o cliente Redis estiver disponível, remove o chat do cache Redis usando a chave `chat:<jid>`.
+   * 1. (Lógica de remoção do cache Redis foi removida).
    * 2. Se `this.mysqlDbManager` estiver configurado, chama `this.mysqlDbManager.deleteChatData(jid)` para remover os dados associados ao chat do banco de dados MySQL.
    * 3. Erros durante o processo são registrados.
    */
@@ -1270,16 +1056,6 @@ class ConnectionManager {
     });
     for (const jid of jids) {
       try {
-        const cacheKey = `${REDIS_PREFIX_CHAT}${jid}`;
-        if (this.redisClient) {
-          await this.redisClient.del(cacheKey);
-          logger.info(`[METRIC] Chat ${jid} removed from Redis.`, {
-            label: 'RedisCache',
-            metricName: 'chat.redis.delete.success',
-            jid,
-            instanceId: this.instanceId,
-          });
-        }
 
         if (this.mysqlDbManager) {
           try {
@@ -1302,9 +1078,9 @@ class ConnectionManager {
           }
         }
       } catch (error) {
-        logger.error(`[METRIC] Error removing chat ${jid} from Redis (outer catch): ${error.message}`, {
-          label: 'SyncError', // Or RedisError
-          metricName: 'chat.redis.delete.error', // General Redis delete error
+        logger.error(`[METRIC] Error processing chat deletion for ${jid} (DB or other): ${error.message}`, {
+          label: 'SyncError',
+          metricName: 'chat.processing.delete.error',
           jid,
           error: error.message,
           stack: error.stack,
@@ -1322,8 +1098,8 @@ class ConnectionManager {
    *
    * @description
    * Para cada contato:
-   * 1. Se o cliente Redis estiver disponível, salva o objeto do contato no cache Redis com a chave `contact:<id>` e TTL `REDIS_TTL_METADATA_LONG`.
-   * 2. Erros durante o salvamento no Redis são registrados. (Atualmente, não há persistência de contatos no MySQL neste handler).
+   * 1. (Lógica de cache Redis foi removida).
+   * 2. (Atualmente, não há persistência de contatos no MySQL neste handler, apenas log).
    */
   async handleContactsUpsert(contacts) {
     logger.info(`[METRIC] 'contacts.upsert' event received. Number of contacts: ${contacts.length}`, {
@@ -1334,25 +1110,17 @@ class ConnectionManager {
     });
     for (const contact of contacts) {
       if (contact.id) {
-        try {
-          await this.setCacheWithLog(`${REDIS_PREFIX_CONTACT}${contact.id}`, contact, REDIS_TTL_METADATA_LONG, 'contacts.upsert');
-          // Metric for redis save is handled by setCacheWithLog
-        } catch (error) {
-          // Error metric is handled by setCacheWithLog
-          logger.warn(`Failed to cache contact ${contact.id} (upsert) due to Redis error. Details in previous log.`, {
-            label: 'ConnectionManager',
-            jid: contact.id,
-            instanceId: this.instanceId,
-          });
-        }
+        // Originalmente, contatos eram apenas cacheados no Redis.
+        // Agora, apenas logamos, pois não há instrução para persisti-los no MySQL aqui.
+        logger.debug(`Contact upsert received: ${contact.id}`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
       }
     }
   }
 
   /**
    * @method handleContactsUpdate
-   * Manipula a atualização de contatos no sistema.
-   * Responsável por atualizar as informações de contato no cache Redis.
+   * Manipula a atualização de contatos.
+   * (Lógica de cache Redis foi removida).
    * Este evento é disparado quando propriedades de um contato existente são alteradas (ex: nome, notificação push) (evento 'contacts.update').
    * @param {Array<Partial<Contact>>} updates - Array de atualizações parciais de contatos. Cada objeto deve ter pelo menos a propriedade `id`.
    *
@@ -1360,8 +1128,7 @@ class ConnectionManager {
    * Para cada atualização de contato:
    * 1. Se o cliente Redis estiver disponível, salva o objeto de atualização do contato no cache Redis com a chave `contact:<id>` e TTL `REDIS_TTL_METADATA_LONG`. (Nota: Isso pode sobrescrever o contato completo com um objeto parcial se não for tratado com cuidado ao ler do cache).
    * 2. Erros durante o salvamento no Redis são registrados. (Atualmente, não há persistência de contatos no MySQL neste handler).
-   * @example
-   * // Exemplo de update recebido
+   * @example // Exemplo de update recebido
    * handleContactsUpdate([{
    *   id: '5511999999999@s.whatsapp.net',
    *   name: 'Novo Nome',
@@ -1377,17 +1144,9 @@ class ConnectionManager {
     });
     for (const contactUpdate of updates) {
       if (contactUpdate.id) {
-        try {
-          await this.setCacheWithLog(`${REDIS_PREFIX_CONTACT}${contactUpdate.id}`, contactUpdate, REDIS_TTL_METADATA_LONG, 'contacts.update');
-          // Metric for redis save is handled by setCacheWithLog
-        } catch (error) {
-          // Error metric is handled by setCacheWithLog
-          logger.warn(`Failed to cache contact update ${contactUpdate.id} due to Redis error. Details in previous log.`, {
-            label: 'ConnectionManager',
-            jid: contactUpdate.id,
-            instanceId: this.instanceId,
-          });
-        }
+        // Originalmente, atualizações de contatos eram apenas cacheadas no Redis.
+        // Agora, apenas logamos.
+        logger.debug(`Contact update received: ${contactUpdate.id}`, { label: 'ConnectionManager', contactId: contactUpdate.id, update: contactUpdate, instanceId: this.instanceId });
       }
     }
   }
