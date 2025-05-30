@@ -30,22 +30,9 @@ function _extractTextFromMessageObject(msgObj, paths) {
       }
     }
   }
-  return ''; // No text found for any path
+  return '';
 }
 
-/**
- * Processa uma mensagem recebida do WhatsApp.
- *
- * @param {object} message - O objeto da mensagem, conforme preparado pelo ConnectionManager.
- *                           Espera-se que contenha propriedades como:
- *                           - key: { remoteJid, fromMe, id, participant }
- *                           - messageTimestamp: timestamp da mensagem
- *                           - pushName: nome do remetente
- *                           - message: { conversation, extendedTextMessage: { text }, ... }
- *                           - instanceId: ID da instância que recebeu a mensagem
- *                           - ... (outras propriedades relevantes)
- * @param {import('baileys').WASocket | null} baileysClient - A instância do cliente Baileys para interagir com o WhatsApp (ex: enviar mensagens).
- */
 async function processIncomingMessage(message, baileysClient) {
   logger.info(`[MessageController] Processando mensagem ID: ${message.key?.id} de ${message.key?.remoteJid}`, {
     label: 'MessageController',
@@ -74,33 +61,7 @@ async function processIncomingMessage(message, baileysClient) {
     }
   }
 
-  let descriptiveMessageText = '';
-  if (message.message?.conversation) {
-    descriptiveMessageText = message.message.conversation;
-  } else if (message.message?.extendedTextMessage?.text) {
-    descriptiveMessageText = message.message.extendedTextMessage.text;
-  } else if (message.message?.imageMessage?.caption) {
-    descriptiveMessageText = `Imagem: ${message.message.imageMessage.caption || '(sem legenda)'}`;
-  } else if (message.message?.imageMessage) {
-    // Imagem sem legenda
-    descriptiveMessageText = 'Imagem (sem legenda)';
-  } else if (message.message?.videoMessage?.caption) {
-    descriptiveMessageText = `Vídeo: ${message.message.videoMessage.caption || '(sem legenda)'}`;
-  } else if (message.message?.videoMessage) {
-    // Vídeo sem legenda
-    descriptiveMessageText = 'Vídeo (sem legenda)';
-  } else if (message.message?.documentMessage?.caption) {
-    descriptiveMessageText = `Documento: ${message.message.documentMessage.caption}`;
-  } else if (message.message?.documentMessage?.fileName) {
-    descriptiveMessageText = `Documento: ${message.message.documentMessage.fileName}`;
-  } else if (message.message?.documentMessage) {
-    descriptiveMessageText = 'Documento (sem legenda/nome)';
-  } else if (commandInputText) {
-    // Se commandInputText foi extraído (ex: de citação) mas não houve descrição primária
-    descriptiveMessageText = `(Conteúdo para comando: "${commandInputText}")`;
-  } else {
-    descriptiveMessageText = '(Conteúdo não textual ou não identificado)';
-  }
+  let descriptiveMessageText = message.message?.conversation || message.message?.extendedTextMessage?.text || (message.message?.imageMessage?.caption ? `Imagem: ${message.message.imageMessage.caption}` : message.message?.imageMessage ? 'Imagem (sem legenda)' : message.message?.videoMessage?.caption ? `Vídeo: ${message.message.videoMessage.caption}` : message.message?.videoMessage ? 'Vídeo (sem legenda)' : message.message?.documentMessage?.caption ? `Documento: ${message.message.documentMessage.caption}` : message.message?.documentMessage?.fileName ? `Documento: ${message.message.documentMessage.fileName}` : message.message?.documentMessage ? 'Documento (sem legenda/nome)' : commandInputText ? `(Conteúdo para comando: "${commandInputText}")` : '(Conteúdo não textual ou não identificado)');
 
   logger.debug(`[MessageController] Conteúdo da mensagem de ${from}: "${descriptiveMessageText}"`, {
     label: 'MessageController',
