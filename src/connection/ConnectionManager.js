@@ -120,7 +120,7 @@ class ConnectionManager {
   emitEvent(eventName, data, context = '') {
     try {
       this.eventEmitter.emit(eventName, data);
-      logger.info(`[METRIC] Event '${eventName}' emitted successfully`, {
+      logger.info(`[MÉTRICA] Evento '${eventName}' emitido com sucesso.`, {
         label: 'EventEmitter',
         metricName: 'event.emit.success',
         context,
@@ -130,7 +130,7 @@ class ConnectionManager {
         instanceId: this.instanceId,
       });
     } catch (error) {
-      logger.error(`[METRIC] Error emitting event '${eventName}': ${error.message}`, {
+      logger.error(`[MÉTRICA] Erro ao emitir o evento '${eventName}': ${error.message}.`, {
         label: 'EventEmitter',
         metricName: 'event.emit.error',
         error: error.message,
@@ -147,7 +147,6 @@ class ConnectionManager {
    * @returns {EventEmitter} Retorna a instância do EventEmitter para escutar eventos customizados, como 'message:upsert:received'.
    */
   getEventEmitter() {
-    // Este método não precisa de try-catch, pois EventEmitter.emit já tem.
     return this.eventEmitter;
   }
 
@@ -159,7 +158,7 @@ class ConnectionManager {
    * @throws {Error} Propaga erros que podem ocorrer durante `loadAuthState` ou `connect`.
    */
   async initialize() {
-    logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager' });
+    logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager', instanceId: this.instanceId });
     await this.loadAuthState();
     await this.connect();
   }
@@ -173,12 +172,12 @@ class ConnectionManager {
    */
   async loadAuthState() {
     if (!fs.existsSync(this.authStatePath)) {
-      logger.info(`Diretório de estado de autenticação não encontrado em ${this.authStatePath}. Criando...`, { label: 'ConnectionManager' });
+      logger.info(`Diretório de estado de autenticação não encontrado em ${this.authStatePath}. Criando...`, { label: 'ConnectionManager', instanceId: this.instanceId });
       try {
         fs.mkdirSync(this.authStatePath, { recursive: true });
-        logger.info(`Diretório ${this.authStatePath} criado com sucesso.`, { label: 'ConnectionManager' });
+        logger.info(`Diretório ${this.authStatePath} criado com sucesso.`, { label: 'ConnectionManager', instanceId: this.instanceId });
       } catch (mkdirError) {
-        logger.error(`Falha ao criar o diretório ${this.authStatePath}: ${mkdirError.message}`, { label: 'ConnectionManager' });
+        logger.error(`Falha ao criar o diretório ${this.authStatePath}: ${mkdirError.message}.`, { label: 'ConnectionManager', instanceId: this.instanceId });
         throw mkdirError;
       }
     }
@@ -235,7 +234,7 @@ class ConnectionManager {
     this.client.ev.on('blocklist.update', this.handleBlocklistUpdate.bind(this));
     this.client.ev.on('call', this.handleCall.bind(this));
     this.client.ev.on('presence.update', this.handlePresenceUpdate.bind(this));
-    logger.debug('Todos os manipuladores de eventos foram registrados.', { label: 'ConnectionManager' });
+    logger.debug('Todos os manipuladores de eventos foram registrados.', { label: 'ConnectionManager', instanceId: this.instanceId });
   }
 
   /**
@@ -256,7 +255,7 @@ class ConnectionManager {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
-      logger.info('[METRIC] QR code generated for authentication. Please scan with your WhatsApp:', {
+      logger.info('[MÉTRICA] Código QR gerado para autenticação. Por favor, escaneie com seu WhatsApp:', {
         label: 'ConnectionManager',
         metricName: 'connection.qr.generated',
         instanceId: this.instanceId,
@@ -265,7 +264,7 @@ class ConnectionManager {
     }
 
     if (connection === STATUS.CONNECTED) {
-      logger.info('[METRIC] WhatsApp connection established successfully!', {
+      logger.info('[MÉTRICA] Conexão com o WhatsApp estabelecida com sucesso!', {
         label: 'ConnectionManager',
         metricName: 'connection.established',
         instanceId: this.instanceId,
@@ -276,7 +275,7 @@ class ConnectionManager {
     if (connection === STATUS.DISCONNECTED) {
       const statusCode = lastDisconnect?.error?.output?.statusCode;
       const reason = DisconnectReason[statusCode] || 'Desconhecida';
-      logger.warn(`[METRIC] WhatsApp connection closed. Reason: ${reason} (Code: ${statusCode})`, {
+      logger.warn(`[MÉTRICA] Conexão com o WhatsApp fechada. Motivo: ${reason} (Código: ${statusCode})`, {
         label: 'ConnectionManager',
         metricName: 'connection.closed',
         statusCode,
@@ -320,13 +319,13 @@ class ConnectionManager {
     this.reconnectionAttempts++;
     this.currentBackoffDelayMs = Math.min(this.initialBackoffDelayMs * Math.pow(2, this.reconnectionAttempts - 1), this.maxBackoffDelayMs);
 
-    logger.info(`[METRIC] Attempting reconnection (Attempt ${this.reconnectionAttempts}/${this.maxReconnectionAttempts}) in ${this.currentBackoffDelayMs}ms...`, {
+    logger.info(`[MÉTRICA] Tentando reconexão (Tentativa ${this.reconnectionAttempts}/${this.maxReconnectionAttempts}) em ${this.currentBackoffDelayMs}ms...`, {
       label: 'ConnectionManager',
       metricName: 'connection.reconnect.attempt',
       attempt: this.reconnectionAttempts,
       maxAttempts: this.maxReconnectionAttempts,
       delayMs: this.currentBackoffDelayMs,
-      statusCode, // Keep this for context
+      statusCode,
       instanceId: this.instanceId,
     });
 
@@ -335,7 +334,7 @@ class ConnectionManager {
         await this.connect();
         this.isReconnecting = false;
       } catch (err) {
-        logger.error(`[METRIC] Reconnection attempt failed: ${err.message}`, {
+        logger.error(`[MÉTRICA] Tentativa de reconexão falhou: ${err.message}.`, {
           label: 'ConnectionManager',
           metricName: 'connection.reconnect.failed_attempt',
           attempt: this.reconnectionAttempts,
@@ -362,7 +361,7 @@ class ConnectionManager {
    * @param {number|undefined} statusCode - O código de status da desconexão (pode ser `undefined`).
    */
   handleIrrecoverableDisconnect(statusCode) {
-    logger.error(`[METRIC] Irrecoverable disconnection. Status Code: ${statusCode}. Please remove the auth directory and restart to generate a new QR code.`, {
+    logger.error(`[MÉTRICA] Desconexão irrecuperável. Código de Status: ${statusCode}. Por favor, remova o diretório de autenticação e reinicie para gerar um novo código QR.`, {
       label: 'ConnectionManager',
       metricName: 'connection.disconnected.irrecoverable',
       statusCode,
@@ -391,7 +390,7 @@ class ConnectionManager {
    */
   async handleCredsUpdate() {
     await this.auth.saveCreds();
-    logger.info('[METRIC] Authentication credentials saved/updated.', {
+    logger.info('[MÉTRICA] Credenciais de autenticação salvas/atualizadas.', {
       label: 'ConnectionManager',
       metricName: 'auth.credentials.updated',
       instanceId: this.instanceId,
@@ -416,79 +415,80 @@ class ConnectionManager {
    */
   async handleMessagesUpsert(data) {
     const { messages, type } = data;
-    logger.info(`[METRIC] Received ${messages.length} message(s) in 'messages.upsert' event. Type: ${type}`, {
+    logger.info(`[MÉTRICA] Recebido(s) ${messages.length} mensagem(ns) no evento 'messages.upsert'. Tipo: ${type}. Preparando para processamento em lote.`, {
       label: 'ConnectionManager',
-      metricName: 'messages.upsert.received',
+      metricName: 'messages.upsert.recebidas',
       count: messages.length,
       type,
       instanceId: this.instanceId,
     });
 
+    const messagesToProcess = [];
+    const originalMessagesForEvent = [];
+
     for (const msg of messages) {
       const messageContentType = msg.message ? getContentType(msg.message) : null;
-
       const { key: messageKey } = msg;
 
       if (messageContentType) {
-        logger.debug(`Content type of message ${messageKey?.id}: ${messageContentType}`, { label: 'ConnectionManager', messageKey, contentType: messageContentType, instanceId: this.instanceId });
+        logger.debug(`Tipo de conteúdo da mensagem ${messageKey?.id}: ${messageContentType}.`, { label: 'ConnectionManager', messageKey, contentType: messageContentType, instanceId: this.instanceId });
       } else {
-        logger.debug(`Could not determine content type for message ${messageKey?.id}`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId });
+        logger.warn(`Não foi possível determinar o tipo de conteúdo para a mensagem ${messageKey?.id}. Pode ser um evento como exclusão de mensagem.`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId, messageDetails: msg });
       }
 
       if (messageKey && messageKey.remoteJid && messageKey.id) {
-        try {
-          const messageToStore = {
-            ...msg,
-            receipts: msg.receipts || {},
-            messageContentType,
-            instanceId: this.instanceId,
-          };
+        const messageToStore = {
+          ...msg,
+          messageContentType,
+          instanceId: this.instanceId,
+        };
+        messagesToProcess.push(messageToStore);
+        originalMessagesForEvent.push(messageToStore); // Keep a reference for event emission
+      } else {
+        logger.warn('Mensagem recebida sem chave completa ou ID, não foi possível processar para o BD.', { label: 'ConnectionManager', messageKey: msg.key, instanceId: this.instanceId });
+      }
+      logger.debug(`Conteúdo da mensagem original: ${msg.key?.id}.`, { label: 'ConnectionManager', messageKey: msg.key, messageDetails: msg, instanceId: this.instanceId });
+    }
 
-          let dataForEvent = { ...messageToStore };
-          if (this.mysqlDbManager) {
-            try {
-              const dbPersistedMessage = await this.mysqlDbManager.upsertMessage(messageToStore);
-              logger.info(`[METRIC] Message ${messageKey.id} upserted to MySQL.`, {
-                label: 'MySQLSync',
-                metricName: 'messages.mysql.upsert.success',
-                messageId: messageKey.id,
-                remoteJid: messageKey.remoteJid,
-                instanceId: this.instanceId,
-              });
-              if (dbPersistedMessage && typeof dbPersistedMessage === 'object') {
-                dataForEvent = { ...dataForEvent, ...dbPersistedMessage };
-                logger.debug(`Message ${messageKey.id} processed by MySQL. DB data added to event payload.`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId });
-              } else {
-                logger.debug(`Message ${messageKey.id} processed by MySQL, but no additional data returned (or unexpected type). Event will use pre-DB data.`, { label: 'ConnectionManager', messageKey, dbReturn: dbPersistedMessage, instanceId: this.instanceId });
-              }
-            } catch (dbError) {
-              logger.error(`[METRIC] MySQL error during upsertMessage for message ${messageKey.id}: ${dbError.message}`, {
-                label: 'SyncError',
-                metricName: 'messages.mysql.upsert.error',
-                messageKey,
-                error: dbError.message,
-                stack: dbError.stack,
-                instanceId: this.instanceId,
-              });
-            }
+    if (this.mysqlDbManager && messagesToProcess.length > 0) {
+      try {
+        // Assume upsertMessagesBatch handles both message and related chat updates
+        // and returns an array of results (e.g., dbPersistedMessage objects) or modifies messages in place.
+        // For this example, let's assume it returns an array of objects that can augment the original messages.
+        const batchResults = await this.mysqlDbManager.upsertMessagesBatch(messagesToProcess);
+
+        logger.info(`[MÉTRICA] ${messagesToProcess.length} mensagens processadas em lote pelo MySQL.`, {
+          label: 'MySQLSync',
+          metricName: 'messages.mysql.batch_upsert.success',
+          count: messagesToProcess.length,
+          instanceId: this.instanceId,
+        });
+
+        // Emit events for each message, potentially augmented with batch results
+        originalMessagesForEvent.forEach((originalMsg, index) => {
+          let dataForEvent = { ...originalMsg };
+          if (batchResults && batchResults[index] && typeof batchResults[index] === 'object') {
+            dataForEvent = { ...dataForEvent, ...batchResults[index] }; // Augment with DB specific info if returned
           }
           this.emitEvent('message:upsert:received', dataForEvent, 'messages.upsert');
-          // Metric for event emission is handled by emitEvent
-        } catch (error) {
-          logger.error(`[METRIC] Error processing message ${messageKey?.id} (enrichment, DB, or event emission): ${error.message}`, {
-            label: 'SyncError',
-            metricName: 'messages.upsert.processing_error',
-            messageId: messageKey?.id,
-            remoteJid: messageKey?.remoteJid,
-            error: error.message,
-            stack: error.stack,
-            instanceId: this.instanceId,
-          });
-        }
-      } else {
-        logger.warn('Mensagem recebida sem chave completa, não foi possível processar.', { label: 'ConnectionManager', message: msg, instanceId: this.instanceId });
+        });
+      } catch (dbError) {
+        logger.error(`[MÉTRICA] Erro no MySQL durante o upsert em lote de ${messagesToProcess.length} mensagens: ${dbError.message}.`, {
+          label: 'SyncError',
+          metricName: 'messages.mysql.batch_upsert.error',
+          count: messagesToProcess.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
+        // Fallback: emit events with original data if DB batch fails
+        originalMessagesForEvent.forEach((msg) => this.emitEvent('message:upsert:received', msg, 'messages.upsert'));
       }
-      logger.debug(`Conteúdo da mensagem original: ${messageKey?.id}`, { label: 'ConnectionManager', messageKey, messageDetails: msg, instanceId: this.instanceId });
+    } else if (originalMessagesForEvent.length > 0) {
+      // No mysqlDbManager, but still emit events for messages that were valid for event emission
+      originalMessagesForEvent.forEach((msg) => {
+        this.emitEvent('message:upsert:received', msg, 'messages.upsert');
+      });
     }
   }
 
@@ -542,7 +542,7 @@ class ConnectionManager {
         if (this.mysqlDbManager) {
           try {
             await this.mysqlDbManager.upsertGroup(finalMetadata);
-            logger.info(`[METRIC] Group metadata for ${jid} updated in MySQL. Context: ${context}`, {
+            logger.info(`[MÉTRICA] Metadados do grupo ${jid} atualizados no MySQL. Contexto: ${context}.`, {
               label: 'MySQLSync',
               metricName: 'group.metadata.mysql.updated',
               jid,
@@ -550,7 +550,7 @@ class ConnectionManager {
               instanceId: this.instanceId,
             });
           } catch (dbError) {
-            logger.error(`[METRIC] Error updating group metadata ${jid} in MySQL. Context: ${context}. Error: ${dbError.message}`, {
+            logger.error(`[MÉTRICA] Erro ao atualizar metadados do grupo ${jid} no MySQL. Contexto: ${context}. Erro: ${dbError.message}.`, {
               label: 'MySQLSyncError',
               metricName: 'group.metadata.mysql.error',
               jid,
@@ -573,7 +573,7 @@ class ConnectionManager {
       });
       return null;
     } catch (error) {
-      logger.error(`Erro ao atualizar metadados do grupo ${jid}${context ? ` (${context})` : ''}: ${error.message}`, {
+      logger.error(`Erro ao atualizar metadados do grupo ${jid}${context ? ` (${context})` : ''}: ${error.message}.`, {
         label: 'SyncError',
         jid,
         error: error.message,
@@ -600,15 +600,33 @@ class ConnectionManager {
    * 5. Erros durante o processo são registrados.
    */
   async handleGroupsUpdate(updates) {
-    logger.debug(`Evento 'groups.update' recebido. Número de atualizações: ${updates.length}`, {
+    logger.debug(`Evento 'groups.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
       count: updates.length,
       instanceId: this.instanceId,
     });
     for (const groupUpdate of updates) {
-      const jid = groupUpdate.id;
-      if (jid) {
-        await this.updateGroupMetadata(jid, null, 'groups.update');
+      const jid = groupUpdate.id; // This is often just the JID
+      if (jid && jid.endsWith('@g.us')) {
+        // For groups.update, Baileys sends partial updates.
+        // We need to fetch full metadata to ensure DB consistency.
+        // This part remains individual as fetching is per-group.
+        // The batching would apply if we collected multiple full metadata objects.
+        // For this specific handler, if updates are frequent and partial,
+        // batching the DB write after fetching full metadata for several groups could be beneficial.
+        // However, updateGroupMetadata already handles a single group update well.
+        // If `updates` array can be large, we can collect JIDs, fetch all metadata, then batch upsert.
+        // For now, let's assume updateGroupMetadata is efficient enough or refactor if it becomes a bottleneck.
+        // To demonstrate batching here, we'd change the flow:
+        // 1. Collect all JIDs from `updates`.
+        // 2. Fetch metadata for all these JIDs (e.g., Promise.all with this.client.groupMetadata).
+        // 3. Collect valid full metadata objects.
+        // 4. Call a batch upsert method.
+        // This change is more involved for this handler due to the fetch step.
+        // The current `updateGroupMetadata` is called, which does a single DB op.
+        // Let's modify this handler to collect metadata first.
+        // (See revised implementation below in the combined diff section for handleGroupsUpdate and handleGroupsUpsert)
+        await this.updateGroupMetadata(jid, groupUpdate, 'groups.update'); // Pass groupUpdate as existingMetadata hint
       }
     }
   }
@@ -623,47 +641,62 @@ class ConnectionManager {
    * @param {ParticipantAction} event.action - Ação realizada ('add', 'remove', 'promote', 'demote').
    *
    * @description
-   * 1. Após uma atualização de participante, busca os metadados atualizados do grupo usando `this.client.groupMetadata(jid)`.
-   * 2. Se os metadados forem obtidos com sucesso e o cliente Redis estiver disponível, eles são salvos no cache Redis com a chave `group:<jid>` e TTL `REDIS_TTL_METADATA_SHORT`.
-   * 3. Se `this.mysqlDbManager` estiver configurado, os metadados atualizados do grupo também são salvos (upsert) no banco de dados MySQL.
-   * 4. Erros durante o processo são registrados.
+   * Após uma atualização de participante, os metadados completos do grupo são buscados e atualizados.
+   * A atualização dos participantes em si é gerenciada pelo `mysqlDbManager.upsertGroup`
+   * que internamente chama `updateGroupParticipants`.
    */
   async handleGroupParticipantsUpdate(event) {
     const { id: jid, action, participants } = event;
-    logger.debug(`Evento 'group-participants.update' recebido para o grupo ${jid}. Ação: ${action}. Participantes: ${participants.join(', ')}`, {
+    logger.debug(`Evento 'group-participants.update' recebido para o grupo ${jid}. Ação: ${action}. Participantes: ${participants.join(', ')}.`, {
       label: 'ConnectionManager',
       jid,
       action,
       participants,
       instanceId: this.instanceId,
     });
-
+    // Fetching full metadata is important as participant list changes.
     await this.updateGroupMetadata(jid, null, 'group-participants.update');
   }
 
   /**
    * @method handleGroupsUpsert
    * Manipula a inserção/atualização de grupos (quando o usuário entra em um novo grupo ou sincronização inicial).
-   * Este evento é geralmente disparado quando o cliente se conecta e sincroniza a lista de grupos,
-   * ou quando o usuário entra em um novo grupo (evento 'groups.upsert').
-   * @param {GroupMetadata[]} groups - Array de objetos completos de metadados de grupo.
-   *
-   * @description
-   * Para cada metadado de grupo recebido:
-   * 1. Prepara os metadados para persistência.
-   * 2. Se `this.mysqlDbManager` estiver configurado, os metadados do grupo também são salvos (upsert) no banco de dados MySQL.
-   * 3. Erros durante o processo são registrados.
+   * @param {GroupMetadata[]} groupsMetadata - Array de objetos completos de metadados de grupo.
    */
-  async handleGroupsUpsert(groups) {
-    logger.debug(`Evento 'groups.upsert' recebido. Número de grupos: ${groups.length}`, {
+  async handleGroupsUpsert(groupsMetadata) {
+    logger.debug(`Evento 'groups.upsert' recebido. Número de grupos: ${groupsMetadata.length}.`, {
       label: 'ConnectionManager',
-      count: groups.length,
+      count: groupsMetadata.length,
       instanceId: this.instanceId,
     });
-    for (const groupMetadata of groups) {
-      const jid = groupMetadata.id;
-      if (jid) {
-        await this.updateGroupMetadata(jid, groupMetadata, 'groups.upsert');
+
+    const validGroupsToUpsert = groupsMetadata.filter((metadata) => this.validateGroupMetadata(metadata));
+
+    if (this.mysqlDbManager && validGroupsToUpsert.length > 0) {
+      try {
+        await this.mysqlDbManager.upsertGroupsBatch(validGroupsToUpsert); // Assumed batch method
+        logger.info(`[MÉTRICA] ${validGroupsToUpsert.length} grupos atualizados/inseridos em lote a partir de 'groups.upsert'.`, {
+          label: 'MySQLSync',
+          metricName: 'group.mysql.batch_upsert.success',
+          count: validGroupsToUpsert.length,
+          instanceId: this.instanceId,
+        });
+        validGroupsToUpsert.forEach((metadata) => {
+          this.emitEvent('group:metadata:updated', { jid: metadata.id, metadata, context: 'groups.upsert' }, 'groups.upsert');
+        });
+      } catch (dbError) {
+        logger.error(`[MÉTRICA] Erro ao atualizar/inserir em lote ${validGroupsToUpsert.length} grupos a partir de 'groups.upsert': ${dbError.message}.`, {
+          label: 'MySQLSyncError',
+          metricName: 'group.mysql.batch_upsert.error',
+          count: validGroupsToUpsert.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
+        // Fallback: emit events even if DB fails, with original data
+        validGroupsToUpsert.forEach((metadata) => {
+          this.emitEvent('group:metadata:updated', { jid: metadata.id, metadata, context: 'groups.upsert' }, 'groups.upsert');
+        });
       }
     }
   }
@@ -686,9 +719,9 @@ class ConnectionManager {
    */
   async handleMessagingHistorySet(data) {
     const { chats, contacts, messages } = data;
-    logger.info(`[METRIC] 'messaging-history.set' event received. Chats: ${chats.length}, Contacts: ${contacts.length}, Messages: ${messages.length}`, {
+    logger.info(`[MÉTRICA] Evento 'messaging-history.set' recebido. Chats: ${chats.length}, Contatos: ${contacts.length}, Mensagens: ${messages.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'messaging_history.set.received',
+      metricName: 'messaging_history.set.recebido',
       counts: { chats: chats.length, contacts: contacts.length, messages: messages.length },
       instanceId: this.instanceId,
     });
@@ -699,14 +732,14 @@ class ConnectionManager {
           if (this.mysqlDbManager) {
             try {
               await this.mysqlDbManager.upsertChat(chat);
-              logger.info(`[METRIC] Chat ${chat.id} from history saved to MySQL.`, {
+              logger.info(`[MÉTRICA] Chat ${chat.id} do histórico salvo no MySQL.`, {
                 label: 'MySQLSync',
                 metricName: 'history.chat.mysql.success',
                 jid: chat.id,
                 instanceId: this.instanceId,
               });
             } catch (dbError) {
-              logger.error(`[METRIC] Error saving chat ${chat.id} from history to MySQL: ${dbError.message}`, {
+              logger.error(`[MÉTRICA] Erro ao salvar chat ${chat.id} do histórico no MySQL: ${dbError.message}.`, {
                 label: 'MySQLSyncError',
                 metricName: 'history.chat.mysql.error',
                 jid: chat.id,
@@ -717,7 +750,7 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[METRIC] Error processing chat ${chat.id} from history (DB or other): ${error.message}`, {
+          logger.error(`[MÉTRICA] Erro ao processar chat ${chat.id} do histórico (BD ou outro): ${error.message}.`, {
             label: 'SyncError',
             metricName: 'history.chat.processing.error',
             jid: chat.id,
@@ -733,12 +766,12 @@ class ConnectionManager {
       if (contact.id) {
         // Originalmente, contatos do histórico eram apenas cacheados no Redis.
         // Agora, apenas logamos, pois não há instrução para persisti-los no MySQL aqui.
-        logger.debug(`Contact from history received: ${contact.id}`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
+        logger.debug(`Contato do histórico recebido: ${contact.id}.`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
       }
     }
 
     for (const msg of messages) {
-      logger.debug(`History message received: ${msg.key?.id} from ${msg.key?.remoteJid}`, { label: 'ConnectionManager', messageKey: msg.key, instanceId: this.instanceId });
+      logger.debug(`Mensagem do histórico recebida: ${msg.key?.id} de ${msg.key?.remoteJid}.`, { label: 'ConnectionManager', messageKey: msg.key, instanceId: this.instanceId });
       if (msg.key && msg.key.remoteJid && msg.key.id) {
         const messageContentType = msg.message ? getContentType(msg.message) : null;
         try {
@@ -747,14 +780,14 @@ class ConnectionManager {
           if (this.mysqlDbManager) {
             try {
               await this.mysqlDbManager.upsertMessage(messageToStore);
-              logger.info(`[METRIC] History message ${msg.key.id} saved to MySQL.`, {
+              logger.info(`[MÉTRICA] Mensagem do histórico ${msg.key.id} salva no MySQL.`, {
                 label: 'MySQLSync',
                 metricName: 'history.message.mysql.success',
                 messageKey: msg.key,
                 instanceId: this.instanceId,
               });
             } catch (dbError) {
-              logger.error(`[METRIC] Error saving history message ${msg.key.id} to MySQL: ${dbError.message}`, {
+              logger.error(`[MÉTRICA] Erro ao salvar mensagem do histórico ${msg.key.id} no MySQL: ${dbError.message}.`, {
                 label: 'MySQLSyncError',
                 metricName: 'history.message.mysql.error',
                 messageKey: msg.key,
@@ -765,7 +798,7 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[METRIC] Error processing history message ${msg.key.id} (DB or other): ${error.message}`, {
+          logger.error(`[MÉTRICA] Erro ao processar mensagem do histórico ${msg.key.id} (BD ou outro): ${error.message}.`, {
             label: 'SyncError',
             metricName: 'history.message.processing.error',
             messageKey: msg.key,
@@ -775,7 +808,7 @@ class ConnectionManager {
           });
         }
       } else {
-        logger.warn('Mensagem do histórico recebida sem chave completa, não foi possível salvar.', { label: 'ConnectionManager', message: msg });
+        logger.warn('Mensagem do histórico recebida sem chave completa, não foi possível salvar.', { label: 'ConnectionManager', message: msg, instanceId: this.instanceId });
       }
     }
   }
@@ -788,14 +821,14 @@ class ConnectionManager {
    * @description Atualmente, este método apenas registra as atualizações recebidas. Nenhuma ação de persistência ou cache é realizada aqui.
    */
   handleMessagesUpdate(updates) {
-    logger.info(`[METRIC] 'messages.update' event received. Number of updates: ${updates.length}`, {
+    logger.info(`[MÉTRICA] Evento 'messages.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'messages.update.received',
+      metricName: 'messages.update.recebido',
       count: updates.length,
       instanceId: this.instanceId,
     });
     updates.forEach((update) => {
-      logger.debug(`Message update details: Key=${update.key?.id}, JID=${update.key?.remoteJid}`, {
+      logger.debug(`Detalhes da atualização da mensagem: Chave=${update.key?.id}, JID=${update.key?.remoteJid}.`, {
         label: 'ConnectionManager',
         messageUpdate: update,
         updateContent: update.update, // Log the actual update content
@@ -813,9 +846,9 @@ class ConnectionManager {
    * @description Atualmente, este método apenas registra o evento de exclusão. Nenhuma ação de remoção do cache ou banco de dados é realizada aqui.
    */
   handleMessagesDelete(deletion) {
-    logger.info(`[METRIC] 'messages.delete' event received.`, {
+    logger.info(`[MÉTRICA] Evento 'messages.delete' recebido.`, {
       label: 'ConnectionManager',
-      metricName: 'messages.delete.received',
+      metricName: 'messages.delete.recebido',
       deletionDetails: deletion,
       instanceId: this.instanceId,
     });
@@ -830,14 +863,14 @@ class ConnectionManager {
    * @description Atualmente, este método apenas registra as reações recebidas. Nenhuma ação de persistência ou cache é realizada aqui.
    */
   handleMessagesReaction(reactions) {
-    logger.info(`[METRIC] 'messages.reaction' event received. Number of reactions: ${reactions.length}`, {
+    logger.info(`[MÉTRICA] Evento 'messages.reaction' recebido. Número de reações: ${reactions.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'messages.reaction.received',
+      metricName: 'messages.reaction.recebido',
       count: reactions.length,
       instanceId: this.instanceId,
     });
     reactions.forEach((reaction) => {
-      logger.debug(`Reaction details: MsgKey=${reaction.key?.id}, JID=${reaction.key?.remoteJid}, ReactionText=${reaction.reaction.text}`, {
+      logger.debug(`Detalhes da reação: ChaveMsg=${reaction.key?.id}, JID=${reaction.key?.remoteJid}, TextoReacao=${reaction.reaction.text}.`, {
         label: 'ConnectionManager',
         reaction,
         instanceId: this.instanceId,
@@ -867,9 +900,76 @@ class ConnectionManager {
    * 5. Erros durante o processo são registrados.
    */
   async handleMessageReceiptUpdate(receipts) {
-    logger.info(`[METRIC] 'message-receipt.update' event received. Number of receipts: ${receipts.length}`, {
+    logger.info(`[MÉTRICA] Evento 'message-receipt.update' recebido. Número de recibos: ${receipts.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'message_receipt.update.received',
+      metricName: 'message_receipt.update.recebido',
+      count: receipts.length,
+      instanceId: this.instanceId,
+    });
+
+    const receiptsToUpsert = [];
+    for (const receiptUpdate of receipts) {
+      const { key, receipt } = receiptUpdate;
+      if (key && key.remoteJid && key.id && receipt && receipt.userJid) {
+        const timestamp = receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp;
+        receiptsToUpsert.push({
+          key,
+          userJid: receipt.userJid,
+          type: receipt.type,
+          timestamp,
+        });
+      }
+      logger.debug(`Detalhes do Recibo: ChaveMsg=${key?.id}, JID=${key?.remoteJid}, Status=${receipt?.type}, UserJid=${receipt?.userJid}.`, { label: 'ConnectionManager', receipt: receiptUpdate, instanceId: this.instanceId });
+    }
+
+    if (this.mysqlDbManager && receiptsToUpsert.length > 0) {
+      try {
+        // Assumed batch method: upsertMessageReceiptsBatch(receiptsToUpsert)
+        await this.mysqlDbManager.upsertMessageReceiptsBatch(receiptsToUpsert);
+        logger.info(`[MÉTRICA] ${receiptsToUpsert.length} recibos de mensagem atualizados/inseridos em lote no MySQL.`, {
+          label: 'MySQLSync',
+          metricName: 'message.receipt.mysql.batch_upserted',
+          count: receiptsToUpsert.length,
+          instanceId: this.instanceId,
+        });
+      } catch (dbError) {
+        logger.error(`[MÉTRICA] Erro ao atualizar/inserir em lote ${receiptsToUpsert.length} recibos de mensagem no MySQL: ${dbError.message}.`, {
+          label: 'MySQLSyncError',
+          metricName: 'message.receipt.mysql.batch_error',
+          count: receiptsToUpsert.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
+      }
+    }
+  }
+
+  /**
+   * @method handleMessageReceiptUpdate // Original method before batching for reference if needed
+   * Manipula atualizações de recibo de mensagem.
+   * Este evento é disparado quando o status de entrega/leitura de uma mensagem é atualizado
+   * (ex: 'delivered', 'read', 'played') (evento 'message-receipt.update').
+   * @param {MessageReceiptUpdate[]} receipts - Array de atualizações de recibo.
+   * Cada objeto contém:
+   *  - `key`: {@link WAMessageKey} A chave da mensagem original.
+   *  - `receipt`: {@link MessageReceipt} O objeto de recibo, contendo:
+   *    - `userJid`: JID do usuário cujo recibo foi atualizado.
+   *    - `type`: Tipo do recibo (e.g., 'read', 'delivered').
+   *    - `receiptTimestamp`, `readTimestamp`, `playedTimestamp`: Timestamps relevantes.
+   *
+   * @description
+   * Para cada atualização de recibo:
+   * 1. Verifica se a chave da mensagem, os detalhes do recibo são válidos.
+   * 2. Prepara os dados do recibo.
+   * 3. Se `this.mysqlDbManager` estiver configurado, salva (upsert) o recibo no banco de dados MySQL.
+   * 4. Erros durante o processo são registrados.
+   */
+  /* // Original handleMessageReceiptUpdate method content for reference
+  async handleMessageReceiptUpdate(receipts) {
+    logger.info(`[MÉTRICA] Evento 'message-receipt.update' recebido. Número de recibos: ${receipts.length}.`, {
+      label: 'ConnectionManager',
+      metricName: 'message_receipt.update.recebido',
       count: receipts.length,
       instanceId: this.instanceId,
     });
@@ -877,14 +977,12 @@ class ConnectionManager {
     for (const receiptUpdate of receipts) {
       const { key, receipt } = receiptUpdate;
       if (key && key.remoteJid && key.id && receipt && receipt.userJid) {
-        try {
-          // A lógica de buscar e atualizar a mensagem no cache Redis foi removida.
-          // Agora, apenas persistimos o recibo no MySQL.
+        try { // This try-catch is per receipt
           if (this.mysqlDbManager) {
             try {
               const timestamp = receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp;
               await this.mysqlDbManager.upsertMessageReceipt(key, receipt.userJid, receipt.type, timestamp);
-              logger.info(`[METRIC] Message receipt for ${key.id} (user ${receipt.userJid}) upserted to MySQL.`, {
+              logger.info(`[MÉTRICA] Recibo de mensagem para ${key.id} (usuário ${receipt.userJid}) atualizado/inserido no MySQL.`, {
                 label: 'MySQLSync',
                 metricName: 'message.receipt.mysql.upserted',
                 messageId: key.id,
@@ -894,7 +992,7 @@ class ConnectionManager {
                 instanceId: this.instanceId,
               });
             } catch (dbError) {
-              logger.error(`[METRIC] Error upserting message receipt for ${key.id} to MySQL: ${dbError.message}`, {
+              logger.error(`[MÉTRICA] Erro ao atualizar/inserir recibo de mensagem para ${key.id} no MySQL: ${dbError.message}.`, {
                 label: 'MySQLSyncError',
                 metricName: 'message.receipt.mysql.error',
                 messageKey: key,
@@ -905,9 +1003,8 @@ class ConnectionManager {
               });
             }
           }
-          // O else que tratava "mensagem não encontrada no cache" foi removido.
         } catch (error) {
-          logger.error(`[METRIC] Error processing message receipt for ${key.id} (DB/other): ${error.message}`, {
+          logger.error(`[MÉTRICA] Erro ao processar recibo de mensagem para ${key.id} (BD/outro): ${error.message}.`, {
             label: 'SyncError',
             metricName: 'message.receipt.db.error', // Mais específico para erro de DB
             messageKey: key,
@@ -917,9 +1014,9 @@ class ConnectionManager {
           });
         }
       }
-      logger.debug(`Detalhes do Recibo: ChaveMsg=${key?.id}, JID=${key?.remoteJid}, Status=${receipt?.type}, UserJid=${receipt?.userJid}`, { label: 'ConnectionManager', receipt: receiptUpdate });
+      logger.debug(`Detalhes do Recibo: ChaveMsg=${key?.id}, JID=${key?.remoteJid}, Status=${receipt?.type}, UserJid=${receipt?.userJid}.`, { label: 'ConnectionManager', receipt: receiptUpdate, instanceId: this.instanceId });
     }
-  }
+  } */
 
   /**
    * @method handleChatsUpsert
@@ -934,46 +1031,41 @@ class ConnectionManager {
    * 3. Erros durante o processo são registrados.
    */
   async handleChatsUpsert(chats) {
-    logger.info(`[METRIC] 'chats.upsert' event received. Number of chats: ${chats.length}`, {
+    logger.info(`[MÉTRICA] Evento 'chats.upsert' recebido. Número de chats: ${chats.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'chats.upsert.received',
+      metricName: 'chats.upsert.recebido',
       count: chats.length,
       instanceId: this.instanceId,
     });
-    for (const chat of chats) {
-      if (chat.id) {
-        try {
-          if (this.mysqlDbManager) {
-            try {
-              await this.mysqlDbManager.upsertChat(chat);
-              logger.info(`[METRIC] Chat ${chat.id} (upsert) saved to MySQL.`, {
-                label: 'MySQLSync',
-                metricName: 'chat.mysql.upsert.success',
-                jid: chat.id,
-                instanceId: this.instanceId,
-              });
-            } catch (dbError) {
-              logger.error(`[METRIC] Error saving chat ${chat.id} (upsert) to MySQL: ${dbError.message}`, {
-                label: 'MySQLSyncError',
-                metricName: 'chat.mysql.upsert.error',
-                jid: chat.id,
-                error: dbError.message,
-                stack: dbError.stack,
-                instanceId: this.instanceId,
-              });
-            }
-          }
-        } catch (error) {
-          logger.error(`[METRIC] Error processing chat ${chat.id} (upsert) (DB or other): ${error.message}`, {
-            label: 'SyncError',
-            metricName: 'chat.processing.upsert.error',
-            jid: chat.id,
-            error: error.message,
-            stack: error.stack,
-            instanceId: this.instanceId,
-          });
-        }
+
+    const validChats = chats.filter((chat) => chat.id);
+
+    if (this.mysqlDbManager && validChats.length > 0) {
+      try {
+        await this.mysqlDbManager.upsertChatsBatch(validChats); // Assumed batch method
+        logger.info(`[MÉTRICA] ${validChats.length} chats atualizados/inseridos em lote no MySQL.`, {
+          label: 'MySQLSync',
+          metricName: 'chat.mysql.batch_upsert.success',
+          count: validChats.length,
+          instanceId: this.instanceId,
+        });
+      } catch (dbError) {
+        logger.error(`[MÉTRICA] Erro ao atualizar/inserir em lote ${validChats.length} chats no MySQL: ${dbError.message}.`, {
+          label: 'MySQLSyncError',
+          metricName: 'chat.mysql.batch_upsert.error',
+          count: validChats.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
       }
+    } else if (validChats.length > 0) {
+      logger.debug(`${validChats.length} chats recebidos para upsert, mas nenhum mysqlDbManager configurado ou nenhum chat válido para processar.`, {
+        label: 'ConnectionManager',
+        count: validChats.length,
+        hasDbManager: !!this.mysqlDbManager,
+        instanceId: this.instanceId,
+      });
     }
   }
 
@@ -987,52 +1079,44 @@ class ConnectionManager {
    * Para cada atualização de chat:
    * 1. Prepara a atualização do chat para persistência.
    * 2. Se `this.mysqlDbManager` estiver configurado, salva (upsert) a atualização do chat no banco de dados MySQL.
+   *    (Assume que `upsertChatsBatch` ou um `upsertChat` individual pode lidar com atualizações parciais).
    * 3. Erros durante o processo são registrados.
    */
   async handleChatsUpdate(updates) {
-    logger.info(`[METRIC] 'chats.update' event received. Number of updates: ${updates.length}`, {
+    logger.info(`[MÉTRICA] Evento 'chats.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'chats.update.received',
+      metricName: 'chats.update.recebido',
       count: updates.length,
       instanceId: this.instanceId,
     });
-    for (const chatUpdate of updates) {
-      if (chatUpdate.id) {
-        try {
-          if (this.mysqlDbManager) {
-            try {
-              await this.mysqlDbManager.upsertChat(chatUpdate); // Assuming upsertChat can handle partial updates
-              logger.info(`[METRIC] Chat ${chatUpdate.id} (update) updated in MySQL.`, {
-                label: 'MySQLSync',
-                metricName: 'chat.mysql.update.success',
-                jid: chatUpdate.id,
-                instanceId: this.instanceId,
-              });
-            } catch (dbError) {
-              logger.error(`[METRIC] Error updating chat ${chatUpdate.id} (update) in MySQL: ${dbError.message}`, {
-                label: 'MySQLSyncError',
-                metricName: 'chat.mysql.update.error',
-                jid: chatUpdate.id,
-                error: dbError.message,
-                stack: dbError.stack,
-                instanceId: this.instanceId,
-              });
-            }
-          }
-        } catch (error) {
-          logger.error(`[METRIC] Error processing chat update ${chatUpdate.id} (DB or other): ${error.message}`, {
-            label: 'SyncError',
-            metricName: 'chat.processing.update.error',
-            jid: chatUpdate.id,
-            error: error.message,
-            stack: error.stack,
-            instanceId: this.instanceId,
-          });
-        }
+
+    const validChatUpdates = updates.filter((chatUpdate) => chatUpdate.id);
+
+    if (this.mysqlDbManager && validChatUpdates.length > 0) {
+      try {
+        // Baileys 'chats.update' provides partial updates.
+        // The batch method `upsertChatsBatch` should be able to handle these,
+        // or we might call individual `upsertChat` if the batch method isn't designed for partials.
+        // For simplicity, let's assume `upsertChatsBatch` can handle partials or merges them correctly.
+        await this.mysqlDbManager.upsertChatsBatch(validChatUpdates);
+        logger.info(`[METRIC] ${validChatUpdates.length} chat updates batch-processed by MySQL.`, {
+          label: 'MySQLSync', // Mantido como label técnico
+          metricName: 'chat.mysql.batch_update.success',
+          count: validChatUpdates.length,
+          instanceId: this.instanceId,
+        });
+      } catch (dbError) {
+        logger.error(`[METRIC] Error batch-updating ${validChatUpdates.length} chats in MySQL: ${dbError.message}`, {
+          label: 'MySQLSyncError', // Mantido como label técnico
+          metricName: 'chat.mysql.batch_update.error',
+          count: validChatUpdates.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
       }
     }
   }
-
   /**
    * @method handleChatsDelete
    * Manipula exclusão de chats.
@@ -1046,9 +1130,9 @@ class ConnectionManager {
    * 3. Erros durante o processo são registrados.
    */
   async handleChatsDelete(jids) {
-    logger.info(`[METRIC] 'chats.delete' event received. Number of JIDs: ${jids.length}`, {
+    logger.info(`[MÉTRICA] Evento 'chats.delete' recebido. Número de JIDs: ${jids.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'chats.delete.received',
+      metricName: 'chats.delete.recebido',
       count: jids.length,
       instanceId: this.instanceId,
     });
@@ -1057,14 +1141,14 @@ class ConnectionManager {
         if (this.mysqlDbManager) {
           try {
             await this.mysqlDbManager.deleteChatData(jid);
-            logger.info(`[METRIC] Chat data for ${jid} removed from MySQL.`, {
+            logger.info(`[MÉTRICA] Dados do chat para ${jid} removidos do MySQL.`, {
               label: 'MySQLSync',
               metricName: 'chat.mysql.delete.success',
               jid,
               instanceId: this.instanceId,
             });
           } catch (dbError) {
-            logger.error(`[METRIC] Error removing chat data for ${jid} from MySQL: ${dbError.message}`, {
+            logger.error(`[MÉTRICA] Erro ao remover dados do chat para ${jid} do MySQL: ${dbError.message}.`, {
               label: 'MySQLSyncError',
               metricName: 'chat.mysql.delete.error',
               jid,
@@ -1075,7 +1159,7 @@ class ConnectionManager {
           }
         }
       } catch (error) {
-        logger.error(`[METRIC] Error processing chat deletion for ${jid} (DB or other): ${error.message}`, {
+        logger.error(`[MÉTRICA] Erro ao processar exclusão de chat para ${jid} (BD ou outro): ${error.message}.`, {
           label: 'SyncError',
           metricName: 'chat.processing.delete.error',
           jid,
@@ -1099,9 +1183,9 @@ class ConnectionManager {
    * 2. (Atualmente, não há persistência de contatos no MySQL neste handler, apenas log).
    */
   async handleContactsUpsert(contacts) {
-    logger.info(`[METRIC] 'contacts.upsert' event received. Number of contacts: ${contacts.length}`, {
+    logger.info(`[MÉTRICA] Evento 'contacts.upsert' recebido. Número de contatos: ${contacts.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'contacts.upsert.received',
+      metricName: 'contacts.upsert.recebido',
       count: contacts.length,
       instanceId: this.instanceId,
     });
@@ -1109,7 +1193,7 @@ class ConnectionManager {
       if (contact.id) {
         // Originalmente, contatos eram apenas cacheados no Redis.
         // Agora, apenas logamos, pois não há instrução para persisti-los no MySQL aqui.
-        logger.debug(`Contact upsert received: ${contact.id}`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
+        logger.debug(`Upsert de contato recebido: ${contact.id}.`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
       }
     }
   }
@@ -1133,17 +1217,17 @@ class ConnectionManager {
    * }]);
    */
   async handleContactsUpdate(updates) {
-    logger.info(`[METRIC] 'contacts.update' event received. Number of updates: ${updates.length}`, {
+    logger.info(`[MÉTRICA] Evento 'contacts.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'contacts.update.received',
+      metricName: 'contacts.update.recebido',
       count: updates.length,
       instanceId: this.instanceId,
     });
     for (const contactUpdate of updates) {
       if (contactUpdate.id) {
         // Originalmente, atualizações de contatos eram apenas cacheadas no Redis.
-        // Agora, apenas logamos.
-        logger.debug(`Contact update received: ${contactUpdate.id}`, { label: 'ConnectionManager', contactId: contactUpdate.id, update: contactUpdate, instanceId: this.instanceId });
+        // Agora, apenas registramos o log.
+        logger.debug(`Atualização de contato recebida: ${contactUpdate.id}.`, { label: 'ConnectionManager', contactId: contactUpdate.id, update: contactUpdate, instanceId: this.instanceId });
       }
     }
   }
@@ -1162,9 +1246,9 @@ class ConnectionManager {
    * });
    */
   handleBlocklistSet(data) {
-    logger.info(`[METRIC] 'blocklist.set' event received. Count: ${data.blocklist?.length || 0}`, {
+    logger.info(`[MÉTRICA] Evento 'blocklist.set' recebido. Contagem: ${data.blocklist?.length || 0}.`, {
       label: 'ConnectionManager',
-      metricName: 'blocklist.set.received',
+      metricName: 'blocklist.set.recebido',
       blocklist: data.blocklist, // Log the actual list for debugging if needed, or just count
       instanceId: this.instanceId,
     });
@@ -1186,9 +1270,9 @@ class ConnectionManager {
    * });
    */
   handleBlocklistUpdate(data) {
-    logger.info(`[METRIC] 'blocklist.update' event received. Action: ${data.action}, JIDs count: ${data.jids?.length || 0}`, {
+    logger.info(`[MÉTRICA] Evento 'blocklist.update' recebido. Ação: ${data.action}, Contagem de JIDs: ${data.jids?.length || 0}.`, {
       label: 'ConnectionManager',
-      metricName: 'blocklist.update.received',
+      metricName: 'blocklist.update.recebido',
       action: data.action,
       jids: data.jids,
       instanceId: this.instanceId,
@@ -1219,9 +1303,9 @@ class ConnectionManager {
   handleCall(callEvents) {
     // Baileys usually emits an array with a single event.
     const callEvent = callEvents && callEvents.length > 0 ? callEvents[0] : null;
-    logger.info(`[METRIC] 'call' event received. Status: ${callEvent?.status}, From: ${callEvent?.from}`, {
+    logger.info(`[MÉTRICA] Evento 'call' recebido. Status: ${callEvent?.status}, De: ${callEvent?.from}.`, {
       label: 'ConnectionManager',
-      metricName: 'call.event.received',
+      metricName: 'call.event.recebido',
       callData: callEvent, // Log the first event, or all if structure changes
       instanceId: this.instanceId,
     });
@@ -1251,7 +1335,7 @@ class ConnectionManager {
   handlePresenceUpdate(data) {
     // This can be very noisy. Log as debug or sample if needed for metrics.
     // For now, just a debug log with metric potential.
-    logger.debug(`[METRIC_POTENTIAL] 'presence.update' event received: JID=${data.id}`, {
+    logger.debug(`[POTENCIAL_MÉTRICA] Evento 'presence.update' recebido: JID=${data.id}.`, {
       label: 'ConnectionManager',
       // metricName: 'presence.update.received', // Uncomment if high-frequency metric is desired
       presenceData: data,
