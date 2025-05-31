@@ -44,6 +44,7 @@ const env = cleanEnv(process.env, {
  * (host, porta, usuário, senha), excluindo o nome do banco de dados.
  * @property {string} dbName - O nome do banco de dados MySQL a ser utilizado.
  */
+
 class MySQLDBManager {
   /**
    * @constructor
@@ -101,7 +102,7 @@ class MySQLDBManager {
       });
       await tempConnection.query(`CREATE DATABASE IF NOT EXISTS \`${this.dbName}\`;`);
       await tempConnection.end();
-      logger.info(`Banco de dados '${this.dbName}' verificado/criado com sucesso.`, { label: 'MySQLDBManager' });
+      logger.info(`Banco de dados '${this.dbName}' verificado/criado com sucesso.`, { label: 'MySQLDBManager.initialize' });
 
       this.pool = mysql.createPool({
         ...this.dbConfig,
@@ -222,7 +223,7 @@ class MySQLDBManager {
       for (const query of queries) {
         await connection.query(query);
       }
-      logger.info('Tabelas MySQL inicializadas/verificadas.', { label: 'MySQLDBManager' });
+      logger.info('Tabelas MySQL inicializadas/verificadas.', { label: 'MySQLDBManager.initializeTables' });
     } catch (err) {
       logger.error('Erro ao criar tabelas MySQL:', {
         label: 'MySQLDBManager',
@@ -268,7 +269,7 @@ class MySQLDBManager {
       const [results] = await connection.query(sql, params);
       return results;
     } catch (err) {
-      logger.error('Erro ao executar query MySQL:', { label: 'MySQLDBManager', sql, params, message: err.message });
+      logger.error('Erro ao executar query MySQL:', { label: 'MySQLDBManager.executeQuery', sql, params, message: err.message });
       throw err;
     } finally {
       if (connection) connection.release();
@@ -340,9 +341,9 @@ class MySQLDBManager {
     `;
     try {
       await this.executeQuery(sql, [chat.id, chat.name, chat.unreadCount || 0, chat.conversationTimestamp || chat.lastMessageTimestamp, chat.id.endsWith('@g.us') ? 1 : 0, chat.pinned || 0, chat.muteEndTime, chat.archived || chat.archive ? 1 : 0, chat.ephemeralDuration]);
-      logger.debug(`Chat ${chat.id} salvo/atualizado no MySQL.`, { label: 'MySQLDBManager', jid: chat.id });
+      logger.debug(`Chat ${chat.id} salvo/atualizado no MySQL.`, { label: 'MySQLDBManager.upsertChat', jid: chat.id });
     } catch (error) {
-      logger.error(`Erro ao fazer upsert do chat ${chat.id} no MySQL: ${error.message}`, { label: 'MySQLDBManager', jid: chat.id, error: error.message, stack: error.stack });
+      logger.error(`Erro ao fazer upsert do chat ${chat.id} no MySQL: ${error.message}`, { label: 'MySQLDBManager.upsertChat', jid: chat.id, error: error.message, stack: error.stack });
     }
   }
 
@@ -398,7 +399,7 @@ class MySQLDBManager {
   async upsertGroup(groupMetadata) {
     if (!groupMetadata || !groupMetadata.id) {
       logger.warn('Tentativa de upsert de grupo com dados inválidos', {
-        label: 'MySQLDBManager',
+        label: 'MySQLDBManager.upsertGroup',
         metadata: groupMetadata,
       });
       return;
@@ -434,7 +435,7 @@ class MySQLDBManager {
       await this.executeQuery(sql, [groupMetadata.id, groupMetadata.subject, groupMetadata.owner, groupMetadata.creation, groupMetadata.desc, groupMetadata.restrict ? 1 : 0, groupMetadata.announce ? 1 : 0, groupMetadata.profilePictureUrl]);
 
       logger.info(`Grupo ${groupMetadata.id} atualizado com sucesso no MySQL`, {
-        label: 'MySQLDBManager',
+        label: 'MySQLDBManager.upsertGroup',
         jid: groupMetadata.id,
         subject: groupMetadata.subject,
       });
@@ -443,13 +444,13 @@ class MySQLDBManager {
         await this.updateGroupParticipants(groupMetadata.id, groupMetadata.participants);
       } else {
         logger.warn(`Grupo ${groupMetadata.id} sem participantes para atualizar ou lista de participantes vazia.`, {
-          label: 'MySQLDBManager',
+          label: 'MySQLDBManager.upsertGroup',
           jid: groupMetadata.id,
         });
       }
     } catch (error) {
       logger.error(`Erro ao fazer upsert do grupo ${groupMetadata.id} no MySQL`, {
-        label: 'MySQLDBManager',
+        label: 'MySQLDBManager.upsertGroup',
         jid: groupMetadata.id,
         error: error.message,
         stack: error.stack,
@@ -503,14 +504,14 @@ class MySQLDBManager {
 
       await connection.commit();
       logger.info(`${participants.length} participantes atualizados para o grupo ${groupJid}`, {
-        label: 'MySQLDBManager',
+        label: 'MySQLDBManager.updateGroupParticipants',
         groupJid,
         participantCount: participants.length,
       });
     } catch (error) {
       await connection.rollback();
       logger.error(`Erro ao atualizar participantes do grupo ${groupJid}`, {
-        label: 'MySQLDBManager',
+        label: 'MySQLDBManager.updateGroupParticipants',
         groupJid,
         error: error.message,
         stack: error.stack,
@@ -608,7 +609,7 @@ class MySQLDBManager {
     preparatoryResults.forEach((result) => {
       if (result.status === 'rejected') {
         logger.warn(`Falha no upsert preparatório (chat) para mensagem ${msg.key.id}. Erro: ${result.reason?.message}`, {
-          label: 'MySQLDBManager',
+          label: 'MySQLDBManager.upsertMessage',
           messageKey: msg.key,
           error: result.reason?.message,
         });
@@ -631,7 +632,7 @@ class MySQLDBManager {
       }
 
       logger.debug(`Tipo de mensagem detectado: ${messageType} para mensagem ${msg.key.id}`, {
-        label: 'MySQLDBManager',
+        label: 'MySQLDBManager.upsertMessage',
         messageId: msg.key.id,
         messageType,
         hasContent: !!textContent,
@@ -659,7 +660,7 @@ class MySQLDBManager {
       const updateChatSql = 'UPDATE Chats SET last_message_timestamp = ?, unread_count = CASE WHEN ? = 0 THEN unread_count + 1 ELSE unread_count END, updated_at = UNIX_TIMESTAMP() WHERE jid = ? AND (? > COALESCE(last_message_timestamp, 0))';
       await this.executeQuery(updateChatSql, [messageTimestamp, msg.key.fromMe ? 1 : 0, chatJid, messageTimestamp]);
     } catch (error) {
-      logger.error(`Erro ao fazer upsert da mensagem ${msg.key?.id} no MySQL: ${error.message}`, { label: 'MySQLDBManager', messageKey: msg.key, error: error.message, stack: error.stack });
+      logger.error(`Erro ao fazer upsert da mensagem ${msg.key?.id} no MySQL: ${error.message}`, { label: 'MySQLDBManager.upsertMessage', messageKey: msg.key, error: error.message, stack: error.stack });
     }
   }
 
@@ -699,7 +700,7 @@ class MySQLDBManager {
   async upsertMessageReceipt(messageKey, recipientJid, receiptType, receiptTimestamp) {
     if (!messageKey?.id || !messageKey?.remoteJid || !recipientJid) {
       logger.warn('Dados inválidos para upsert de recibo (faltando messageKey.id, messageKey.remoteJid ou recipientJid).', {
-        label: 'MySQLDBManager',
+        label: 'MySQLDBManager.upsertMessageReceipt',
         messageKey,
         recipientJid,
         originalReceiptType: receiptType,
@@ -715,7 +716,7 @@ class MySQLDBManager {
 
       if (rows.length === 0) {
         logger.warn(`Mensagem pai (ID: ${messageKey.id}, ChatJID: ${messageKey.remoteJid}) não encontrada. Recibo para ${recipientJid} (tipo ${finalReceiptType}) não será inserido.`, {
-          label: 'MySQLDBManager',
+          label: 'MySQLDBManager.upsertMessageReceipt',
           messageKey,
           recipientJid,
           receiptType: finalReceiptType,
@@ -725,7 +726,7 @@ class MySQLDBManager {
       }
     } catch (checkError) {
       logger.error(`Erro ao verificar a existência da mensagem pai para o recibo (MsgID: ${messageKey.id}, ChatJID: ${messageKey.remoteJid}): ${checkError.message}`, {
-        label: 'MySQLDBManager',
+        label: 'MySQLDBManager.upsertMessageReceipt',
         messageKey,
         recipientJid,
         error: checkError.message,
@@ -751,7 +752,7 @@ class MySQLDBManager {
       logger.debug(`Recibo para msg ${messageKey.id} (tipo ${finalReceiptType}, user ${recipientJid}) salvo no MySQL.`, { label: 'MySQLDBManager' });
     } catch (error) {
       logger.error(`Erro ao fazer upsert do recibo para msg ${messageKey?.id} (user ${recipientJid}) no MySQL: ${error.message}`, {
-        label: 'MySQLDBManager',
+        label: 'MySQLDBManager.upsertMessageReceipt',
         messageKey,
         recipientJid,
         error: error.message,
@@ -790,9 +791,9 @@ class MySQLDBManager {
         await this.executeQuery('DELETE FROM Groups WHERE jid = ?', [chatJid]);
       }
       await this.executeQuery('DELETE FROM Chats WHERE jid = ?', [chatJid]);
-      logger.info(`Dados do chat ${chatJid} removidos do MySQL.`, { label: 'MySQLDBManager', jid: chatJid });
+      logger.info(`Dados do chat ${chatJid} removidos do MySQL.`, { label: 'MySQLDBManager.deleteChatData', jid: chatJid });
     } catch (error) {
-      logger.error(`Erro ao deletar dados do chat ${chatJid} no MySQL: ${error.message}`, { label: 'MySQLDBManager', jid: chatJid, error: error.message, stack: error.stack });
+      logger.error(`Erro ao deletar dados do chat ${chatJid} no MySQL: ${error.message}`, { label: 'MySQLDBManager.deleteChatData', jid: chatJid, error: error.message, stack: error.stack });
     }
   }
 
@@ -818,10 +819,10 @@ class MySQLDBManager {
     if (this.pool) {
       try {
         await this.pool.end();
-        logger.info('Pool de conexões MySQL fechado com sucesso.', { label: 'MySQLDBManager' });
+        logger.info('Pool de conexões MySQL fechado com sucesso.', { label: 'MySQLDBManager.closePool' });
         this.pool = null;
       } catch (err) {
-        logger.error('Erro ao fechar pool de conexões MySQL:', { label: 'MySQLDBManager', message: err.message });
+        logger.error('Erro ao fechar pool de conexões MySQL:', { label: 'MySQLDBManager.closePool', message: err.message });
       }
     } else {
       logger.warn('Tentativa de fechar pool de conexões MySQL que não está inicializado ou já foi fechado.', { label: 'MySQLDBManager' });
