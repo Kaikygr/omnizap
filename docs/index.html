@@ -1,25 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>JSDoc: Home</title>
 
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> Home</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
 </head>
 
-<body>
 
-<div id="main">
 
-    <h1 class="page-title">Home</h1>
-
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
     
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="ConnectionManager.html">ConnectionManager</a></li><li><a href="MySQLDBManager.html">MySQLDBManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_extractTextFromMessageObject">_extractTextFromMessageObject</a></li><li><a href="global.html#closePool">closePool</a></li><li><a href="global.html#connectConecta-seaoWhatsAppusandooestadodeautentica%25C3%25A7%25C3%25A3ocarregado.ConfiguraosocketBaileyscomasop%25C3%25A7%25C3%25B5esnecess%25C3%25A1rias,incluindologgereinforma%25C3%25A7%25C3%25B5esdonavegador.">connect
+Conecta-se ao WhatsApp usando o estado de autenticação carregado.
+Configura o socket Baileys com as opções necessárias, incluindo logger e informações do navegador.</a></li><li><a href="global.html#deleteChatData">deleteChatData</a></li><li><a href="global.html#deleteChatsDataBatch">deleteChatsDataBatch</a></li><li><a href="global.html#executeQuery">executeQuery</a></li><li><a href="global.html#getEventEmitter">getEventEmitter</a></li><li><a href="global.html#getInstance">getInstance</a></li><li><a href="global.html#handleBlocklistSetProcessaoeventodedefini%25C3%25A7%25C3%25A3odalistadebloqueio.Registraosn%25C3%25BAmerosqueest%25C3%25A3onalistadebloqueiodoWhatsApp.Esteevento%25C3%25A9disparadoquandoalistadebloqueio%25C3%25A9definidaousincronizada(evento'blocklist.set').">handleBlocklistSet
+Processa o evento de definição da lista de bloqueio.
+Registra os números que estão na lista de bloqueio do WhatsApp.
+Este evento é disparado quando a lista de bloqueio é definida ou sincronizada (evento 'blocklist.set').</a></li><li><a href="global.html#handleBlocklistUpdateProcessaatualiza%25C3%25A7%25C3%25B5esnalistadebloqueiodoWhatsApp.Registraaltera%25C3%25A7%25C3%25B5es(adi%25C3%25A7%25C3%25B5es/remo%25C3%25A7%25C3%25B5es)nalistadecontatosbloqueados.Esteevento%25C3%25A9disparadoquandoumJID%25C3%25A9adicionadoouremovidodalistadebloqueio(evento'blocklist.update').">handleBlocklistUpdate
+Processa atualizações na lista de bloqueio do WhatsApp.
+Registra alterações (adições/remoções) na lista de contatos bloqueados.
+Este evento é disparado quando um JID é adicionado ou removido da lista de bloqueio (evento 'blocklist.update').</a></li><li><a href="global.html#handleCallProcessaeventosdechamadasrecebidasourealizadas.Registrainforma%25C3%25A7%25C3%25B5essobrechamadasdevoz/v%25C3%25ADdeonoWhatsApp.Esteevento%25C3%25A9disparadoparav%25C3%25A1riosest%25C3%25A1giosdeumachamada(oferta,aceita%25C3%25A7%25C3%25A3o,rejei%25C3%25A7%25C3%25A3o,t%25C3%25A9rmino)(evento'call').">handleCall
+Processa eventos de chamadas recebidas ou realizadas.
+Registra informações sobre chamadas de voz/vídeo no WhatsApp.
+Este evento é disparado para vários estágios de uma chamada (oferta, aceitação, rejeição, término) (evento 'call').</a></li><li><a href="global.html#handleChatsDeleteManipulaexclus%25C3%25A3odechats.Esteevento%25C3%25A9disparadoquandochatss%25C3%25A3odeletados(evento'chats.delete').">handleChatsDelete
+Manipula exclusão de chats.
+Este evento é disparado quando chats são deletados (evento 'chats.delete').</a></li><li><a href="global.html#handleChatsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdechats.Esteevento%25C3%25A9disparadoquandopropriedadesdeumchatexistentes%25C3%25A3oalteradas(ex:%2560unreadCount%2560,%2560mute%2560)(evento'chats.update').">handleChatsUpdate
+Manipula atualizações de chats.
+Este evento é disparado quando propriedades de um chat existente são alteradas (ex: `unreadCount`, `mute`) (evento 'chats.update').</a></li><li><a href="global.html#handleChatsUpsertManipulainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odechats.Esteevento%25C3%25A9disparadoquandonovoschatss%25C3%25A3ocriadosouchatsexistentess%25C3%25A3osincronizados(evento'chats.upsert').">handleChatsUpsert
+Manipula inserção/atualização de chats.
+Este evento é disparado quando novos chats são criados ou chats existentes são sincronizados (evento 'chats.upsert').</a></li><li><a href="global.html#handleConnectionUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdeconex%25C3%25A3odoclienteWhatsApp.Estem%25C3%25A9todo%25C3%25A9chamadoquandooestadodaconex%25C3%25A3ocomoWhatsAppmuda(evento%2560connection.update%2560).">handleConnectionUpdate
+Manipula atualizações de conexão do cliente WhatsApp.
+Este método é chamado quando o estado da conexão com o WhatsApp muda (evento `connection.update`).</a></li><li><a href="global.html#handleContactsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecontatos.(L%25C3%25B3gicadecacheRedisfoiremovida).Esteevento%25C3%25A9disparadoquandopropriedadesdeumcontatoexistentes%25C3%25A3oalteradas(ex:nome,notifica%25C3%25A7%25C3%25A3opush)(evento'contacts.update').">handleContactsUpdate
+Manipula a atualização de contatos.
+(Lógica de cache Redis foi removida).
+Este evento é disparado quando propriedades de um contato existente são alteradas (ex: nome, notificação push) (evento 'contacts.update').</a></li><li><a href="global.html#handleContactsUpsertManipulainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odecontatos.Esteevento%25C3%25A9disparadoquandonovoscontatoss%25C3%25A3oadicionadosoucontatosexistentess%25C3%25A3osincronizados(evento'contacts.upsert').">handleContactsUpsert
+Manipula inserção/atualização de contatos.
+Este evento é disparado quando novos contatos são adicionados ou contatos existentes são sincronizados (evento 'contacts.upsert').</a></li><li><a href="global.html#handleCredsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecredenciais.Estem%25C3%25A9todo%25C3%25A9chamadoporBaileysquandoascredenciaisdeautentica%25C3%25A7%25C3%25A3os%25C3%25A3oatualizadas(porexemplo,ap%25C3%25B3sescanearoQRcodeouduranteareconex%25C3%25A3o).Salvaasnovascredenciaisusando%2560this.auth.saveCreds()%2560.">handleCredsUpdate
+Manipula a atualização de credenciais.
+Este método é chamado por Baileys quando as credenciais de autenticação são atualizadas (por exemplo, após escanear o QR code ou durante a reconexão).
+Salva as novas credenciais usando `this.auth.saveCreds()`.</a></li><li><a href="global.html#handleGroupParticipantsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdeparticipantesdegrupos.Chamadoquandoparticipantesentram,saem,s%25C3%25A3opromovidosourebaixadosemumgrupo(evento'group-participants.update').">handleGroupParticipantsUpdate
+Manipula atualizações de participantes de grupos.
+Chamado quando participantes entram, saem, são promovidos ou rebaixados em um grupo (evento 'group-participants.update').</a></li><li><a href="global.html#handleGroupsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdegrupos.Estem%25C3%25A9todo%25C3%25A9chamadoquandoh%25C3%25A1atualiza%25C3%25A7%25C3%25B5esnosmetadadosdegruposexistentes(ex:mudan%25C3%25A7adenome,descri%25C3%25A7%25C3%25A3o)(evento'groups.update').">handleGroupsUpdate
+Manipula atualizações de grupos.
+Este método é chamado quando há atualizações nos metadados de grupos existentes (ex: mudança de nome, descrição) (evento 'groups.update').</a></li><li><a href="global.html#handleGroupsUpsertManipulaainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odegrupos(quandoousu%25C3%25A1rioentraemumnovogrupoousincroniza%25C3%25A7%25C3%25A3oinicial).">handleGroupsUpsert
+Manipula a inserção/atualização de grupos (quando o usuário entra em um novo grupo ou sincronização inicial).</a></li><li><a href="global.html#handleIrrecoverableDisconnectManipuladesconex%25C3%25A3oirrecuper%25C3%25A1vel(ex:logoutoum%25C3%25A1ximodetentativasatingido).Registraumerroinformandoousu%25C3%25A1riosobreasitua%25C3%25A7%25C3%25A3oeanecessidadederemoverosdadosdeautentica%25C3%25A7%25C3%25A3oereiniciarparagerarumnovoQRcode.Resetaoestadodereconex%25C3%25A3o.">handleIrrecoverableDisconnect
+Manipula desconexão irrecuperável (ex: logout ou máximo de tentativas atingido).
+Registra um erro informando o usuário sobre a situação e a necessidade de
+remover os dados de autenticação e reiniciar para gerar um novo QR code.
+Reseta o estado de reconexão.</a></li><li><a href="global.html#handleMessageReceiptUpdateManipulaatualiza%25C3%25A7%25C3%25B5esderecibodemensagem.Esteevento%25C3%25A9disparadoquandoostatusdeentrega/leituradeumamensagem%25C3%25A9atualizado(ex:'delivered','read','played')(evento'message-receipt.update').">handleMessageReceiptUpdate
+Manipula atualizações de recibo de mensagem.
+Este evento é disparado quando o status de entrega/leitura de uma mensagem é atualizado
+(ex: 'delivered', 'read', 'played') (evento 'message-receipt.update').</a></li><li><a href="global.html#handleMessageReceiptUpdate//OriginalmethodbeforebatchingforreferenceifneededManipulaatualiza%25C3%25A7%25C3%25B5esderecibodemensagem.Esteevento%25C3%25A9disparadoquandoostatusdeentrega/leituradeumamensagem%25C3%25A9atualizado(ex:'delivered','read','played')(evento'message-receipt.update').">handleMessageReceiptUpdate // Original method before batching for reference if needed
+Manipula atualizações de recibo de mensagem.
+Este evento é disparado quando o status de entrega/leitura de uma mensagem é atualizado
+(ex: 'delivered', 'read', 'played') (evento 'message-receipt.update').</a></li><li><a href="global.html#handleMessagesDeleteManipulaexclus%25C3%25A3odemensagens.Esteevento%25C3%25A9disparadoquandomensagenss%25C3%25A3odeletadas(evento'messages.delete').">handleMessagesDelete
+Manipula exclusão de mensagens.
+Este evento é disparado quando mensagens são deletadas (evento 'messages.delete').</a></li><li><a href="global.html#handleMessagesReactionManipularea%25C3%25A7%25C3%25B5esamensagens.Esteevento%25C3%25A9disparadoquandoumarea%25C3%25A7%25C3%25A3o%25C3%25A9adicionadaouremovidadeumamensagem(evento'messages.reaction').">handleMessagesReaction
+Manipula reações a mensagens.
+Este evento é disparado quando uma reação é adicionada ou removida de uma mensagem (evento 'messages.reaction').</a></li><li><a href="global.html#handleMessagesUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdemensagens.Esteevento%25C3%25A9disparadoparaatualiza%25C3%25A7%25C3%25B5esemmensagensexistentes(ex:statusdeentrega,edi%25C3%25A7%25C3%25A3o-sesuportado)(evento'messages.update').">handleMessagesUpdate
+Manipula atualizações de mensagens.
+Este evento é disparado para atualizações em mensagens existentes (ex: status de entrega, edição - se suportado) (evento 'messages.update').</a></li><li><a href="global.html#handleMessagesUpsertManipulamensagensnovas/atualizadas.Estem%25C3%25A9todo%25C3%25A9chamadoquandonovasmensagenss%25C3%25A3orecebidasoumensagensexistentess%25C3%25A3oatualizadas(evento'messages.upsert').">handleMessagesUpsert
+Manipula mensagens novas/atualizadas.
+Este método é chamado quando novas mensagens são recebidas ou mensagens existentes são atualizadas (evento 'messages.upsert').</a></li><li><a href="global.html#handleMessagingHistorySetManipulaoeventodeconjuntodehist%25C3%25B3ricodemensagens.Esteevento%25C3%25A9disparadoduranteasincroniza%25C3%25A7%25C3%25A3oinicialdohist%25C3%25B3rico(evento'messaging-history.set'),fornecendoumconjuntodechats,contatosemensagens.">handleMessagingHistorySet
+Manipula o evento de conjunto de histórico de mensagens.
+Este evento é disparado durante a sincronização inicial do histórico (evento 'messaging-history.set'),
+fornecendo um conjunto de chats, contatos e mensagens.</a></li><li><a href="global.html#handlePresenceUpdateProcessaatualiza%25C3%25A7%25C3%25B5esdepresen%25C3%25A7adoscontatos.Registraemonitoraaltera%25C3%25A7%25C3%25B5esnostatusdepresen%25C3%25A7a(online,offline,digitando,gravando%25C3%25A1udio)e%25C3%25BAltimavisualiza%25C3%25A7%25C3%25A3o(evento'presence.update').">handlePresenceUpdate
+Processa atualizações de presença dos contatos.
+Registra e monitora alterações no status de presença (online, offline, digitando, gravando áudio) e última visualização (evento 'presence.update').</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#initializeInicializaaconex%25C3%25A3oprincipalcomoWhatsApp.Estem%25C3%25A9todoorquestraocarregamentodoestadodeautentica%25C3%25A7%25C3%25A3oe,emseguida,tentaestabeleceraconex%25C3%25A3ocomoWhatsApp.">initialize
+Inicializa a conexão principal com o WhatsApp.
+Este método orquestra o carregamento do estado de autenticação e, em seguida,
+tenta estabelecer a conexão com o WhatsApp.</a></li><li><a href="global.html#loadAuthStateCarregaoestadodeautentica%25C3%25A7%25C3%25A3ododiret%25C3%25B3rioespecificadoem%2560this.authStatePath%2560.Seodiret%25C3%25B3rion%25C3%25A3oexistir,eleser%25C3%25A1criado.Utiliza%2560useMultiFileAuthState%2560dabibliotecaBaileysparagerenciarascredenciais.">loadAuthState
+Carrega o estado de autenticação do diretório especificado em `this.authStatePath`.
+Se o diretório não existir, ele será criado.
+Utiliza `useMultiFileAuthState` da biblioteca Baileys para gerenciar as credenciais.</a></li><li><a href="global.html#reconnectWithBackoffReconectaaoWhatsAppcombackoffexponencial.Incrementaocontadordetentativasdereconex%25C3%25A3oecalculaopr%25C3%25B3ximoatrasodeformaexponencial,limitadopelo%2560maxBackoffDelayMs%2560.Agendaumanovatentativadeconex%25C3%25A3o(%2560this.connect()%2560)ap%25C3%25B3soatrasocalculado.Seareconex%25C3%25A3ofalhar,eaindaforpermitidotentarnovamente,chamaasimesmorecursivamente.Casocontr%25C3%25A1rio,tratacomodesconex%25C3%25A3oirrecuper%25C3%25A1vel.">reconnectWithBackoff
+Reconecta ao WhatsApp com backoff exponencial.
+Incrementa o contador de tentativas de reconexão e calcula o próximo atraso
+de forma exponencial, limitado pelo `maxBackoffDelayMs`.
+Agenda uma nova tentativa de conexão (`this.connect()`) após o atraso calculado.
+Se a reconexão falhar, e ainda for permitido tentar novamente, chama a si mesmo recursivamente. Caso contrário, trata como desconexão irrecuperável.</a></li><li><a href="global.html#resetReconnectionStateResetaoestadodereconex%25C3%25A3o.Define%2560this.reconnectionAttempts%2560para0,%2560this.currentBackoffDelayMs%2560para%2560this.initialBackoffDelayMs%2560,e%2560this.isReconnecting%2560para%2560false%2560.">resetReconnectionState
+Reseta o estado de reconexão.
+Define `this.reconnectionAttempts` para 0, `this.currentBackoffDelayMs` para `this.initialBackoffDelayMs`,
+e `this.isReconnecting` para `false`.</a></li><li><a href="global.html#setupEventHandlersConfiguraosmanipuladoresdeeventosparaoclienteWhatsApp(Baileys).Registralistenersparaumavariedadedeeventos,comoatualiza%25C3%25A7%25C3%25B5esdeconex%25C3%25A3o,recebimentodemensagens,atualiza%25C3%25A7%25C3%25B5esdegrupos,chats,contatos,etc.Cadaevento%25C3%25A9vinculadoaom%25C3%25A9todocorrespondentenestaclasse.">setupEventHandlers
+Configura os manipuladores de eventos para o cliente WhatsApp (Baileys).
+Registra listeners para uma variedade de eventos, como atualizações de conexão,
+recebimento de mensagens, atualizações de grupos, chats, contatos, etc.
+Cada evento é vinculado ao método correspondente nesta classe.</a></li><li><a href="global.html#shouldReconnectDeterminaseareconex%25C3%25A3odevesertentadacombasenomotivodadesconex%25C3%25A3o.">shouldReconnect
+Determina se a reconexão deve ser tentada com base no motivo da desconexão.</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li><li><a href="global.html#upsertChat">upsertChat</a></li><li><a href="global.html#upsertChatsBatch">upsertChatsBatch</a></li><li><a href="global.html#upsertGroup">upsertGroup</a></li><li><a href="global.html#upsertGroupsBatch">upsertGroupsBatch</a></li><li><a href="global.html#upsertMessage">upsertMessage</a></li><li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li><li><a href="global.html#upsertMessageReceiptsBatch">upsertMessageReceiptsBatch</a></li><li><a href="global.html#upsertMessagesBatch">upsertMessagesBatch</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p></p>
+                    <h1>Home</h1>
+                </header>
+                
 
 
 
@@ -42,101 +173,415 @@
 
 
 
+    <section>
+        <article><p><a href="https://freeimage.host/i/3DG6WBV"><img src="https://iili.io/3DG6WBV.md.png" alt="3DG6WBV.md.png"></a></p>
+<h1>OmniZap</h1>
+<p>Bot multifuncional para WhatsApp, desenvolvido em JavaScript como um projeto open-source e educacional.</p>
+<h2>📋 Sobre</h2>
+<p>OmniZap é um bot versátil para WhatsApp que atende tanto usuários pessoais quanto administradores de grupos e pequenas automações empresariais. Desenvolvido com foco em aprendizado e colaboração da comunidade, com suporte a persistência de dados e cache.</p>
+<h2>⚙️ Funcionalidades Principais</h2>
+<ul>
+<li>Sistema robusto de gerenciamento de conexão com reconexão automática</li>
+<li>Persistência completa de dados em MySQL</li>
+<li>Sistema de cache com Redis para melhor performance</li>
+<li>Gerenciamento avançado de grupos</li>
+<li>Tratamento de mensagens, recibos e eventos</li>
+<li>Sistema de logs detalhado</li>
+<li>Arquitetura modular e expansível</li>
+</ul>
+<h2>🏗️ Arquitetura</h2>
+<p>O projeto é composto por três componentes principais:</p>
+<h3>ConnectionManager</h3>
+<ul>
+<li>Gerencia a conexão WebSocket com o WhatsApp</li>
+<li>Implementa reconexão automática com backoff exponencial</li>
+<li>Gerencia eventos do WhatsApp (mensagens, grupos, contatos)</li>
+<li>Integra com Redis para cache e MySQL para persistência</li>
+</ul>
+<h3>MySQLDBManager</h3>
+<ul>
+<li>Gerencia todas as operações com o banco de dados MySQL</li>
+<li>Implementa padrão Singleton para conexão</li>
+<li>Gerencia pool de conexões para melhor performance</li>
+<li>Fornece métodos CRUD para todas as entidades:
+<ul>
+<li>Chats</li>
+<li>Grupos e Participantes</li>
+<li>Mensagens e Recibos</li>
+<li>Contatos</li>
+</ul>
+</li>
+</ul>
+<h3>Sistema de Cache (Redis)</h3>
+<ul>
+<li>Cache de metadados com TTL configurável</li>
+<li>Prefixos específicos para cada tipo de dado:
+<ul>
+<li><code>chat:</code> - Dados de conversas</li>
+<li><code>group:</code> - Metadados de grupos</li>
+<li><code>contact:</code> - Informações de contatos</li>
+<li><code>message:</code> - Mensagens e recibos</li>
+</ul>
+</li>
+</ul>
+<h2>🗄️ Estrutura do Banco de Dados</h2>
+<h3>Tabelas MySQL</h3>
+<h4>Chats</h4>
+<pre class="prettyprint source lang-sql"><code>CREATE TABLE Chats (
+    jid VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255),
+    unread_count INT DEFAULT 0,
+    last_message_timestamp BIGINT,
+    is_group BOOLEAN DEFAULT 0,
+    pinned_timestamp BIGINT DEFAULT 0,
+    mute_until_timestamp BIGINT DEFAULT 0,
+    archived BOOLEAN DEFAULT 0,
+    ephemeral_duration INT,
+    created_at BIGINT,
+    updated_at BIGINT
+);
+</code></pre>
+<h4>Groups</h4>
+<pre class="prettyprint source lang-sql"><code>CREATE TABLE Groups (
+    jid VARCHAR(255) PRIMARY KEY,
+    subject VARCHAR(255),
+    owner_jid VARCHAR(255),
+    creation_timestamp BIGINT,
+    description TEXT,
+    restrict_mode BOOLEAN DEFAULT 0,
+    announce_mode BOOLEAN DEFAULT 0,
+    img_url TEXT,
+    created_at BIGINT,
+    updated_at BIGINT,
+    FOREIGN KEY (jid) REFERENCES Chats(jid) ON DELETE CASCADE
+);
+</code></pre>
+<h4>GroupParticipants</h4>
+<pre class="prettyprint source lang-sql"><code>CREATE TABLE GroupParticipants (
+    group_jid VARCHAR(255) NOT NULL,
+    participant_jid VARCHAR(255) NOT NULL,
+    admin_status VARCHAR(50),
+    PRIMARY KEY (group_jid, participant_jid),
+    FOREIGN KEY (group_jid) REFERENCES Groups(jid) ON DELETE CASCADE
+);
+</code></pre>
+<h4>Messages</h4>
+<pre class="prettyprint source lang-sql"><code>CREATE TABLE Messages (
+    message_id VARCHAR(255) NOT NULL,
+    chat_jid VARCHAR(255) NOT NULL,
+    sender_jid VARCHAR(255),
+    from_me BOOLEAN NOT NULL,
+    message_timestamp BIGINT NOT NULL,
+    push_name VARCHAR(255),
+    message_type VARCHAR(50),
+    quoted_message_id VARCHAR(255),
+    quoted_message_sender_jid VARCHAR(255),
+    raw_message_content JSON,
+    created_at BIGINT,
+    updated_at BIGINT,
+    PRIMARY KEY (message_id, chat_jid),
+    INDEX idx_messages_chat_timestamp (chat_jid, message_timestamp),
+    INDEX idx_messages_sender (sender_jid),
+    FOREIGN KEY (chat_jid) REFERENCES Chats(jid) ON DELETE CASCADE
+);
+</code></pre>
+<h4>MessageReceipts</h4>
+<pre class="prettyprint source lang-sql"><code>CREATE TABLE MessageReceipts (
+    message_id VARCHAR(255) NOT NULL,
+    chat_jid VARCHAR(255) NOT NULL,
+    recipient_jid VARCHAR(255) NOT NULL,
+    receipt_type VARCHAR(50) NOT NULL,
+    receipt_timestamp BIGINT NOT NULL,
+    PRIMARY KEY (message_id, chat_jid, recipient_jid, receipt_type),
+    FOREIGN KEY (message_id, chat_jid) REFERENCES Messages(message_id, chat_jid) ON DELETE CASCADE
+);
+</code></pre>
+<h2>⚡ Cache Redis</h2>
+<h3>TTLs Configurados</h3>
+<ul>
+<li><code>REDIS_TTL_METADATA_SHORT</code>: 3600s (1 hora) - Metadados de curta duração</li>
+<li><code>REDIS_TTL_METADATA_LONG</code>: 86400s (24 horas) - Metadados de longa duração</li>
+<li><code>REDIS_TTL_MESSAGE</code>: 604800s (7 dias) - Mensagens</li>
+<li><code>REDIS_TTL_RECEIPT</code>: 604800s (7 dias) - Recibos</li>
+</ul>
+<h3>Prefixos de Cache</h3>
+<ul>
+<li><code>chat:</code> - Dados de conversas</li>
+<li><code>group:</code> - Metadados de grupos</li>
+<li><code>contact:</code> - Informações de contatos</li>
+<li><code>message:</code> - Mensagens e recibos</li>
+</ul>
+<h2>🔄 Sistema de Cache</h2>
+<h3>Diagrama de Relações</h3>
+<pre class="prettyprint source lang-ascii"><code>┌─────────────────────── Cache Redis ────────────────────────┐
+│                                                            │
+│  Prefixos e TTLs:                                          │
+│  ┌─────────────────────────────────────────┐               │
+│  │ REDIS_PREFIX_GROUP    (TTL: 1h)         │               │
+│  │ REDIS_PREFIX_CHAT     (TTL: 1h)         │               │
+│  │ REDIS_PREFIX_CONTACT  (TTL: 24h)        │               │
+│  │ REDIS_PREFIX_MESSAGE  (TTL: 7d)         │               │
+│  └─────────────────────────────────────────┘               │
+│                                                            │
+│  Estrutura de Dados:                                       │
+│                                                            │
+│    ┌─────────── Mensagem ──────────┐                       │
+│    │ Key: message:&lt;remoteJid>:&lt;id> │                       │
+│    │ - messageContentType          │    ┌── Grupo ────┐    │
+│    │ - receipts                    │────►  Key: group:&lt;jid>│
+│    │ - groupMetadata (se grupo)    │    │ - participantes  │
+│    └───────────────────────────────┘    │ - descrição      │
+│                │                        │ - configurações  │
+│                │                        └──────────────┘   │
+│                │                                           │
+│                │         ┌────── Chat ─────┐               │
+│                └────────►│ Key: chat:&lt;id>  │               │
+│                          │ - unreadCount   │               │
+│                          │ - lastMessage   │               │
+│                          └────────────── ──┘               │
+│                                │                           │
+│                                │                           │
+│                     ┌──── Contato ────┐                    │
+│                     │ Key:contact:&lt;id>│                    │
+│                     │ - nome          │                    │
+│                     │ - notify        │                    │
+│                     └──────────────── ┘                    │
+│                                                            │
+└────────────────────────────────────────────────────────── ─┘
+</code></pre>
+<h2>🎯 Sistema de Eventos</h2>
+<h3>Eventos Principais</h3>
+<h4>Conexão</h4>
+<ul>
+<li><code>connection.update</code> - Atualizações de estado da conexão</li>
+<li><code>creds.update</code> - Atualizações de credenciais</li>
+</ul>
+<h4>Mensagens</h4>
+<ul>
+<li><code>messages.upsert</code> - Novas mensagens/atualizações</li>
+<li><code>messages.update</code> - Atualizações de status</li>
+<li><code>messages.delete</code> - Exclusão de mensagens</li>
+<li><code>messages.reaction</code> - Reações em mensagens</li>
+<li><code>message-receipt.update</code> - Recibos de mensagem</li>
+</ul>
+<h4>Grupos</h4>
+<ul>
+<li><code>groups.update</code> - Atualizações de metadados</li>
+<li><code>groups.upsert</code> - Novos grupos</li>
+<li><code>group-participants.update</code> - Mudanças de participantes</li>
+</ul>
+<h4>Chats e Contatos</h4>
+<ul>
+<li><code>chats.upsert</code> - Novos chats</li>
+<li><code>chats.update</code> - Atualizações de chat</li>
+<li><code>chats.delete</code> - Exclusão de chats</li>
+<li><code>contacts.upsert</code> - Novos contatos</li>
+<li><code>contacts.update</code> - Atualizações de contato</li>
+</ul>
+<h4>Outros</h4>
+<ul>
+<li><code>blocklist.set</code> - Lista de bloqueio</li>
+<li><code>blocklist.update</code> - Atualizações de bloqueio</li>
+<li><code>call</code> - Chamadas de voz/vídeo</li>
+<li><code>presence.update</code> - Status de presença</li>
+</ul>
+<h3>Fluxo de Dados</h3>
+<ol>
+<li>Evento recebido do WhatsApp</li>
+<li>Processamento pelo handler específico</li>
+<li>Atualização do cache Redis (se aplicável)</li>
+<li>Persistência no MySQL (se aplicável)</li>
+<li>Emissão de eventos customizados para subscribers</li>
+</ol>
+<h3>Estrutura de Chaves</h3>
+<h4>Mensagens</h4>
+<ul>
+<li><strong>Chave</strong>: <code>message:&lt;remoteJid&gt;:&lt;id&gt;</code></li>
+<li><strong>TTL</strong>: 7 dias</li>
+<li><strong>Dados</strong>:
+<ul>
+<li>Conteúdo da mensagem</li>
+<li>Tipo de conteúdo</li>
+<li>Status de entrega/leitura</li>
+<li>Metadados do grupo (se aplicável)</li>
+</ul>
+</li>
+</ul>
+<h4>Grupos</h4>
+<ul>
+<li><strong>Chave</strong>: <code>group:&lt;jid&gt;</code></li>
+<li><strong>TTL</strong>: 1 hora</li>
+<li><strong>Dados</strong>:
+<ul>
+<li>Lista de participantes</li>
+<li>Configurações do grupo</li>
+<li>Descrição</li>
+<li>Imagem do grupo</li>
+</ul>
+</li>
+</ul>
+<h4>Chats</h4>
+<ul>
+<li><strong>Chave</strong>: <code>chat:&lt;id&gt;</code></li>
+<li><strong>TTL</strong>: 1 hora</li>
+<li><strong>Dados</strong>:
+<ul>
+<li>Contagem de mensagens não lidas</li>
+<li>Última mensagem</li>
+<li>Status de silenciamento</li>
+<li>Configurações do chat</li>
+</ul>
+</li>
+</ul>
+<h4>Contatos</h4>
+<ul>
+<li><strong>Chave</strong>: <code>contact:&lt;id&gt;</code></li>
+<li><strong>TTL</strong>: 24 horas</li>
+<li><strong>Dados</strong>:
+<ul>
+<li>Nome do contato</li>
+<li>Configurações de notificação</li>
+<li>Informações de perfil</li>
+</ul>
+</li>
+</ul>
+<h3>Estratégia de Cache</h3>
+<ol>
+<li>
+<p><strong>Cache First</strong></p>
+<ul>
+<li>Todas as consultas primeiro verificam o cache</li>
+<li>Em caso de miss, busca da API e atualiza o cache</li>
+</ul>
+</li>
+<li>
+<p><strong>TTLs Diferenciados</strong></p>
+<ul>
+<li>Metadados de curta duração: 1 hora</li>
+<li>Informações de contato: 24 horas</li>
+<li>Mensagens e recibos: 7 dias</li>
+</ul>
+</li>
+<li>
+<p><strong>Invalidação Automática</strong></p>
+<ul>
+<li>TTLs automáticos para evitar dados obsoletos</li>
+<li>Atualização proativa em eventos relevantes</li>
+</ul>
+</li>
+<li>
+<p><strong>Otimização de Desempenho</strong></p>
+<ul>
+<li>Cache de metadados de grupo para operações frequentes</li>
+<li>Armazenamento de recibos de mensagem para consulta rápida</li>
+</ul>
+</li>
+<li>
+<p><strong>Persistência em Camadas</strong></p>
+<ul>
+<li>Redis: Dados frequentemente acessados</li>
+<li>MySQL: Armazenamento persistente de longo prazo</li>
+<li>Sincronização automática entre camadas</li>
+</ul>
+</li>
+</ol>
+<h3>Monitoramento e Logs</h3>
+<ul>
+<li>Rastreamento de hits/misses do cache</li>
+<li>Logging detalhado de operações</li>
+<li>Métricas de performance por tipo de dado</li>
+<li>Alertas para falhas de cache</li>
+</ul>
+<h2>🚀 Começando</h2>
+<h3>Pré-requisitos</h3>
+<ul>
+<li>Node.js v14+</li>
+<li>NPM ou Yarn</li>
+<li>MySQL Server 8.0+</li>
+<li>Redis Server 6.0+</li>
+</ul>
+<h3>Configuração do Ambiente</h3>
+<p>Configure as variáveis de ambiente em um arquivo <code>.env</code>:</p>
+<pre class="prettyprint source lang-env"><code># MySQL
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=seu_usuario
+MYSQL_PASSWORD=sua_senha
+MYSQL_DATABASE_NAME=omnizap_db
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+
+# Reconexão
+BACKOFF_INITIAL_DELAY_MS=5000
+BACKOFF_MAX_DELAY_MS=60000
+
+# Auth State
+AUTH_STATE_PATH=./auth_state
+</code></pre>
+<h3>Instalação</h3>
+<pre class="prettyprint source lang-bash"><code># Clone o repositório
+git clone https://github.com/Kaikygr/OmniZap.git
+
+# Entre no diretório
+cd OmniZap
+
+# Instale as dependências
+npm install
+
+# Inicie o bot
+npm start
+</code></pre>
+<h2>🛠️ Tecnologias</h2>
+<ul>
+<li>JavaScript/Node.js</li>
+<li><a href="https://github.com/WhiskeySockets/Baileys">Baileys</a> - Framework WhatsApp Web API</li>
+<li>MySQL - Sistema de Banco de Dados</li>
+<li>Redis - Sistema de Cache</li>
+<li>Winston - Sistema de Logs</li>
+<li>Envalid - Validação de variáveis de ambiente</li>
+<li>ioredis - Cliente Redis</li>
+<li>mysql2 - Cliente MySQL</li>
+</ul>
+<h2>📄 Licença</h2>
+<p>Este projeto está sob a licença MIT - veja o arquivo <a href="LICENSE">LICENSE</a> para detalhes.</p>
+<h2>🤝 Contribuindo</h2>
+<p>Contribuições são bem-vindas! Por favor, leia nosso guia de contribuição antes de submeter pull requests.</p>
+<h2>💰 Apoie o Projeto</h2>
+<p>Se você gostou do projeto e quer apoiar seu desenvolvimento: <a href="https://bit.ly/m/Kaally">Apoiar</a></p>
+<hr>
+<p>🚀 <strong>OmniZap</strong> — Sistema robusto e escalável para automação do WhatsApp</p>
+<p>⚠️ <strong>Aviso</strong>: Este é um projeto educacional e não se destina a fins comerciais ou spam.</p></article>
+    </section>
 
 
 
 
 
-</div>
 
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConnectionManager.html">ConnectionManager</a></li><li><a href="MySQLDBManager.html">MySQLDBManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DEFAULT_LOG_LEVEL">DEFAULT_LOG_LEVEL</a></li><li><a href="global.html#ECOSYSTEM_NAME">ECOSYSTEM_NAME</a></li><li><a href="global.html#INSTANCE_ID">INSTANCE_ID</a></li><li><a href="global.html#IS_PRODUCTION">IS_PRODUCTION</a></li><li><a href="global.html#LOG_COLORS">LOG_COLORS</a></li><li><a href="global.html#LOG_DEFAULTS">LOG_DEFAULTS</a></li><li><a href="global.html#LOG_DIR_PATH">LOG_DIR_PATH</a></li><li><a href="global.html#LOG_LEVELS">LOG_LEVELS</a></li><li><a href="global.html#LOG_LEVEL_NAMES">LOG_LEVEL_NAMES</a></li><li><a href="global.html#NODE_ENV">NODE_ENV</a></li><li><a href="global.html#PROJECT_ROOT">PROJECT_ROOT</a></li><li><a href="global.html#REDIS_PREFIX_CHAT">REDIS_PREFIX_CHAT</a></li><li><a href="global.html#REDIS_PREFIX_CONTACT">REDIS_PREFIX_CONTACT</a></li><li><a href="global.html#REDIS_PREFIX_GROUP">REDIS_PREFIX_GROUP</a></li><li><a href="global.html#REDIS_PREFIX_MESSAGE">REDIS_PREFIX_MESSAGE</a></li><li><a href="global.html#REDIS_TTL_MESSAGE">REDIS_TTL_MESSAGE</a></li><li><a href="global.html#REDIS_TTL_METADATA_LONG">REDIS_TTL_METADATA_LONG</a></li><li><a href="global.html#REDIS_TTL_METADATA_SHORT">REDIS_TTL_METADATA_SHORT</a></li><li><a href="global.html#REDIS_TTL_RECEIPT">REDIS_TTL_RECEIPT</a></li><li><a href="global.html#_extractTextFromMessageObject">_extractTextFromMessageObject</a></li><li><a href="global.html#closePool">closePool</a></li><li><a href="global.html#connectConecta-seaoWhatsAppusandooestadodeautentica%25C3%25A7%25C3%25A3ocarregado.ConfiguraosocketBaileyscomasop%25C3%25A7%25C3%25B5esnecess%25C3%25A1rias,incluindologger,informa%25C3%25A7%25C3%25B5esdonavegador,eafun%25C3%25A7%25C3%25A3o%2560cachedGroupMetadata%2560paraotimizarocarregamentodemetadadosdegrupoapartirdoRedis.">connect
-Conecta-se ao WhatsApp usando o estado de autenticação carregado.
-Configura o socket Baileys com as opções necessárias, incluindo logger, informações do navegador, e a função `cachedGroupMetadata` para otimizar o carregamento de metadados de grupo a partir do Redis.</a></li><li><a href="global.html#consoleFormat">consoleFormat</a></li><li><a href="global.html#createLoggerInstance">createLoggerInstance</a></li><li><a href="global.html#deleteChatData">deleteChatData</a></li><li><a href="global.html#env">env</a></li><li><a href="global.html#executeQuery">executeQuery</a></li><li><a href="global.html#fileFormat">fileFormat</a></li><li><a href="global.html#getDefaultTransportDefinitions">getDefaultTransportDefinitions</a></li><li><a href="global.html#getEventEmitter">getEventEmitter</a></li><li><a href="global.html#getInstance">getInstance</a></li><li><a href="global.html#handleBlocklistSetProcessaoeventodedefini%25C3%25A7%25C3%25A3odalistadebloqueio.Registraosn%25C3%25BAmerosqueest%25C3%25A3onalistadebloqueiodoWhatsApp.Esteevento%25C3%25A9disparadoquandoalistadebloqueio%25C3%25A9definidaousincronizada(evento'blocklist.set').">handleBlocklistSet
-Processa o evento de definição da lista de bloqueio.
-Registra os números que estão na lista de bloqueio do WhatsApp.
-Este evento é disparado quando a lista de bloqueio é definida ou sincronizada (evento 'blocklist.set').</a></li><li><a href="global.html#handleBlocklistUpdateProcessaatualiza%25C3%25A7%25C3%25B5esnalistadebloqueiodoWhatsApp.Registraaltera%25C3%25A7%25C3%25B5es(adi%25C3%25A7%25C3%25B5es/remo%25C3%25A7%25C3%25B5es)nalistadecontatosbloqueados.Esteevento%25C3%25A9disparadoquandoumJID%25C3%25A9adicionadoouremovidodalistadebloqueio(evento'blocklist.update').">handleBlocklistUpdate
-Processa atualizações na lista de bloqueio do WhatsApp.
-Registra alterações (adições/remoções) na lista de contatos bloqueados.
-Este evento é disparado quando um JID é adicionado ou removido da lista de bloqueio (evento 'blocklist.update').</a></li><li><a href="global.html#handleCallProcessaeventosdechamadasrecebidasourealizadas.Registrainforma%25C3%25A7%25C3%25B5essobrechamadasdevoz/v%25C3%25ADdeonoWhatsApp.Esteevento%25C3%25A9disparadoparav%25C3%25A1riosest%25C3%25A1giosdeumachamada(oferta,aceita%25C3%25A7%25C3%25A3o,rejei%25C3%25A7%25C3%25A3o,t%25C3%25A9rmino)(evento'call').">handleCall
-Processa eventos de chamadas recebidas ou realizadas.
-Registra informações sobre chamadas de voz/vídeo no WhatsApp.
-Este evento é disparado para vários estágios de uma chamada (oferta, aceitação, rejeição, término) (evento 'call').</a></li><li><a href="global.html#handleChatsDeleteManipulaexclus%25C3%25A3odechats.Esteevento%25C3%25A9disparadoquandochatss%25C3%25A3odeletados(evento'chats.delete').">handleChatsDelete
-Manipula exclusão de chats.
-Este evento é disparado quando chats são deletados (evento 'chats.delete').</a></li><li><a href="global.html#handleChatsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdechats.Esteevento%25C3%25A9disparadoquandopropriedadesdeumchatexistentes%25C3%25A3oalteradas(ex:%2560unreadCount%2560,%2560mute%2560)(evento'chats.update').">handleChatsUpdate
-Manipula atualizações de chats.
-Este evento é disparado quando propriedades de um chat existente são alteradas (ex: `unreadCount`, `mute`) (evento 'chats.update').</a></li><li><a href="global.html#handleChatsUpsertManipulainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odechats.Esteevento%25C3%25A9disparadoquandonovoschatss%25C3%25A3ocriadosouchatsexistentess%25C3%25A3osincronizados(evento'chats.upsert').">handleChatsUpsert
-Manipula inserção/atualização de chats.
-Este evento é disparado quando novos chats são criados ou chats existentes são sincronizados (evento 'chats.upsert').</a></li><li><a href="global.html#handleConnectionUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdeconex%25C3%25A3odoclienteWhatsApp.Estem%25C3%25A9todo%25C3%25A9chamadoquandooestadodaconex%25C3%25A3ocomoWhatsAppmuda(evento%2560connection.update%2560).">handleConnectionUpdate
-Manipula atualizações de conexão do cliente WhatsApp.
-Este método é chamado quando o estado da conexão com o WhatsApp muda (evento `connection.update`).</a></li><li><a href="global.html#handleContactsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecontatosnosistema.Respons%25C3%25A1velporatualizarasinforma%25C3%25A7%25C3%25B5esdecontatonocacheRedis.Esteevento%25C3%25A9disparadoquandopropriedadesdeumcontatoexistentes%25C3%25A3oalteradas(ex:nome,notifica%25C3%25A7%25C3%25A3opush)(evento'contacts.update').">handleContactsUpdate
-Manipula a atualização de contatos no sistema.
-Responsável por atualizar as informações de contato no cache Redis.
-Este evento é disparado quando propriedades de um contato existente são alteradas (ex: nome, notificação push) (evento 'contacts.update').</a></li><li><a href="global.html#handleContactsUpsertManipulainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odecontatos.Esteevento%25C3%25A9disparadoquandonovoscontatoss%25C3%25A3oadicionadosoucontatosexistentess%25C3%25A3osincronizados(evento'contacts.upsert').">handleContactsUpsert
-Manipula inserção/atualização de contatos.
-Este evento é disparado quando novos contatos são adicionados ou contatos existentes são sincronizados (evento 'contacts.upsert').</a></li><li><a href="global.html#handleCredsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecredenciais.Estem%25C3%25A9todo%25C3%25A9chamadoporBaileysquandoascredenciaisdeautentica%25C3%25A7%25C3%25A3os%25C3%25A3oatualizadas(porexemplo,ap%25C3%25B3sescanearoQRcodeouduranteareconex%25C3%25A3o).Salvaasnovascredenciaisusando%2560this.auth.saveCreds()%2560.">handleCredsUpdate
-Manipula a atualização de credenciais.
-Este método é chamado por Baileys quando as credenciais de autenticação são atualizadas (por exemplo, após escanear o QR code ou durante a reconexão).
-Salva as novas credenciais usando `this.auth.saveCreds()`.</a></li><li><a href="global.html#handleGroupParticipantsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdeparticipantesdegrupos.Chamadoquandoparticipantesentram,saem,s%25C3%25A3opromovidosourebaixadosemumgrupo(evento'group-participants.update').">handleGroupParticipantsUpdate
-Manipula atualizações de participantes de grupos.
-Chamado quando participantes entram, saem, são promovidos ou rebaixados em um grupo (evento 'group-participants.update').</a></li><li><a href="global.html#handleGroupsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdegrupos.Estem%25C3%25A9todo%25C3%25A9chamadoquandoh%25C3%25A1atualiza%25C3%25A7%25C3%25B5esnosmetadadosdegruposexistentes(ex:mudan%25C3%25A7adenome,descri%25C3%25A7%25C3%25A3o)(evento'groups.update').">handleGroupsUpdate
-Manipula atualizações de grupos.
-Este método é chamado quando há atualizações nos metadados de grupos existentes (ex: mudança de nome, descrição) (evento 'groups.update').</a></li><li><a href="global.html#handleGroupsUpsertManipulaainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odegrupos(quandoousu%25C3%25A1rioentraemumnovogrupoousincroniza%25C3%25A7%25C3%25A3oinicial).Esteevento%25C3%25A9geralmentedisparadoquandooclienteseconectaesincronizaalistadegrupos,ouquandoousu%25C3%25A1rioentraemumnovogrupo(evento'groups.upsert').">handleGroupsUpsert
-Manipula a inserção/atualização de grupos (quando o usuário entra em um novo grupo ou sincronização inicial).
-Este evento é geralmente disparado quando o cliente se conecta e sincroniza a lista de grupos,
-ou quando o usuário entra em um novo grupo (evento 'groups.upsert').</a></li><li><a href="global.html#handleIrrecoverableDisconnectManipuladesconex%25C3%25A3oirrecuper%25C3%25A1vel(ex:logoutoum%25C3%25A1ximodetentativasatingido).Registraumerroinformandoousu%25C3%25A1riosobreasitua%25C3%25A7%25C3%25A3oeanecessidadederemoverosdadosdeautentica%25C3%25A7%25C3%25A3oereiniciarparagerarumnovoQRcode.Resetaoestadodereconex%25C3%25A3o.">handleIrrecoverableDisconnect
-Manipula desconexão irrecuperável (ex: logout ou máximo de tentativas atingido).
-Registra um erro informando o usuário sobre a situação e a necessidade de
-remover os dados de autenticação e reiniciar para gerar um novo QR code.
-Reseta o estado de reconexão.</a></li><li><a href="global.html#handleMessageReceiptUpdateManipulaatualiza%25C3%25A7%25C3%25B5esderecibodemensagem.Esteevento%25C3%25A9disparadoquandoostatusdeentrega/leituradeumamensagem%25C3%25A9atualizado(ex:'delivered','read','played')(evento'message-receipt.update').">handleMessageReceiptUpdate
-Manipula atualizações de recibo de mensagem.
-Este evento é disparado quando o status de entrega/leitura de uma mensagem é atualizado
-(ex: 'delivered', 'read', 'played') (evento 'message-receipt.update').</a></li><li><a href="global.html#handleMessagesDeleteManipulaexclus%25C3%25A3odemensagens.Esteevento%25C3%25A9disparadoquandomensagenss%25C3%25A3odeletadas(evento'messages.delete').">handleMessagesDelete
-Manipula exclusão de mensagens.
-Este evento é disparado quando mensagens são deletadas (evento 'messages.delete').</a></li><li><a href="global.html#handleMessagesReactionManipularea%25C3%25A7%25C3%25B5esamensagens.Esteevento%25C3%25A9disparadoquandoumarea%25C3%25A7%25C3%25A3o%25C3%25A9adicionadaouremovidadeumamensagem(evento'messages.reaction').">handleMessagesReaction
-Manipula reações a mensagens.
-Este evento é disparado quando uma reação é adicionada ou removida de uma mensagem (evento 'messages.reaction').</a></li><li><a href="global.html#handleMessagesUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdemensagens.Esteevento%25C3%25A9disparadoparaatualiza%25C3%25A7%25C3%25B5esemmensagensexistentes(ex:statusdeentrega,edi%25C3%25A7%25C3%25A3o-sesuportado)(evento'messages.update').">handleMessagesUpdate
-Manipula atualizações de mensagens.
-Este evento é disparado para atualizações em mensagens existentes (ex: status de entrega, edição - se suportado) (evento 'messages.update').</a></li><li><a href="global.html#handleMessagesUpsertManipulamensagensnovas/atualizadas.Estem%25C3%25A9todo%25C3%25A9chamadoquandonovasmensagenss%25C3%25A3orecebidasoumensagensexistentess%25C3%25A3oatualizadas(evento'messages.upsert').">handleMessagesUpsert
-Manipula mensagens novas/atualizadas.
-Este método é chamado quando novas mensagens são recebidas ou mensagens existentes são atualizadas (evento 'messages.upsert').</a></li><li><a href="global.html#handleMessagingHistorySetManipulaoeventodeconjuntodehist%25C3%25B3ricodemensagens.Esteevento%25C3%25A9disparadoduranteasincroniza%25C3%25A7%25C3%25A3oinicialdohist%25C3%25B3rico(evento'messaging-history.set'),fornecendoumconjuntodechats,contatosemensagens.">handleMessagingHistorySet
-Manipula o evento de conjunto de histórico de mensagens.
-Este evento é disparado durante a sincronização inicial do histórico (evento 'messaging-history.set'),
-fornecendo um conjunto de chats, contatos e mensagens.</a></li><li><a href="global.html#handlePresenceUpdateProcessaatualiza%25C3%25A7%25C3%25B5esdepresen%25C3%25A7adoscontatos.Registraemonitoraaltera%25C3%25A7%25C3%25B5esnostatusdepresen%25C3%25A7a(online,offline,digitando,gravando%25C3%25A1udio)e%25C3%25BAltimavisualiza%25C3%25A7%25C3%25A3o(evento'presence.update').">handlePresenceUpdate
-Processa atualizações de presença dos contatos.
-Registra e monitora alterações no status de presença (online, offline, digitando, gravando áudio) e última visualização (evento 'presence.update').</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#initializeInicializaaconex%25C3%25A3oprincipalcomoWhatsApp.Estem%25C3%25A9todoorquestraocarregamentodoestadodeautentica%25C3%25A7%25C3%25A3oe,emseguida,tentaestabeleceraconex%25C3%25A3ocomoWhatsApp.">initialize
-Inicializa a conexão principal com o WhatsApp.
-Este método orquestra o carregamento do estado de autenticação e, em seguida,
-tenta estabelecer a conexão com o WhatsApp.</a></li><li><a href="global.html#initializeRedisClientInicializaoclienteRedisparacachededados.Configuraconex%25C3%25A3o,eventosetratamentodeerrosdoRedis.Osdetalhesdaconex%25C3%25A3o(host,porta,senha,db)s%25C3%25A3oobtidosdasvari%25C3%25A1veisdeambiente.Registralistenersparaoseventos'connect','ready'e'error'doclienteRedis.">initializeRedisClient
-Inicializa o cliente Redis para cache de dados.
-Configura conexão, eventos e tratamento de erros do Redis.
-Os detalhes da conexão (host, porta, senha, db) são obtidos das variáveis de ambiente.
-Registra listeners para os eventos 'connect', 'ready' e 'error' do cliente Redis.</a></li><li><a href="global.html#loadAuthStateCarregaoestadodeautentica%25C3%25A7%25C3%25A3ododiret%25C3%25B3rioespecificadoem%2560this.authStatePath%2560.Seodiret%25C3%25B3rion%25C3%25A3oexistir,eleser%25C3%25A1criado.Utiliza%2560useMultiFileAuthState%2560dabibliotecaBaileysparagerenciarascredenciais.">loadAuthState
-Carrega o estado de autenticação do diretório especificado em `this.authStatePath`.
-Se o diretório não existir, ele será criado.
-Utiliza `useMultiFileAuthState` da biblioteca Baileys para gerenciar as credenciais.</a></li><li><a href="global.html#logger">logger</a></li><li><a href="global.html#processIncomingMessage">processIncomingMessage</a></li><li><a href="global.html#reconnectWithBackoffReconectaaoWhatsAppcombackoffexponencial.Incrementaocontadordetentativasdereconex%25C3%25A3oecalculaopr%25C3%25B3ximoatrasodeformaexponencial,limitadopelo%2560maxBackoffDelayMs%2560.Agendaumanovatentativadeconex%25C3%25A3o(%2560this.connect()%2560)ap%25C3%25B3soatrasocalculado.Seareconex%25C3%25A3ofalhar,eaindaforpermitidotentarnovamente,chamaasimesmorecursivamente.Casocontr%25C3%25A1rio,tratacomodesconex%25C3%25A3oirrecuper%25C3%25A1vel.">reconnectWithBackoff
-Reconecta ao WhatsApp com backoff exponencial.
-Incrementa o contador de tentativas de reconexão e calcula o próximo atraso
-de forma exponencial, limitado pelo `maxBackoffDelayMs`.
-Agenda uma nova tentativa de conexão (`this.connect()`) após o atraso calculado.
-Se a reconexão falhar, e ainda for permitido tentar novamente, chama a si mesmo recursivamente. Caso contrário, trata como desconexão irrecuperável.</a></li><li><a href="global.html#resetReconnectionStateResetaoestadodereconex%25C3%25A3o.Define%2560this.reconnectionAttempts%2560para0,%2560this.currentBackoffDelayMs%2560para%2560this.initialBackoffDelayMs%2560,e%2560this.isReconnecting%2560para%2560false%2560.">resetReconnectionState
-Reseta o estado de reconexão.
-Define `this.reconnectionAttempts` para 0, `this.currentBackoffDelayMs` para `this.initialBackoffDelayMs`,
-e `this.isReconnecting` para `false`.</a></li><li><a href="global.html#setupEventHandlersConfiguraosmanipuladoresdeeventosparaoclienteWhatsApp(Baileys).Registralistenersparaumavariedadedeeventos,comoatualiza%25C3%25A7%25C3%25B5esdeconex%25C3%25A3o,recebimentodemensagens,atualiza%25C3%25A7%25C3%25B5esdegrupos,chats,contatos,etc.Cadaevento%25C3%25A9vinculadoaom%25C3%25A9todocorrespondentenestaclasse.">setupEventHandlers
-Configura os manipuladores de eventos para o cliente WhatsApp (Baileys).
-Registra listeners para uma variedade de eventos, como atualizações de conexão,
-recebimento de mensagens, atualizações de grupos, chats, contatos, etc.
-Cada evento é vinculado ao método correspondente nesta classe.</a></li><li><a href="global.html#shouldReconnectDeterminaseareconex%25C3%25A3odevesertentadacombasenomotivodadesconex%25C3%25A3o.">shouldReconnect
-Determina se a reconexão deve ser tentada com base no motivo da desconexão.</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#syncFromRedis">syncFromRedis</a></li><li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li><li><a href="global.html#upsertChat">upsertChat</a></li><li><a href="global.html#upsertGroup">upsertGroup</a></li><li><a href="global.html#upsertMessage">upsertMessage</a></li><li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li></ul>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 18:27:25 GMT-0400 (Horário Padrão do Amazonas)
-</footer>
-
-<script> prettyPrint(); </script>
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
 <script src="scripts/linenumber.js"> </script>
+
+
 </body>
 </html>

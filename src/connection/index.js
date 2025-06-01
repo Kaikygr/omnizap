@@ -1,7 +1,7 @@
 const ConnectionManager = require('./ConnectionManager');
 const { getInstance: getMySQLDBManagerInstance } = require('./../database/MySQLDBManager');
 const logger = require('./../utils/logs/logger');
-const messageController = require('../controllers/MessageController'); // Importar o controller
+const messageController = require('../controllers/MessageController');
 
 /**
  * @async
@@ -11,8 +11,6 @@ const messageController = require('../controllers/MessageController'); // Import
  * Este script orquestra a inicialização dos componentes chave:
  * 1. Inicializa o `MySQLDBManager` para interação com o banco de dados.
  * 2. Inicializa o `ConnectionManager`, passando a instância do `mysqlDbManager`, para conectar ao WhatsApp.
- * 3. Realiza uma sincronização inicial de dados do Redis para o MySQL, se o `redisClient` no `ConnectionManager`
- *    estiver disponível e conectado.
  * @throws {Error} Se ocorrer qualquer falha crítica durante a inicialização (ex: falha ao conectar ao MySQL, erro fatal no ConnectionManager), a aplicação registrará o erro e terminará com `process.exit(1)`.
  */
 async function start() {
@@ -23,14 +21,8 @@ async function start() {
     logger.info('MySQLDBManager inicializado.', { label: 'Application' });
 
     const connectionManager = new ConnectionManager(mysqlDbManager);
-    await connectionManager.initialize();
 
-    if (connectionManager.redisClient) {
-      logger.info('Iniciando sincronização inicial de dados do Redis para o MySQL...', { label: 'Application' });
-      await mysqlDbManager.syncFromRedis(connectionManager.redisClient);
-    } else {
-      logger.warn('Cliente Redis não disponível no ConnectionManager, pulando sincronização inicial do Redis para MySQL.', { label: 'Application' });
-    }
+    await connectionManager.initialize();
 
     const messageEmitter = connectionManager.getEventEmitter();
     messageEmitter.on('message:upsert:received', (message) => {
