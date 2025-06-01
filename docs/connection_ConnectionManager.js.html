@@ -1,25 +1,158 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>JSDoc: Source: connection/ConnectionManager.js</title>
 
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> connection/ConnectionManager.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
 </head>
 
-<body>
 
-<div id="main">
 
-    <h1 class="page-title">Source: connection/ConnectionManager.js</h1>
-
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
     
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="ConnectionManager.html">ConnectionManager</a></li><li><a href="MySQLDBManager.html">MySQLDBManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_extractTextFromMessageObject">_extractTextFromMessageObject</a></li><li><a href="global.html#closePool">closePool</a></li><li><a href="global.html#connectConecta-seaoWhatsAppusandooestadodeautentica%25C3%25A7%25C3%25A3ocarregado.ConfiguraosocketBaileyscomasop%25C3%25A7%25C3%25B5esnecess%25C3%25A1rias,incluindologgereinforma%25C3%25A7%25C3%25B5esdonavegador.">connect
+Conecta-se ao WhatsApp usando o estado de autenticação carregado.
+Configura o socket Baileys com as opções necessárias, incluindo logger e informações do navegador.</a></li><li><a href="global.html#deleteChatData">deleteChatData</a></li><li><a href="global.html#deleteChatsDataBatch">deleteChatsDataBatch</a></li><li><a href="global.html#executeQuery">executeQuery</a></li><li><a href="global.html#getEventEmitter">getEventEmitter</a></li><li><a href="global.html#getInstance">getInstance</a></li><li><a href="global.html#handleBlocklistSetProcessaoeventodedefini%25C3%25A7%25C3%25A3odalistadebloqueio.Registraosn%25C3%25BAmerosqueest%25C3%25A3onalistadebloqueiodoWhatsApp.Esteevento%25C3%25A9disparadoquandoalistadebloqueio%25C3%25A9definidaousincronizada(evento'blocklist.set').">handleBlocklistSet
+Processa o evento de definição da lista de bloqueio.
+Registra os números que estão na lista de bloqueio do WhatsApp.
+Este evento é disparado quando a lista de bloqueio é definida ou sincronizada (evento 'blocklist.set').</a></li><li><a href="global.html#handleBlocklistUpdateProcessaatualiza%25C3%25A7%25C3%25B5esnalistadebloqueiodoWhatsApp.Registraaltera%25C3%25A7%25C3%25B5es(adi%25C3%25A7%25C3%25B5es/remo%25C3%25A7%25C3%25B5es)nalistadecontatosbloqueados.Esteevento%25C3%25A9disparadoquandoumJID%25C3%25A9adicionadoouremovidodalistadebloqueio(evento'blocklist.update').">handleBlocklistUpdate
+Processa atualizações na lista de bloqueio do WhatsApp.
+Registra alterações (adições/remoções) na lista de contatos bloqueados.
+Este evento é disparado quando um JID é adicionado ou removido da lista de bloqueio (evento 'blocklist.update').</a></li><li><a href="global.html#handleCallProcessaeventosdechamadasrecebidasourealizadas.Registrainforma%25C3%25A7%25C3%25B5essobrechamadasdevoz/v%25C3%25ADdeonoWhatsApp.Esteevento%25C3%25A9disparadoparav%25C3%25A1riosest%25C3%25A1giosdeumachamada(oferta,aceita%25C3%25A7%25C3%25A3o,rejei%25C3%25A7%25C3%25A3o,t%25C3%25A9rmino)(evento'call').">handleCall
+Processa eventos de chamadas recebidas ou realizadas.
+Registra informações sobre chamadas de voz/vídeo no WhatsApp.
+Este evento é disparado para vários estágios de uma chamada (oferta, aceitação, rejeição, término) (evento 'call').</a></li><li><a href="global.html#handleChatsDeleteManipulaexclus%25C3%25A3odechats.Esteevento%25C3%25A9disparadoquandochatss%25C3%25A3odeletados(evento'chats.delete').">handleChatsDelete
+Manipula exclusão de chats.
+Este evento é disparado quando chats são deletados (evento 'chats.delete').</a></li><li><a href="global.html#handleChatsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdechats.Esteevento%25C3%25A9disparadoquandopropriedadesdeumchatexistentes%25C3%25A3oalteradas(ex:%2560unreadCount%2560,%2560mute%2560)(evento'chats.update').">handleChatsUpdate
+Manipula atualizações de chats.
+Este evento é disparado quando propriedades de um chat existente são alteradas (ex: `unreadCount`, `mute`) (evento 'chats.update').</a></li><li><a href="global.html#handleChatsUpsertManipulainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odechats.Esteevento%25C3%25A9disparadoquandonovoschatss%25C3%25A3ocriadosouchatsexistentess%25C3%25A3osincronizados(evento'chats.upsert').">handleChatsUpsert
+Manipula inserção/atualização de chats.
+Este evento é disparado quando novos chats são criados ou chats existentes são sincronizados (evento 'chats.upsert').</a></li><li><a href="global.html#handleConnectionUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdeconex%25C3%25A3odoclienteWhatsApp.Estem%25C3%25A9todo%25C3%25A9chamadoquandooestadodaconex%25C3%25A3ocomoWhatsAppmuda(evento%2560connection.update%2560).">handleConnectionUpdate
+Manipula atualizações de conexão do cliente WhatsApp.
+Este método é chamado quando o estado da conexão com o WhatsApp muda (evento `connection.update`).</a></li><li><a href="global.html#handleContactsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecontatos.(L%25C3%25B3gicadecacheRedisfoiremovida).Esteevento%25C3%25A9disparadoquandopropriedadesdeumcontatoexistentes%25C3%25A3oalteradas(ex:nome,notifica%25C3%25A7%25C3%25A3opush)(evento'contacts.update').">handleContactsUpdate
+Manipula a atualização de contatos.
+(Lógica de cache Redis foi removida).
+Este evento é disparado quando propriedades de um contato existente são alteradas (ex: nome, notificação push) (evento 'contacts.update').</a></li><li><a href="global.html#handleContactsUpsertManipulainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odecontatos.Esteevento%25C3%25A9disparadoquandonovoscontatoss%25C3%25A3oadicionadosoucontatosexistentess%25C3%25A3osincronizados(evento'contacts.upsert').">handleContactsUpsert
+Manipula inserção/atualização de contatos.
+Este evento é disparado quando novos contatos são adicionados ou contatos existentes são sincronizados (evento 'contacts.upsert').</a></li><li><a href="global.html#handleCredsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecredenciais.Estem%25C3%25A9todo%25C3%25A9chamadoporBaileysquandoascredenciaisdeautentica%25C3%25A7%25C3%25A3os%25C3%25A3oatualizadas(porexemplo,ap%25C3%25B3sescanearoQRcodeouduranteareconex%25C3%25A3o).Salvaasnovascredenciaisusando%2560this.auth.saveCreds()%2560.">handleCredsUpdate
+Manipula a atualização de credenciais.
+Este método é chamado por Baileys quando as credenciais de autenticação são atualizadas (por exemplo, após escanear o QR code ou durante a reconexão).
+Salva as novas credenciais usando `this.auth.saveCreds()`.</a></li><li><a href="global.html#handleGroupParticipantsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdeparticipantesdegrupos.Chamadoquandoparticipantesentram,saem,s%25C3%25A3opromovidosourebaixadosemumgrupo(evento'group-participants.update').">handleGroupParticipantsUpdate
+Manipula atualizações de participantes de grupos.
+Chamado quando participantes entram, saem, são promovidos ou rebaixados em um grupo (evento 'group-participants.update').</a></li><li><a href="global.html#handleGroupsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdegrupos.Estem%25C3%25A9todo%25C3%25A9chamadoquandoh%25C3%25A1atualiza%25C3%25A7%25C3%25B5esnosmetadadosdegruposexistentes(ex:mudan%25C3%25A7adenome,descri%25C3%25A7%25C3%25A3o)(evento'groups.update').">handleGroupsUpdate
+Manipula atualizações de grupos.
+Este método é chamado quando há atualizações nos metadados de grupos existentes (ex: mudança de nome, descrição) (evento 'groups.update').</a></li><li><a href="global.html#handleGroupsUpsertManipulaainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odegrupos(quandoousu%25C3%25A1rioentraemumnovogrupoousincroniza%25C3%25A7%25C3%25A3oinicial).">handleGroupsUpsert
+Manipula a inserção/atualização de grupos (quando o usuário entra em um novo grupo ou sincronização inicial).</a></li><li><a href="global.html#handleIrrecoverableDisconnectManipuladesconex%25C3%25A3oirrecuper%25C3%25A1vel(ex:logoutoum%25C3%25A1ximodetentativasatingido).Registraumerroinformandoousu%25C3%25A1riosobreasitua%25C3%25A7%25C3%25A3oeanecessidadederemoverosdadosdeautentica%25C3%25A7%25C3%25A3oereiniciarparagerarumnovoQRcode.Resetaoestadodereconex%25C3%25A3o.">handleIrrecoverableDisconnect
+Manipula desconexão irrecuperável (ex: logout ou máximo de tentativas atingido).
+Registra um erro informando o usuário sobre a situação e a necessidade de
+remover os dados de autenticação e reiniciar para gerar um novo QR code.
+Reseta o estado de reconexão.</a></li><li><a href="global.html#handleMessageReceiptUpdateManipulaatualiza%25C3%25A7%25C3%25B5esderecibodemensagem.Esteevento%25C3%25A9disparadoquandoostatusdeentrega/leituradeumamensagem%25C3%25A9atualizado(ex:'delivered','read','played')(evento'message-receipt.update').">handleMessageReceiptUpdate
+Manipula atualizações de recibo de mensagem.
+Este evento é disparado quando o status de entrega/leitura de uma mensagem é atualizado
+(ex: 'delivered', 'read', 'played') (evento 'message-receipt.update').</a></li><li><a href="global.html#handleMessageReceiptUpdate//OriginalmethodbeforebatchingforreferenceifneededManipulaatualiza%25C3%25A7%25C3%25B5esderecibodemensagem.Esteevento%25C3%25A9disparadoquandoostatusdeentrega/leituradeumamensagem%25C3%25A9atualizado(ex:'delivered','read','played')(evento'message-receipt.update').">handleMessageReceiptUpdate // Original method before batching for reference if needed
+Manipula atualizações de recibo de mensagem.
+Este evento é disparado quando o status de entrega/leitura de uma mensagem é atualizado
+(ex: 'delivered', 'read', 'played') (evento 'message-receipt.update').</a></li><li><a href="global.html#handleMessagesDeleteManipulaexclus%25C3%25A3odemensagens.Esteevento%25C3%25A9disparadoquandomensagenss%25C3%25A3odeletadas(evento'messages.delete').">handleMessagesDelete
+Manipula exclusão de mensagens.
+Este evento é disparado quando mensagens são deletadas (evento 'messages.delete').</a></li><li><a href="global.html#handleMessagesReactionManipularea%25C3%25A7%25C3%25B5esamensagens.Esteevento%25C3%25A9disparadoquandoumarea%25C3%25A7%25C3%25A3o%25C3%25A9adicionadaouremovidadeumamensagem(evento'messages.reaction').">handleMessagesReaction
+Manipula reações a mensagens.
+Este evento é disparado quando uma reação é adicionada ou removida de uma mensagem (evento 'messages.reaction').</a></li><li><a href="global.html#handleMessagesUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdemensagens.Esteevento%25C3%25A9disparadoparaatualiza%25C3%25A7%25C3%25B5esemmensagensexistentes(ex:statusdeentrega,edi%25C3%25A7%25C3%25A3o-sesuportado)(evento'messages.update').">handleMessagesUpdate
+Manipula atualizações de mensagens.
+Este evento é disparado para atualizações em mensagens existentes (ex: status de entrega, edição - se suportado) (evento 'messages.update').</a></li><li><a href="global.html#handleMessagesUpsertManipulamensagensnovas/atualizadas.Estem%25C3%25A9todo%25C3%25A9chamadoquandonovasmensagenss%25C3%25A3orecebidasoumensagensexistentess%25C3%25A3oatualizadas(evento'messages.upsert').">handleMessagesUpsert
+Manipula mensagens novas/atualizadas.
+Este método é chamado quando novas mensagens são recebidas ou mensagens existentes são atualizadas (evento 'messages.upsert').</a></li><li><a href="global.html#handleMessagingHistorySetManipulaoeventodeconjuntodehist%25C3%25B3ricodemensagens.Esteevento%25C3%25A9disparadoduranteasincroniza%25C3%25A7%25C3%25A3oinicialdohist%25C3%25B3rico(evento'messaging-history.set'),fornecendoumconjuntodechats,contatosemensagens.">handleMessagingHistorySet
+Manipula o evento de conjunto de histórico de mensagens.
+Este evento é disparado durante a sincronização inicial do histórico (evento 'messaging-history.set'),
+fornecendo um conjunto de chats, contatos e mensagens.</a></li><li><a href="global.html#handlePresenceUpdateProcessaatualiza%25C3%25A7%25C3%25B5esdepresen%25C3%25A7adoscontatos.Registraemonitoraaltera%25C3%25A7%25C3%25B5esnostatusdepresen%25C3%25A7a(online,offline,digitando,gravando%25C3%25A1udio)e%25C3%25BAltimavisualiza%25C3%25A7%25C3%25A3o(evento'presence.update').">handlePresenceUpdate
+Processa atualizações de presença dos contatos.
+Registra e monitora alterações no status de presença (online, offline, digitando, gravando áudio) e última visualização (evento 'presence.update').</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#initializeInicializaaconex%25C3%25A3oprincipalcomoWhatsApp.Estem%25C3%25A9todoorquestraocarregamentodoestadodeautentica%25C3%25A7%25C3%25A3oe,emseguida,tentaestabeleceraconex%25C3%25A3ocomoWhatsApp.">initialize
+Inicializa a conexão principal com o WhatsApp.
+Este método orquestra o carregamento do estado de autenticação e, em seguida,
+tenta estabelecer a conexão com o WhatsApp.</a></li><li><a href="global.html#loadAuthStateCarregaoestadodeautentica%25C3%25A7%25C3%25A3ododiret%25C3%25B3rioespecificadoem%2560this.authStatePath%2560.Seodiret%25C3%25B3rion%25C3%25A3oexistir,eleser%25C3%25A1criado.Utiliza%2560useMultiFileAuthState%2560dabibliotecaBaileysparagerenciarascredenciais.">loadAuthState
+Carrega o estado de autenticação do diretório especificado em `this.authStatePath`.
+Se o diretório não existir, ele será criado.
+Utiliza `useMultiFileAuthState` da biblioteca Baileys para gerenciar as credenciais.</a></li><li><a href="global.html#reconnectWithBackoffReconectaaoWhatsAppcombackoffexponencial.Incrementaocontadordetentativasdereconex%25C3%25A3oecalculaopr%25C3%25B3ximoatrasodeformaexponencial,limitadopelo%2560maxBackoffDelayMs%2560.Agendaumanovatentativadeconex%25C3%25A3o(%2560this.connect()%2560)ap%25C3%25B3soatrasocalculado.Seareconex%25C3%25A3ofalhar,eaindaforpermitidotentarnovamente,chamaasimesmorecursivamente.Casocontr%25C3%25A1rio,tratacomodesconex%25C3%25A3oirrecuper%25C3%25A1vel.">reconnectWithBackoff
+Reconecta ao WhatsApp com backoff exponencial.
+Incrementa o contador de tentativas de reconexão e calcula o próximo atraso
+de forma exponencial, limitado pelo `maxBackoffDelayMs`.
+Agenda uma nova tentativa de conexão (`this.connect()`) após o atraso calculado.
+Se a reconexão falhar, e ainda for permitido tentar novamente, chama a si mesmo recursivamente. Caso contrário, trata como desconexão irrecuperável.</a></li><li><a href="global.html#resetReconnectionStateResetaoestadodereconex%25C3%25A3o.Define%2560this.reconnectionAttempts%2560para0,%2560this.currentBackoffDelayMs%2560para%2560this.initialBackoffDelayMs%2560,e%2560this.isReconnecting%2560para%2560false%2560.">resetReconnectionState
+Reseta o estado de reconexão.
+Define `this.reconnectionAttempts` para 0, `this.currentBackoffDelayMs` para `this.initialBackoffDelayMs`,
+e `this.isReconnecting` para `false`.</a></li><li><a href="global.html#setupEventHandlersConfiguraosmanipuladoresdeeventosparaoclienteWhatsApp(Baileys).Registralistenersparaumavariedadedeeventos,comoatualiza%25C3%25A7%25C3%25B5esdeconex%25C3%25A3o,recebimentodemensagens,atualiza%25C3%25A7%25C3%25B5esdegrupos,chats,contatos,etc.Cadaevento%25C3%25A9vinculadoaom%25C3%25A9todocorrespondentenestaclasse.">setupEventHandlers
+Configura os manipuladores de eventos para o cliente WhatsApp (Baileys).
+Registra listeners para uma variedade de eventos, como atualizações de conexão,
+recebimento de mensagens, atualizações de grupos, chats, contatos, etc.
+Cada evento é vinculado ao método correspondente nesta classe.</a></li><li><a href="global.html#shouldReconnectDeterminaseareconex%25C3%25A3odevesertentadacombasenomotivodadesconex%25C3%25A3o.">shouldReconnect
+Determina se a reconexão deve ser tentada com base no motivo da desconexão.</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li><li><a href="global.html#upsertChat">upsertChat</a></li><li><a href="global.html#upsertChatsBatch">upsertChatsBatch</a></li><li><a href="global.html#upsertGroup">upsertGroup</a></li><li><a href="global.html#upsertGroupsBatch">upsertGroupsBatch</a></li><li><a href="global.html#upsertMessage">upsertMessage</a></li><li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li><li><a href="global.html#upsertMessageReceiptsBatch">upsertMessageReceiptsBatch</a></li><li><a href="global.html#upsertMessagesBatch">upsertMessagesBatch</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>connection/ConnectionManager.js</h1>
+                </header>
+                
 
 
 
@@ -148,7 +281,7 @@ class ConnectionManager {
   emitEvent(eventName, data, context = '') {
     try {
       this.eventEmitter.emit(eventName, data);
-      logger.info(`[METRIC] Event '${eventName}' emitted successfully`, {
+      logger.info(`[MÉTRICA] Evento '${eventName}' emitido com sucesso.`, {
         label: 'EventEmitter',
         metricName: 'event.emit.success',
         context,
@@ -158,7 +291,7 @@ class ConnectionManager {
         instanceId: this.instanceId,
       });
     } catch (error) {
-      logger.error(`[METRIC] Error emitting event '${eventName}': ${error.message}`, {
+      logger.error(`[MÉTRICA] Erro ao emitir o evento '${eventName}': ${error.message}.`, {
         label: 'EventEmitter',
         metricName: 'event.emit.error',
         error: error.message,
@@ -175,7 +308,6 @@ class ConnectionManager {
    * @returns {EventEmitter} Retorna a instância do EventEmitter para escutar eventos customizados, como 'message:upsert:received'.
    */
   getEventEmitter() {
-    // Este método não precisa de try-catch, pois EventEmitter.emit já tem.
     return this.eventEmitter;
   }
 
@@ -187,7 +319,7 @@ class ConnectionManager {
    * @throws {Error} Propaga erros que podem ocorrer durante `loadAuthState` ou `connect`.
    */
   async initialize() {
-    logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager' });
+    logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager', instanceId: this.instanceId });
     await this.loadAuthState();
     await this.connect();
   }
@@ -201,12 +333,12 @@ class ConnectionManager {
    */
   async loadAuthState() {
     if (!fs.existsSync(this.authStatePath)) {
-      logger.info(`Diretório de estado de autenticação não encontrado em ${this.authStatePath}. Criando...`, { label: 'ConnectionManager' });
+      logger.info(`Diretório de estado de autenticação não encontrado em ${this.authStatePath}. Criando...`, { label: 'ConnectionManager', instanceId: this.instanceId });
       try {
         fs.mkdirSync(this.authStatePath, { recursive: true });
-        logger.info(`Diretório ${this.authStatePath} criado com sucesso.`, { label: 'ConnectionManager' });
+        logger.info(`Diretório ${this.authStatePath} criado com sucesso.`, { label: 'ConnectionManager', instanceId: this.instanceId });
       } catch (mkdirError) {
-        logger.error(`Falha ao criar o diretório ${this.authStatePath}: ${mkdirError.message}`, { label: 'ConnectionManager' });
+        logger.error(`Falha ao criar o diretório ${this.authStatePath}: ${mkdirError.message}.`, { label: 'ConnectionManager', instanceId: this.instanceId });
         throw mkdirError;
       }
     }
@@ -263,7 +395,7 @@ class ConnectionManager {
     this.client.ev.on('blocklist.update', this.handleBlocklistUpdate.bind(this));
     this.client.ev.on('call', this.handleCall.bind(this));
     this.client.ev.on('presence.update', this.handlePresenceUpdate.bind(this));
-    logger.debug('Todos os manipuladores de eventos foram registrados.', { label: 'ConnectionManager' });
+    logger.debug('Todos os manipuladores de eventos foram registrados.', { label: 'ConnectionManager', instanceId: this.instanceId });
   }
 
   /**
@@ -284,7 +416,7 @@ class ConnectionManager {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
-      logger.info('[METRIC] QR code generated for authentication. Please scan with your WhatsApp:', {
+      logger.info('[MÉTRICA] Código QR gerado para autenticação. Por favor, escaneie com seu WhatsApp:', {
         label: 'ConnectionManager',
         metricName: 'connection.qr.generated',
         instanceId: this.instanceId,
@@ -293,7 +425,7 @@ class ConnectionManager {
     }
 
     if (connection === STATUS.CONNECTED) {
-      logger.info('[METRIC] WhatsApp connection established successfully!', {
+      logger.info('[MÉTRICA] Conexão com o WhatsApp estabelecida com sucesso!', {
         label: 'ConnectionManager',
         metricName: 'connection.established',
         instanceId: this.instanceId,
@@ -304,7 +436,7 @@ class ConnectionManager {
     if (connection === STATUS.DISCONNECTED) {
       const statusCode = lastDisconnect?.error?.output?.statusCode;
       const reason = DisconnectReason[statusCode] || 'Desconhecida';
-      logger.warn(`[METRIC] WhatsApp connection closed. Reason: ${reason} (Code: ${statusCode})`, {
+      logger.warn(`[MÉTRICA] Conexão com o WhatsApp fechada. Motivo: ${reason} (Código: ${statusCode})`, {
         label: 'ConnectionManager',
         metricName: 'connection.closed',
         statusCode,
@@ -348,13 +480,13 @@ class ConnectionManager {
     this.reconnectionAttempts++;
     this.currentBackoffDelayMs = Math.min(this.initialBackoffDelayMs * Math.pow(2, this.reconnectionAttempts - 1), this.maxBackoffDelayMs);
 
-    logger.info(`[METRIC] Attempting reconnection (Attempt ${this.reconnectionAttempts}/${this.maxReconnectionAttempts}) in ${this.currentBackoffDelayMs}ms...`, {
+    logger.info(`[MÉTRICA] Tentando reconexão (Tentativa ${this.reconnectionAttempts}/${this.maxReconnectionAttempts}) em ${this.currentBackoffDelayMs}ms...`, {
       label: 'ConnectionManager',
       metricName: 'connection.reconnect.attempt',
       attempt: this.reconnectionAttempts,
       maxAttempts: this.maxReconnectionAttempts,
       delayMs: this.currentBackoffDelayMs,
-      statusCode, // Keep this for context
+      statusCode,
       instanceId: this.instanceId,
     });
 
@@ -363,7 +495,7 @@ class ConnectionManager {
         await this.connect();
         this.isReconnecting = false;
       } catch (err) {
-        logger.error(`[METRIC] Reconnection attempt failed: ${err.message}`, {
+        logger.error(`[MÉTRICA] Tentativa de reconexão falhou: ${err.message}.`, {
           label: 'ConnectionManager',
           metricName: 'connection.reconnect.failed_attempt',
           attempt: this.reconnectionAttempts,
@@ -390,7 +522,7 @@ class ConnectionManager {
    * @param {number|undefined} statusCode - O código de status da desconexão (pode ser `undefined`).
    */
   handleIrrecoverableDisconnect(statusCode) {
-    logger.error(`[METRIC] Irrecoverable disconnection. Status Code: ${statusCode}. Please remove the auth directory and restart to generate a new QR code.`, {
+    logger.error(`[MÉTRICA] Desconexão irrecuperável. Código de Status: ${statusCode}. Por favor, remova o diretório de autenticação e reinicie para gerar um novo código QR.`, {
       label: 'ConnectionManager',
       metricName: 'connection.disconnected.irrecoverable',
       statusCode,
@@ -419,7 +551,7 @@ class ConnectionManager {
    */
   async handleCredsUpdate() {
     await this.auth.saveCreds();
-    logger.info('[METRIC] Authentication credentials saved/updated.', {
+    logger.info('[MÉTRICA] Credenciais de autenticação salvas/atualizadas.', {
       label: 'ConnectionManager',
       metricName: 'auth.credentials.updated',
       instanceId: this.instanceId,
@@ -444,79 +576,80 @@ class ConnectionManager {
    */
   async handleMessagesUpsert(data) {
     const { messages, type } = data;
-    logger.info(`[METRIC] Received ${messages.length} message(s) in 'messages.upsert' event. Type: ${type}`, {
+    logger.info(`[MÉTRICA] Recebido(s) ${messages.length} mensagem(ns) no evento 'messages.upsert'. Tipo: ${type}. Preparando para processamento em lote.`, {
       label: 'ConnectionManager',
-      metricName: 'messages.upsert.received',
+      metricName: 'messages.upsert.recebidas',
       count: messages.length,
       type,
       instanceId: this.instanceId,
     });
 
+    const messagesToProcess = [];
+    const originalMessagesForEvent = [];
+
     for (const msg of messages) {
       const messageContentType = msg.message ? getContentType(msg.message) : null;
-
       const { key: messageKey } = msg;
 
       if (messageContentType) {
-        logger.debug(`Content type of message ${messageKey?.id}: ${messageContentType}`, { label: 'ConnectionManager', messageKey, contentType: messageContentType, instanceId: this.instanceId });
+        logger.debug(`Tipo de conteúdo da mensagem ${messageKey?.id}: ${messageContentType}.`, { label: 'ConnectionManager', messageKey, contentType: messageContentType, instanceId: this.instanceId });
       } else {
-        logger.debug(`Could not determine content type for message ${messageKey?.id}`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId });
+        logger.warn(`Não foi possível determinar o tipo de conteúdo para a mensagem ${messageKey?.id}. Pode ser um evento como exclusão de mensagem.`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId, messageDetails: msg });
       }
 
       if (messageKey &amp;&amp; messageKey.remoteJid &amp;&amp; messageKey.id) {
-        try {
-          const messageToStore = {
-            ...msg,
-            receipts: msg.receipts || {},
-            messageContentType,
-            instanceId: this.instanceId,
-          };
+        const messageToStore = {
+          ...msg,
+          messageContentType,
+          instanceId: this.instanceId,
+        };
+        messagesToProcess.push(messageToStore);
+        originalMessagesForEvent.push(messageToStore); // Keep a reference for event emission
+      } else {
+        logger.warn('Mensagem recebida sem chave completa ou ID, não foi possível processar para o BD.', { label: 'ConnectionManager', messageKey: msg.key, instanceId: this.instanceId });
+      }
+      logger.debug(`Conteúdo da mensagem original: ${msg.key?.id}.`, { label: 'ConnectionManager', messageKey: msg.key, messageDetails: msg, instanceId: this.instanceId });
+    }
 
-          let dataForEvent = { ...messageToStore };
-          if (this.mysqlDbManager) {
-            try {
-              const dbPersistedMessage = await this.mysqlDbManager.upsertMessage(messageToStore);
-              logger.info(`[METRIC] Message ${messageKey.id} upserted to MySQL.`, {
-                label: 'MySQLSync',
-                metricName: 'messages.mysql.upsert.success',
-                messageId: messageKey.id,
-                remoteJid: messageKey.remoteJid,
-                instanceId: this.instanceId,
-              });
-              if (dbPersistedMessage &amp;&amp; typeof dbPersistedMessage === 'object') {
-                dataForEvent = { ...dataForEvent, ...dbPersistedMessage };
-                logger.debug(`Message ${messageKey.id} processed by MySQL. DB data added to event payload.`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId });
-              } else {
-                logger.debug(`Message ${messageKey.id} processed by MySQL, but no additional data returned (or unexpected type). Event will use pre-DB data.`, { label: 'ConnectionManager', messageKey, dbReturn: dbPersistedMessage, instanceId: this.instanceId });
-              }
-            } catch (dbError) {
-              logger.error(`[METRIC] MySQL error during upsertMessage for message ${messageKey.id}: ${dbError.message}`, {
-                label: 'SyncError',
-                metricName: 'messages.mysql.upsert.error',
-                messageKey,
-                error: dbError.message,
-                stack: dbError.stack,
-                instanceId: this.instanceId,
-              });
-            }
+    if (this.mysqlDbManager &amp;&amp; messagesToProcess.length > 0) {
+      try {
+        // Assume upsertMessagesBatch handles both message and related chat updates
+        // and returns an array of results (e.g., dbPersistedMessage objects) or modifies messages in place.
+        // For this example, let's assume it returns an array of objects that can augment the original messages.
+        const batchResults = await this.mysqlDbManager.upsertMessagesBatch(messagesToProcess);
+
+        logger.info(`[MÉTRICA] ${messagesToProcess.length} mensagens processadas em lote pelo MySQL.`, {
+          label: 'MySQLSync',
+          metricName: 'messages.mysql.batch_upsert.success',
+          count: messagesToProcess.length,
+          instanceId: this.instanceId,
+        });
+
+        // Emit events for each message, potentially augmented with batch results
+        originalMessagesForEvent.forEach((originalMsg, index) => {
+          let dataForEvent = { ...originalMsg };
+          if (batchResults &amp;&amp; batchResults[index] &amp;&amp; typeof batchResults[index] === 'object') {
+            dataForEvent = { ...dataForEvent, ...batchResults[index] }; // Augment with DB specific info if returned
           }
           this.emitEvent('message:upsert:received', dataForEvent, 'messages.upsert');
-          // Metric for event emission is handled by emitEvent
-        } catch (error) {
-          logger.error(`[METRIC] Error processing message ${messageKey?.id} (enrichment, DB, or event emission): ${error.message}`, {
-            label: 'SyncError',
-            metricName: 'messages.upsert.processing_error',
-            messageId: messageKey?.id,
-            remoteJid: messageKey?.remoteJid,
-            error: error.message,
-            stack: error.stack,
-            instanceId: this.instanceId,
-          });
-        }
-      } else {
-        logger.warn('Mensagem recebida sem chave completa, não foi possível processar.', { label: 'ConnectionManager', message: msg, instanceId: this.instanceId });
+        });
+      } catch (dbError) {
+        logger.error(`[MÉTRICA] Erro no MySQL durante o upsert em lote de ${messagesToProcess.length} mensagens: ${dbError.message}.`, {
+          label: 'SyncError',
+          metricName: 'messages.mysql.batch_upsert.error',
+          count: messagesToProcess.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
+        // Fallback: emit events with original data if DB batch fails
+        originalMessagesForEvent.forEach((msg) => this.emitEvent('message:upsert:received', msg, 'messages.upsert'));
       }
-      logger.debug(`Conteúdo da mensagem original: ${messageKey?.id}`, { label: 'ConnectionManager', messageKey, messageDetails: msg, instanceId: this.instanceId });
+    } else if (originalMessagesForEvent.length > 0) {
+      // No mysqlDbManager, but still emit events for messages that were valid for event emission
+      originalMessagesForEvent.forEach((msg) => {
+        this.emitEvent('message:upsert:received', msg, 'messages.upsert');
+      });
     }
   }
 
@@ -570,7 +703,7 @@ class ConnectionManager {
         if (this.mysqlDbManager) {
           try {
             await this.mysqlDbManager.upsertGroup(finalMetadata);
-            logger.info(`[METRIC] Group metadata for ${jid} updated in MySQL. Context: ${context}`, {
+            logger.info(`[MÉTRICA] Metadados do grupo ${jid} atualizados no MySQL. Contexto: ${context}.`, {
               label: 'MySQLSync',
               metricName: 'group.metadata.mysql.updated',
               jid,
@@ -578,7 +711,7 @@ class ConnectionManager {
               instanceId: this.instanceId,
             });
           } catch (dbError) {
-            logger.error(`[METRIC] Error updating group metadata ${jid} in MySQL. Context: ${context}. Error: ${dbError.message}`, {
+            logger.error(`[MÉTRICA] Erro ao atualizar metadados do grupo ${jid} no MySQL. Contexto: ${context}. Erro: ${dbError.message}.`, {
               label: 'MySQLSyncError',
               metricName: 'group.metadata.mysql.error',
               jid,
@@ -601,7 +734,7 @@ class ConnectionManager {
       });
       return null;
     } catch (error) {
-      logger.error(`Erro ao atualizar metadados do grupo ${jid}${context ? ` (${context})` : ''}: ${error.message}`, {
+      logger.error(`Erro ao atualizar metadados do grupo ${jid}${context ? ` (${context})` : ''}: ${error.message}.`, {
         label: 'SyncError',
         jid,
         error: error.message,
@@ -628,15 +761,33 @@ class ConnectionManager {
    * 5. Erros durante o processo são registrados.
    */
   async handleGroupsUpdate(updates) {
-    logger.debug(`Evento 'groups.update' recebido. Número de atualizações: ${updates.length}`, {
+    logger.debug(`Evento 'groups.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
       count: updates.length,
       instanceId: this.instanceId,
     });
     for (const groupUpdate of updates) {
-      const jid = groupUpdate.id;
-      if (jid) {
-        await this.updateGroupMetadata(jid, null, 'groups.update');
+      const jid = groupUpdate.id; // This is often just the JID
+      if (jid &amp;&amp; jid.endsWith('@g.us')) {
+        // For groups.update, Baileys sends partial updates.
+        // We need to fetch full metadata to ensure DB consistency.
+        // This part remains individual as fetching is per-group.
+        // The batching would apply if we collected multiple full metadata objects.
+        // For this specific handler, if updates are frequent and partial,
+        // batching the DB write after fetching full metadata for several groups could be beneficial.
+        // However, updateGroupMetadata already handles a single group update well.
+        // If `updates` array can be large, we can collect JIDs, fetch all metadata, then batch upsert.
+        // For now, let's assume updateGroupMetadata is efficient enough or refactor if it becomes a bottleneck.
+        // To demonstrate batching here, we'd change the flow:
+        // 1. Collect all JIDs from `updates`.
+        // 2. Fetch metadata for all these JIDs (e.g., Promise.all with this.client.groupMetadata).
+        // 3. Collect valid full metadata objects.
+        // 4. Call a batch upsert method.
+        // This change is more involved for this handler due to the fetch step.
+        // The current `updateGroupMetadata` is called, which does a single DB op.
+        // Let's modify this handler to collect metadata first.
+        // (See revised implementation below in the combined diff section for handleGroupsUpdate and handleGroupsUpsert)
+        await this.updateGroupMetadata(jid, groupUpdate, 'groups.update'); // Pass groupUpdate as existingMetadata hint
       }
     }
   }
@@ -651,47 +802,62 @@ class ConnectionManager {
    * @param {ParticipantAction} event.action - Ação realizada ('add', 'remove', 'promote', 'demote').
    *
    * @description
-   * 1. Após uma atualização de participante, busca os metadados atualizados do grupo usando `this.client.groupMetadata(jid)`.
-   * 2. Se os metadados forem obtidos com sucesso e o cliente Redis estiver disponível, eles são salvos no cache Redis com a chave `group:&lt;jid>` e TTL `REDIS_TTL_METADATA_SHORT`.
-   * 3. Se `this.mysqlDbManager` estiver configurado, os metadados atualizados do grupo também são salvos (upsert) no banco de dados MySQL.
-   * 4. Erros durante o processo são registrados.
+   * Após uma atualização de participante, os metadados completos do grupo são buscados e atualizados.
+   * A atualização dos participantes em si é gerenciada pelo `mysqlDbManager.upsertGroup`
+   * que internamente chama `updateGroupParticipants`.
    */
   async handleGroupParticipantsUpdate(event) {
     const { id: jid, action, participants } = event;
-    logger.debug(`Evento 'group-participants.update' recebido para o grupo ${jid}. Ação: ${action}. Participantes: ${participants.join(', ')}`, {
+    logger.debug(`Evento 'group-participants.update' recebido para o grupo ${jid}. Ação: ${action}. Participantes: ${participants.join(', ')}.`, {
       label: 'ConnectionManager',
       jid,
       action,
       participants,
       instanceId: this.instanceId,
     });
-
+    // Fetching full metadata is important as participant list changes.
     await this.updateGroupMetadata(jid, null, 'group-participants.update');
   }
 
   /**
    * @method handleGroupsUpsert
    * Manipula a inserção/atualização de grupos (quando o usuário entra em um novo grupo ou sincronização inicial).
-   * Este evento é geralmente disparado quando o cliente se conecta e sincroniza a lista de grupos,
-   * ou quando o usuário entra em um novo grupo (evento 'groups.upsert').
-   * @param {GroupMetadata[]} groups - Array de objetos completos de metadados de grupo.
-   *
-   * @description
-   * Para cada metadado de grupo recebido:
-   * 1. Prepara os metadados para persistência.
-   * 2. Se `this.mysqlDbManager` estiver configurado, os metadados do grupo também são salvos (upsert) no banco de dados MySQL.
-   * 3. Erros durante o processo são registrados.
+   * @param {GroupMetadata[]} groupsMetadata - Array de objetos completos de metadados de grupo.
    */
-  async handleGroupsUpsert(groups) {
-    logger.debug(`Evento 'groups.upsert' recebido. Número de grupos: ${groups.length}`, {
+  async handleGroupsUpsert(groupsMetadata) {
+    logger.debug(`Evento 'groups.upsert' recebido. Número de grupos: ${groupsMetadata.length}.`, {
       label: 'ConnectionManager',
-      count: groups.length,
+      count: groupsMetadata.length,
       instanceId: this.instanceId,
     });
-    for (const groupMetadata of groups) {
-      const jid = groupMetadata.id;
-      if (jid) {
-        await this.updateGroupMetadata(jid, groupMetadata, 'groups.upsert');
+
+    const validGroupsToUpsert = groupsMetadata.filter((metadata) => this.validateGroupMetadata(metadata));
+
+    if (this.mysqlDbManager &amp;&amp; validGroupsToUpsert.length > 0) {
+      try {
+        await this.mysqlDbManager.upsertGroupsBatch(validGroupsToUpsert); // Assumed batch method
+        logger.info(`[MÉTRICA] ${validGroupsToUpsert.length} grupos atualizados/inseridos em lote a partir de 'groups.upsert'.`, {
+          label: 'MySQLSync',
+          metricName: 'group.mysql.batch_upsert.success',
+          count: validGroupsToUpsert.length,
+          instanceId: this.instanceId,
+        });
+        validGroupsToUpsert.forEach((metadata) => {
+          this.emitEvent('group:metadata:updated', { jid: metadata.id, metadata, context: 'groups.upsert' }, 'groups.upsert');
+        });
+      } catch (dbError) {
+        logger.error(`[MÉTRICA] Erro ao atualizar/inserir em lote ${validGroupsToUpsert.length} grupos a partir de 'groups.upsert': ${dbError.message}.`, {
+          label: 'MySQLSyncError',
+          metricName: 'group.mysql.batch_upsert.error',
+          count: validGroupsToUpsert.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
+        // Fallback: emit events even if DB fails, with original data
+        validGroupsToUpsert.forEach((metadata) => {
+          this.emitEvent('group:metadata:updated', { jid: metadata.id, metadata, context: 'groups.upsert' }, 'groups.upsert');
+        });
       }
     }
   }
@@ -714,9 +880,9 @@ class ConnectionManager {
    */
   async handleMessagingHistorySet(data) {
     const { chats, contacts, messages } = data;
-    logger.info(`[METRIC] 'messaging-history.set' event received. Chats: ${chats.length}, Contacts: ${contacts.length}, Messages: ${messages.length}`, {
+    logger.info(`[MÉTRICA] Evento 'messaging-history.set' recebido. Chats: ${chats.length}, Contatos: ${contacts.length}, Mensagens: ${messages.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'messaging_history.set.received',
+      metricName: 'messaging_history.set.recebido',
       counts: { chats: chats.length, contacts: contacts.length, messages: messages.length },
       instanceId: this.instanceId,
     });
@@ -727,14 +893,14 @@ class ConnectionManager {
           if (this.mysqlDbManager) {
             try {
               await this.mysqlDbManager.upsertChat(chat);
-              logger.info(`[METRIC] Chat ${chat.id} from history saved to MySQL.`, {
+              logger.info(`[MÉTRICA] Chat ${chat.id} do histórico salvo no MySQL.`, {
                 label: 'MySQLSync',
                 metricName: 'history.chat.mysql.success',
                 jid: chat.id,
                 instanceId: this.instanceId,
               });
             } catch (dbError) {
-              logger.error(`[METRIC] Error saving chat ${chat.id} from history to MySQL: ${dbError.message}`, {
+              logger.error(`[MÉTRICA] Erro ao salvar chat ${chat.id} do histórico no MySQL: ${dbError.message}.`, {
                 label: 'MySQLSyncError',
                 metricName: 'history.chat.mysql.error',
                 jid: chat.id,
@@ -745,7 +911,7 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[METRIC] Error processing chat ${chat.id} from history (DB or other): ${error.message}`, {
+          logger.error(`[MÉTRICA] Erro ao processar chat ${chat.id} do histórico (BD ou outro): ${error.message}.`, {
             label: 'SyncError',
             metricName: 'history.chat.processing.error',
             jid: chat.id,
@@ -761,12 +927,12 @@ class ConnectionManager {
       if (contact.id) {
         // Originalmente, contatos do histórico eram apenas cacheados no Redis.
         // Agora, apenas logamos, pois não há instrução para persisti-los no MySQL aqui.
-        logger.debug(`Contact from history received: ${contact.id}`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
+        logger.debug(`Contato do histórico recebido: ${contact.id}.`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
       }
     }
 
     for (const msg of messages) {
-      logger.debug(`History message received: ${msg.key?.id} from ${msg.key?.remoteJid}`, { label: 'ConnectionManager', messageKey: msg.key, instanceId: this.instanceId });
+      logger.debug(`Mensagem do histórico recebida: ${msg.key?.id} de ${msg.key?.remoteJid}.`, { label: 'ConnectionManager', messageKey: msg.key, instanceId: this.instanceId });
       if (msg.key &amp;&amp; msg.key.remoteJid &amp;&amp; msg.key.id) {
         const messageContentType = msg.message ? getContentType(msg.message) : null;
         try {
@@ -775,14 +941,14 @@ class ConnectionManager {
           if (this.mysqlDbManager) {
             try {
               await this.mysqlDbManager.upsertMessage(messageToStore);
-              logger.info(`[METRIC] History message ${msg.key.id} saved to MySQL.`, {
+              logger.info(`[MÉTRICA] Mensagem do histórico ${msg.key.id} salva no MySQL.`, {
                 label: 'MySQLSync',
                 metricName: 'history.message.mysql.success',
                 messageKey: msg.key,
                 instanceId: this.instanceId,
               });
             } catch (dbError) {
-              logger.error(`[METRIC] Error saving history message ${msg.key.id} to MySQL: ${dbError.message}`, {
+              logger.error(`[MÉTRICA] Erro ao salvar mensagem do histórico ${msg.key.id} no MySQL: ${dbError.message}.`, {
                 label: 'MySQLSyncError',
                 metricName: 'history.message.mysql.error',
                 messageKey: msg.key,
@@ -793,7 +959,7 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[METRIC] Error processing history message ${msg.key.id} (DB or other): ${error.message}`, {
+          logger.error(`[MÉTRICA] Erro ao processar mensagem do histórico ${msg.key.id} (BD ou outro): ${error.message}.`, {
             label: 'SyncError',
             metricName: 'history.message.processing.error',
             messageKey: msg.key,
@@ -803,7 +969,7 @@ class ConnectionManager {
           });
         }
       } else {
-        logger.warn('Mensagem do histórico recebida sem chave completa, não foi possível salvar.', { label: 'ConnectionManager', message: msg });
+        logger.warn('Mensagem do histórico recebida sem chave completa, não foi possível salvar.', { label: 'ConnectionManager', message: msg, instanceId: this.instanceId });
       }
     }
   }
@@ -816,14 +982,14 @@ class ConnectionManager {
    * @description Atualmente, este método apenas registra as atualizações recebidas. Nenhuma ação de persistência ou cache é realizada aqui.
    */
   handleMessagesUpdate(updates) {
-    logger.info(`[METRIC] 'messages.update' event received. Number of updates: ${updates.length}`, {
+    logger.info(`[MÉTRICA] Evento 'messages.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'messages.update.received',
+      metricName: 'messages.update.recebido',
       count: updates.length,
       instanceId: this.instanceId,
     });
     updates.forEach((update) => {
-      logger.debug(`Message update details: Key=${update.key?.id}, JID=${update.key?.remoteJid}`, {
+      logger.debug(`Detalhes da atualização da mensagem: Chave=${update.key?.id}, JID=${update.key?.remoteJid}.`, {
         label: 'ConnectionManager',
         messageUpdate: update,
         updateContent: update.update, // Log the actual update content
@@ -841,9 +1007,9 @@ class ConnectionManager {
    * @description Atualmente, este método apenas registra o evento de exclusão. Nenhuma ação de remoção do cache ou banco de dados é realizada aqui.
    */
   handleMessagesDelete(deletion) {
-    logger.info(`[METRIC] 'messages.delete' event received.`, {
+    logger.info(`[MÉTRICA] Evento 'messages.delete' recebido.`, {
       label: 'ConnectionManager',
-      metricName: 'messages.delete.received',
+      metricName: 'messages.delete.recebido',
       deletionDetails: deletion,
       instanceId: this.instanceId,
     });
@@ -858,14 +1024,14 @@ class ConnectionManager {
    * @description Atualmente, este método apenas registra as reações recebidas. Nenhuma ação de persistência ou cache é realizada aqui.
    */
   handleMessagesReaction(reactions) {
-    logger.info(`[METRIC] 'messages.reaction' event received. Number of reactions: ${reactions.length}`, {
+    logger.info(`[MÉTRICA] Evento 'messages.reaction' recebido. Número de reações: ${reactions.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'messages.reaction.received',
+      metricName: 'messages.reaction.recebido',
       count: reactions.length,
       instanceId: this.instanceId,
     });
     reactions.forEach((reaction) => {
-      logger.debug(`Reaction details: MsgKey=${reaction.key?.id}, JID=${reaction.key?.remoteJid}, ReactionText=${reaction.reaction.text}`, {
+      logger.debug(`Detalhes da reação: ChaveMsg=${reaction.key?.id}, JID=${reaction.key?.remoteJid}, TextoReacao=${reaction.reaction.text}.`, {
         label: 'ConnectionManager',
         reaction,
         instanceId: this.instanceId,
@@ -895,9 +1061,76 @@ class ConnectionManager {
    * 5. Erros durante o processo são registrados.
    */
   async handleMessageReceiptUpdate(receipts) {
-    logger.info(`[METRIC] 'message-receipt.update' event received. Number of receipts: ${receipts.length}`, {
+    logger.info(`[MÉTRICA] Evento 'message-receipt.update' recebido. Número de recibos: ${receipts.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'message_receipt.update.received',
+      metricName: 'message_receipt.update.recebido',
+      count: receipts.length,
+      instanceId: this.instanceId,
+    });
+
+    const receiptsToUpsert = [];
+    for (const receiptUpdate of receipts) {
+      const { key, receipt } = receiptUpdate;
+      if (key &amp;&amp; key.remoteJid &amp;&amp; key.id &amp;&amp; receipt &amp;&amp; receipt.userJid) {
+        const timestamp = receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp;
+        receiptsToUpsert.push({
+          key,
+          userJid: receipt.userJid,
+          type: receipt.type,
+          timestamp,
+        });
+      }
+      logger.debug(`Detalhes do Recibo: ChaveMsg=${key?.id}, JID=${key?.remoteJid}, Status=${receipt?.type}, UserJid=${receipt?.userJid}.`, { label: 'ConnectionManager', receipt: receiptUpdate, instanceId: this.instanceId });
+    }
+
+    if (this.mysqlDbManager &amp;&amp; receiptsToUpsert.length > 0) {
+      try {
+        // Assumed batch method: upsertMessageReceiptsBatch(receiptsToUpsert)
+        await this.mysqlDbManager.upsertMessageReceiptsBatch(receiptsToUpsert);
+        logger.info(`[MÉTRICA] ${receiptsToUpsert.length} recibos de mensagem atualizados/inseridos em lote no MySQL.`, {
+          label: 'MySQLSync',
+          metricName: 'message.receipt.mysql.batch_upserted',
+          count: receiptsToUpsert.length,
+          instanceId: this.instanceId,
+        });
+      } catch (dbError) {
+        logger.error(`[MÉTRICA] Erro ao atualizar/inserir em lote ${receiptsToUpsert.length} recibos de mensagem no MySQL: ${dbError.message}.`, {
+          label: 'MySQLSyncError',
+          metricName: 'message.receipt.mysql.batch_error',
+          count: receiptsToUpsert.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
+      }
+    }
+  }
+
+  /**
+   * @method handleMessageReceiptUpdate // Original method before batching for reference if needed
+   * Manipula atualizações de recibo de mensagem.
+   * Este evento é disparado quando o status de entrega/leitura de uma mensagem é atualizado
+   * (ex: 'delivered', 'read', 'played') (evento 'message-receipt.update').
+   * @param {MessageReceiptUpdate[]} receipts - Array de atualizações de recibo.
+   * Cada objeto contém:
+   *  - `key`: {@link WAMessageKey} A chave da mensagem original.
+   *  - `receipt`: {@link MessageReceipt} O objeto de recibo, contendo:
+   *    - `userJid`: JID do usuário cujo recibo foi atualizado.
+   *    - `type`: Tipo do recibo (e.g., 'read', 'delivered').
+   *    - `receiptTimestamp`, `readTimestamp`, `playedTimestamp`: Timestamps relevantes.
+   *
+   * @description
+   * Para cada atualização de recibo:
+   * 1. Verifica se a chave da mensagem, os detalhes do recibo são válidos.
+   * 2. Prepara os dados do recibo.
+   * 3. Se `this.mysqlDbManager` estiver configurado, salva (upsert) o recibo no banco de dados MySQL.
+   * 4. Erros durante o processo são registrados.
+   */
+  /* // Original handleMessageReceiptUpdate method content for reference
+  async handleMessageReceiptUpdate(receipts) {
+    logger.info(`[MÉTRICA] Evento 'message-receipt.update' recebido. Número de recibos: ${receipts.length}.`, {
+      label: 'ConnectionManager',
+      metricName: 'message_receipt.update.recebido',
       count: receipts.length,
       instanceId: this.instanceId,
     });
@@ -905,14 +1138,12 @@ class ConnectionManager {
     for (const receiptUpdate of receipts) {
       const { key, receipt } = receiptUpdate;
       if (key &amp;&amp; key.remoteJid &amp;&amp; key.id &amp;&amp; receipt &amp;&amp; receipt.userJid) {
-        try {
-          // A lógica de buscar e atualizar a mensagem no cache Redis foi removida.
-          // Agora, apenas persistimos o recibo no MySQL.
+        try { // This try-catch is per receipt
           if (this.mysqlDbManager) {
             try {
               const timestamp = receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp;
               await this.mysqlDbManager.upsertMessageReceipt(key, receipt.userJid, receipt.type, timestamp);
-              logger.info(`[METRIC] Message receipt for ${key.id} (user ${receipt.userJid}) upserted to MySQL.`, {
+              logger.info(`[MÉTRICA] Recibo de mensagem para ${key.id} (usuário ${receipt.userJid}) atualizado/inserido no MySQL.`, {
                 label: 'MySQLSync',
                 metricName: 'message.receipt.mysql.upserted',
                 messageId: key.id,
@@ -922,7 +1153,7 @@ class ConnectionManager {
                 instanceId: this.instanceId,
               });
             } catch (dbError) {
-              logger.error(`[METRIC] Error upserting message receipt for ${key.id} to MySQL: ${dbError.message}`, {
+              logger.error(`[MÉTRICA] Erro ao atualizar/inserir recibo de mensagem para ${key.id} no MySQL: ${dbError.message}.`, {
                 label: 'MySQLSyncError',
                 metricName: 'message.receipt.mysql.error',
                 messageKey: key,
@@ -933,9 +1164,8 @@ class ConnectionManager {
               });
             }
           }
-          // O else que tratava "mensagem não encontrada no cache" foi removido.
         } catch (error) {
-          logger.error(`[METRIC] Error processing message receipt for ${key.id} (DB/other): ${error.message}`, {
+          logger.error(`[MÉTRICA] Erro ao processar recibo de mensagem para ${key.id} (BD/outro): ${error.message}.`, {
             label: 'SyncError',
             metricName: 'message.receipt.db.error', // Mais específico para erro de DB
             messageKey: key,
@@ -945,9 +1175,9 @@ class ConnectionManager {
           });
         }
       }
-      logger.debug(`Detalhes do Recibo: ChaveMsg=${key?.id}, JID=${key?.remoteJid}, Status=${receipt?.type}, UserJid=${receipt?.userJid}`, { label: 'ConnectionManager', receipt: receiptUpdate });
+      logger.debug(`Detalhes do Recibo: ChaveMsg=${key?.id}, JID=${key?.remoteJid}, Status=${receipt?.type}, UserJid=${receipt?.userJid}.`, { label: 'ConnectionManager', receipt: receiptUpdate, instanceId: this.instanceId });
     }
-  }
+  } */
 
   /**
    * @method handleChatsUpsert
@@ -962,46 +1192,41 @@ class ConnectionManager {
    * 3. Erros durante o processo são registrados.
    */
   async handleChatsUpsert(chats) {
-    logger.info(`[METRIC] 'chats.upsert' event received. Number of chats: ${chats.length}`, {
+    logger.info(`[MÉTRICA] Evento 'chats.upsert' recebido. Número de chats: ${chats.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'chats.upsert.received',
+      metricName: 'chats.upsert.recebido',
       count: chats.length,
       instanceId: this.instanceId,
     });
-    for (const chat of chats) {
-      if (chat.id) {
-        try {
-          if (this.mysqlDbManager) {
-            try {
-              await this.mysqlDbManager.upsertChat(chat);
-              logger.info(`[METRIC] Chat ${chat.id} (upsert) saved to MySQL.`, {
-                label: 'MySQLSync',
-                metricName: 'chat.mysql.upsert.success',
-                jid: chat.id,
-                instanceId: this.instanceId,
-              });
-            } catch (dbError) {
-              logger.error(`[METRIC] Error saving chat ${chat.id} (upsert) to MySQL: ${dbError.message}`, {
-                label: 'MySQLSyncError',
-                metricName: 'chat.mysql.upsert.error',
-                jid: chat.id,
-                error: dbError.message,
-                stack: dbError.stack,
-                instanceId: this.instanceId,
-              });
-            }
-          }
-        } catch (error) {
-          logger.error(`[METRIC] Error processing chat ${chat.id} (upsert) (DB or other): ${error.message}`, {
-            label: 'SyncError',
-            metricName: 'chat.processing.upsert.error',
-            jid: chat.id,
-            error: error.message,
-            stack: error.stack,
-            instanceId: this.instanceId,
-          });
-        }
+
+    const validChats = chats.filter((chat) => chat.id);
+
+    if (this.mysqlDbManager &amp;&amp; validChats.length > 0) {
+      try {
+        await this.mysqlDbManager.upsertChatsBatch(validChats); // Assumed batch method
+        logger.info(`[MÉTRICA] ${validChats.length} chats atualizados/inseridos em lote no MySQL.`, {
+          label: 'MySQLSync',
+          metricName: 'chat.mysql.batch_upsert.success',
+          count: validChats.length,
+          instanceId: this.instanceId,
+        });
+      } catch (dbError) {
+        logger.error(`[MÉTRICA] Erro ao atualizar/inserir em lote ${validChats.length} chats no MySQL: ${dbError.message}.`, {
+          label: 'MySQLSyncError',
+          metricName: 'chat.mysql.batch_upsert.error',
+          count: validChats.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
       }
+    } else if (validChats.length > 0) {
+      logger.debug(`${validChats.length} chats recebidos para upsert, mas nenhum mysqlDbManager configurado ou nenhum chat válido para processar.`, {
+        label: 'ConnectionManager',
+        count: validChats.length,
+        hasDbManager: !!this.mysqlDbManager,
+        instanceId: this.instanceId,
+      });
     }
   }
 
@@ -1015,52 +1240,44 @@ class ConnectionManager {
    * Para cada atualização de chat:
    * 1. Prepara a atualização do chat para persistência.
    * 2. Se `this.mysqlDbManager` estiver configurado, salva (upsert) a atualização do chat no banco de dados MySQL.
+   *    (Assume que `upsertChatsBatch` ou um `upsertChat` individual pode lidar com atualizações parciais).
    * 3. Erros durante o processo são registrados.
    */
   async handleChatsUpdate(updates) {
-    logger.info(`[METRIC] 'chats.update' event received. Number of updates: ${updates.length}`, {
+    logger.info(`[MÉTRICA] Evento 'chats.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'chats.update.received',
+      metricName: 'chats.update.recebido',
       count: updates.length,
       instanceId: this.instanceId,
     });
-    for (const chatUpdate of updates) {
-      if (chatUpdate.id) {
-        try {
-          if (this.mysqlDbManager) {
-            try {
-              await this.mysqlDbManager.upsertChat(chatUpdate); // Assuming upsertChat can handle partial updates
-              logger.info(`[METRIC] Chat ${chatUpdate.id} (update) updated in MySQL.`, {
-                label: 'MySQLSync',
-                metricName: 'chat.mysql.update.success',
-                jid: chatUpdate.id,
-                instanceId: this.instanceId,
-              });
-            } catch (dbError) {
-              logger.error(`[METRIC] Error updating chat ${chatUpdate.id} (update) in MySQL: ${dbError.message}`, {
-                label: 'MySQLSyncError',
-                metricName: 'chat.mysql.update.error',
-                jid: chatUpdate.id,
-                error: dbError.message,
-                stack: dbError.stack,
-                instanceId: this.instanceId,
-              });
-            }
-          }
-        } catch (error) {
-          logger.error(`[METRIC] Error processing chat update ${chatUpdate.id} (DB or other): ${error.message}`, {
-            label: 'SyncError',
-            metricName: 'chat.processing.update.error',
-            jid: chatUpdate.id,
-            error: error.message,
-            stack: error.stack,
-            instanceId: this.instanceId,
-          });
-        }
+
+    const validChatUpdates = updates.filter((chatUpdate) => chatUpdate.id);
+
+    if (this.mysqlDbManager &amp;&amp; validChatUpdates.length > 0) {
+      try {
+        // Baileys 'chats.update' provides partial updates.
+        // The batch method `upsertChatsBatch` should be able to handle these,
+        // or we might call individual `upsertChat` if the batch method isn't designed for partials.
+        // For simplicity, let's assume `upsertChatsBatch` can handle partials or merges them correctly.
+        await this.mysqlDbManager.upsertChatsBatch(validChatUpdates);
+        logger.info(`[METRIC] ${validChatUpdates.length} chat updates batch-processed by MySQL.`, {
+          label: 'MySQLSync', // Mantido como label técnico
+          metricName: 'chat.mysql.batch_update.success',
+          count: validChatUpdates.length,
+          instanceId: this.instanceId,
+        });
+      } catch (dbError) {
+        logger.error(`[METRIC] Error batch-updating ${validChatUpdates.length} chats in MySQL: ${dbError.message}`, {
+          label: 'MySQLSyncError', // Mantido como label técnico
+          metricName: 'chat.mysql.batch_update.error',
+          count: validChatUpdates.length,
+          error: dbError.message,
+          stack: dbError.stack,
+          instanceId: this.instanceId,
+        });
       }
     }
   }
-
   /**
    * @method handleChatsDelete
    * Manipula exclusão de chats.
@@ -1074,9 +1291,9 @@ class ConnectionManager {
    * 3. Erros durante o processo são registrados.
    */
   async handleChatsDelete(jids) {
-    logger.info(`[METRIC] 'chats.delete' event received. Number of JIDs: ${jids.length}`, {
+    logger.info(`[MÉTRICA] Evento 'chats.delete' recebido. Número de JIDs: ${jids.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'chats.delete.received',
+      metricName: 'chats.delete.recebido',
       count: jids.length,
       instanceId: this.instanceId,
     });
@@ -1085,14 +1302,14 @@ class ConnectionManager {
         if (this.mysqlDbManager) {
           try {
             await this.mysqlDbManager.deleteChatData(jid);
-            logger.info(`[METRIC] Chat data for ${jid} removed from MySQL.`, {
+            logger.info(`[MÉTRICA] Dados do chat para ${jid} removidos do MySQL.`, {
               label: 'MySQLSync',
               metricName: 'chat.mysql.delete.success',
               jid,
               instanceId: this.instanceId,
             });
           } catch (dbError) {
-            logger.error(`[METRIC] Error removing chat data for ${jid} from MySQL: ${dbError.message}`, {
+            logger.error(`[MÉTRICA] Erro ao remover dados do chat para ${jid} do MySQL: ${dbError.message}.`, {
               label: 'MySQLSyncError',
               metricName: 'chat.mysql.delete.error',
               jid,
@@ -1103,7 +1320,7 @@ class ConnectionManager {
           }
         }
       } catch (error) {
-        logger.error(`[METRIC] Error processing chat deletion for ${jid} (DB or other): ${error.message}`, {
+        logger.error(`[MÉTRICA] Erro ao processar exclusão de chat para ${jid} (BD ou outro): ${error.message}.`, {
           label: 'SyncError',
           metricName: 'chat.processing.delete.error',
           jid,
@@ -1127,9 +1344,9 @@ class ConnectionManager {
    * 2. (Atualmente, não há persistência de contatos no MySQL neste handler, apenas log).
    */
   async handleContactsUpsert(contacts) {
-    logger.info(`[METRIC] 'contacts.upsert' event received. Number of contacts: ${contacts.length}`, {
+    logger.info(`[MÉTRICA] Evento 'contacts.upsert' recebido. Número de contatos: ${contacts.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'contacts.upsert.received',
+      metricName: 'contacts.upsert.recebido',
       count: contacts.length,
       instanceId: this.instanceId,
     });
@@ -1137,7 +1354,7 @@ class ConnectionManager {
       if (contact.id) {
         // Originalmente, contatos eram apenas cacheados no Redis.
         // Agora, apenas logamos, pois não há instrução para persisti-los no MySQL aqui.
-        logger.debug(`Contact upsert received: ${contact.id}`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
+        logger.debug(`Upsert de contato recebido: ${contact.id}.`, { label: 'ConnectionManager', contactId: contact.id, instanceId: this.instanceId });
       }
     }
   }
@@ -1161,17 +1378,17 @@ class ConnectionManager {
    * }]);
    */
   async handleContactsUpdate(updates) {
-    logger.info(`[METRIC] 'contacts.update' event received. Number of updates: ${updates.length}`, {
+    logger.info(`[MÉTRICA] Evento 'contacts.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
-      metricName: 'contacts.update.received',
+      metricName: 'contacts.update.recebido',
       count: updates.length,
       instanceId: this.instanceId,
     });
     for (const contactUpdate of updates) {
       if (contactUpdate.id) {
         // Originalmente, atualizações de contatos eram apenas cacheadas no Redis.
-        // Agora, apenas logamos.
-        logger.debug(`Contact update received: ${contactUpdate.id}`, { label: 'ConnectionManager', contactId: contactUpdate.id, update: contactUpdate, instanceId: this.instanceId });
+        // Agora, apenas registramos o log.
+        logger.debug(`Atualização de contato recebida: ${contactUpdate.id}.`, { label: 'ConnectionManager', contactId: contactUpdate.id, update: contactUpdate, instanceId: this.instanceId });
       }
     }
   }
@@ -1190,9 +1407,9 @@ class ConnectionManager {
    * });
    */
   handleBlocklistSet(data) {
-    logger.info(`[METRIC] 'blocklist.set' event received. Count: ${data.blocklist?.length || 0}`, {
+    logger.info(`[MÉTRICA] Evento 'blocklist.set' recebido. Contagem: ${data.blocklist?.length || 0}.`, {
       label: 'ConnectionManager',
-      metricName: 'blocklist.set.received',
+      metricName: 'blocklist.set.recebido',
       blocklist: data.blocklist, // Log the actual list for debugging if needed, or just count
       instanceId: this.instanceId,
     });
@@ -1214,9 +1431,9 @@ class ConnectionManager {
    * });
    */
   handleBlocklistUpdate(data) {
-    logger.info(`[METRIC] 'blocklist.update' event received. Action: ${data.action}, JIDs count: ${data.jids?.length || 0}`, {
+    logger.info(`[MÉTRICA] Evento 'blocklist.update' recebido. Ação: ${data.action}, Contagem de JIDs: ${data.jids?.length || 0}.`, {
       label: 'ConnectionManager',
-      metricName: 'blocklist.update.received',
+      metricName: 'blocklist.update.recebido',
       action: data.action,
       jids: data.jids,
       instanceId: this.instanceId,
@@ -1247,9 +1464,9 @@ class ConnectionManager {
   handleCall(callEvents) {
     // Baileys usually emits an array with a single event.
     const callEvent = callEvents &amp;&amp; callEvents.length > 0 ? callEvents[0] : null;
-    logger.info(`[METRIC] 'call' event received. Status: ${callEvent?.status}, From: ${callEvent?.from}`, {
+    logger.info(`[MÉTRICA] Evento 'call' recebido. Status: ${callEvent?.status}, De: ${callEvent?.from}.`, {
       label: 'ConnectionManager',
-      metricName: 'call.event.received',
+      metricName: 'call.event.recebido',
       callData: callEvent, // Log the first event, or all if structure changes
       instanceId: this.instanceId,
     });
@@ -1279,7 +1496,7 @@ class ConnectionManager {
   handlePresenceUpdate(data) {
     // This can be very noisy. Log as debug or sample if needed for metrics.
     // For now, just a debug log with metric potential.
-    logger.debug(`[METRIC_POTENTIAL] 'presence.update' event received: JID=${data.id}`, {
+    logger.debug(`[POTENCIAL_MÉTRICA] Evento 'presence.update' recebido: JID=${data.id}.`, {
       label: 'ConnectionManager',
       // metricName: 'presence.update.received', // Uncomment if high-frequency metric is desired
       presenceData: data,
@@ -1296,92 +1513,26 @@ module.exports = ConnectionManager;
 
 
 
-</div>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConnectionManager.html">ConnectionManager</a></li><li><a href="MySQLDBManager.html">MySQLDBManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_extractTextFromMessageObject">_extractTextFromMessageObject</a></li><li><a href="global.html#closePool">closePool</a></li><li><a href="global.html#connectConecta-seaoWhatsAppusandooestadodeautentica%25C3%25A7%25C3%25A3ocarregado.ConfiguraosocketBaileyscomasop%25C3%25A7%25C3%25B5esnecess%25C3%25A1rias,incluindologgereinforma%25C3%25A7%25C3%25B5esdonavegador.">connect
-Conecta-se ao WhatsApp usando o estado de autenticação carregado.
-Configura o socket Baileys com as opções necessárias, incluindo logger e informações do navegador.</a></li><li><a href="global.html#deleteChatData">deleteChatData</a></li><li><a href="global.html#executeQuery">executeQuery</a></li><li><a href="global.html#getEventEmitter">getEventEmitter</a></li><li><a href="global.html#getInstance">getInstance</a></li><li><a href="global.html#handleBlocklistSetProcessaoeventodedefini%25C3%25A7%25C3%25A3odalistadebloqueio.Registraosn%25C3%25BAmerosqueest%25C3%25A3onalistadebloqueiodoWhatsApp.Esteevento%25C3%25A9disparadoquandoalistadebloqueio%25C3%25A9definidaousincronizada(evento'blocklist.set').">handleBlocklistSet
-Processa o evento de definição da lista de bloqueio.
-Registra os números que estão na lista de bloqueio do WhatsApp.
-Este evento é disparado quando a lista de bloqueio é definida ou sincronizada (evento 'blocklist.set').</a></li><li><a href="global.html#handleBlocklistUpdateProcessaatualiza%25C3%25A7%25C3%25B5esnalistadebloqueiodoWhatsApp.Registraaltera%25C3%25A7%25C3%25B5es(adi%25C3%25A7%25C3%25B5es/remo%25C3%25A7%25C3%25B5es)nalistadecontatosbloqueados.Esteevento%25C3%25A9disparadoquandoumJID%25C3%25A9adicionadoouremovidodalistadebloqueio(evento'blocklist.update').">handleBlocklistUpdate
-Processa atualizações na lista de bloqueio do WhatsApp.
-Registra alterações (adições/remoções) na lista de contatos bloqueados.
-Este evento é disparado quando um JID é adicionado ou removido da lista de bloqueio (evento 'blocklist.update').</a></li><li><a href="global.html#handleCallProcessaeventosdechamadasrecebidasourealizadas.Registrainforma%25C3%25A7%25C3%25B5essobrechamadasdevoz/v%25C3%25ADdeonoWhatsApp.Esteevento%25C3%25A9disparadoparav%25C3%25A1riosest%25C3%25A1giosdeumachamada(oferta,aceita%25C3%25A7%25C3%25A3o,rejei%25C3%25A7%25C3%25A3o,t%25C3%25A9rmino)(evento'call').">handleCall
-Processa eventos de chamadas recebidas ou realizadas.
-Registra informações sobre chamadas de voz/vídeo no WhatsApp.
-Este evento é disparado para vários estágios de uma chamada (oferta, aceitação, rejeição, término) (evento 'call').</a></li><li><a href="global.html#handleChatsDeleteManipulaexclus%25C3%25A3odechats.Esteevento%25C3%25A9disparadoquandochatss%25C3%25A3odeletados(evento'chats.delete').">handleChatsDelete
-Manipula exclusão de chats.
-Este evento é disparado quando chats são deletados (evento 'chats.delete').</a></li><li><a href="global.html#handleChatsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdechats.Esteevento%25C3%25A9disparadoquandopropriedadesdeumchatexistentes%25C3%25A3oalteradas(ex:%2560unreadCount%2560,%2560mute%2560)(evento'chats.update').">handleChatsUpdate
-Manipula atualizações de chats.
-Este evento é disparado quando propriedades de um chat existente são alteradas (ex: `unreadCount`, `mute`) (evento 'chats.update').</a></li><li><a href="global.html#handleChatsUpsertManipulainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odechats.Esteevento%25C3%25A9disparadoquandonovoschatss%25C3%25A3ocriadosouchatsexistentess%25C3%25A3osincronizados(evento'chats.upsert').">handleChatsUpsert
-Manipula inserção/atualização de chats.
-Este evento é disparado quando novos chats são criados ou chats existentes são sincronizados (evento 'chats.upsert').</a></li><li><a href="global.html#handleConnectionUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdeconex%25C3%25A3odoclienteWhatsApp.Estem%25C3%25A9todo%25C3%25A9chamadoquandooestadodaconex%25C3%25A3ocomoWhatsAppmuda(evento%2560connection.update%2560).">handleConnectionUpdate
-Manipula atualizações de conexão do cliente WhatsApp.
-Este método é chamado quando o estado da conexão com o WhatsApp muda (evento `connection.update`).</a></li><li><a href="global.html#handleContactsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecontatos.(L%25C3%25B3gicadecacheRedisfoiremovida).Esteevento%25C3%25A9disparadoquandopropriedadesdeumcontatoexistentes%25C3%25A3oalteradas(ex:nome,notifica%25C3%25A7%25C3%25A3opush)(evento'contacts.update').">handleContactsUpdate
-Manipula a atualização de contatos.
-(Lógica de cache Redis foi removida).
-Este evento é disparado quando propriedades de um contato existente são alteradas (ex: nome, notificação push) (evento 'contacts.update').</a></li><li><a href="global.html#handleContactsUpsertManipulainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odecontatos.Esteevento%25C3%25A9disparadoquandonovoscontatoss%25C3%25A3oadicionadosoucontatosexistentess%25C3%25A3osincronizados(evento'contacts.upsert').">handleContactsUpsert
-Manipula inserção/atualização de contatos.
-Este evento é disparado quando novos contatos são adicionados ou contatos existentes são sincronizados (evento 'contacts.upsert').</a></li><li><a href="global.html#handleCredsUpdateManipulaaatualiza%25C3%25A7%25C3%25A3odecredenciais.Estem%25C3%25A9todo%25C3%25A9chamadoporBaileysquandoascredenciaisdeautentica%25C3%25A7%25C3%25A3os%25C3%25A3oatualizadas(porexemplo,ap%25C3%25B3sescanearoQRcodeouduranteareconex%25C3%25A3o).Salvaasnovascredenciaisusando%2560this.auth.saveCreds()%2560.">handleCredsUpdate
-Manipula a atualização de credenciais.
-Este método é chamado por Baileys quando as credenciais de autenticação são atualizadas (por exemplo, após escanear o QR code ou durante a reconexão).
-Salva as novas credenciais usando `this.auth.saveCreds()`.</a></li><li><a href="global.html#handleGroupParticipantsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdeparticipantesdegrupos.Chamadoquandoparticipantesentram,saem,s%25C3%25A3opromovidosourebaixadosemumgrupo(evento'group-participants.update').">handleGroupParticipantsUpdate
-Manipula atualizações de participantes de grupos.
-Chamado quando participantes entram, saem, são promovidos ou rebaixados em um grupo (evento 'group-participants.update').</a></li><li><a href="global.html#handleGroupsUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdegrupos.Estem%25C3%25A9todo%25C3%25A9chamadoquandoh%25C3%25A1atualiza%25C3%25A7%25C3%25B5esnosmetadadosdegruposexistentes(ex:mudan%25C3%25A7adenome,descri%25C3%25A7%25C3%25A3o)(evento'groups.update').">handleGroupsUpdate
-Manipula atualizações de grupos.
-Este método é chamado quando há atualizações nos metadados de grupos existentes (ex: mudança de nome, descrição) (evento 'groups.update').</a></li><li><a href="global.html#handleGroupsUpsertManipulaainser%25C3%25A7%25C3%25A3o/atualiza%25C3%25A7%25C3%25A3odegrupos(quandoousu%25C3%25A1rioentraemumnovogrupoousincroniza%25C3%25A7%25C3%25A3oinicial).Esteevento%25C3%25A9geralmentedisparadoquandooclienteseconectaesincronizaalistadegrupos,ouquandoousu%25C3%25A1rioentraemumnovogrupo(evento'groups.upsert').">handleGroupsUpsert
-Manipula a inserção/atualização de grupos (quando o usuário entra em um novo grupo ou sincronização inicial).
-Este evento é geralmente disparado quando o cliente se conecta e sincroniza a lista de grupos,
-ou quando o usuário entra em um novo grupo (evento 'groups.upsert').</a></li><li><a href="global.html#handleIrrecoverableDisconnectManipuladesconex%25C3%25A3oirrecuper%25C3%25A1vel(ex:logoutoum%25C3%25A1ximodetentativasatingido).Registraumerroinformandoousu%25C3%25A1riosobreasitua%25C3%25A7%25C3%25A3oeanecessidadederemoverosdadosdeautentica%25C3%25A7%25C3%25A3oereiniciarparagerarumnovoQRcode.Resetaoestadodereconex%25C3%25A3o.">handleIrrecoverableDisconnect
-Manipula desconexão irrecuperável (ex: logout ou máximo de tentativas atingido).
-Registra um erro informando o usuário sobre a situação e a necessidade de
-remover os dados de autenticação e reiniciar para gerar um novo QR code.
-Reseta o estado de reconexão.</a></li><li><a href="global.html#handleMessageReceiptUpdateManipulaatualiza%25C3%25A7%25C3%25B5esderecibodemensagem.Esteevento%25C3%25A9disparadoquandoostatusdeentrega/leituradeumamensagem%25C3%25A9atualizado(ex:'delivered','read','played')(evento'message-receipt.update').">handleMessageReceiptUpdate
-Manipula atualizações de recibo de mensagem.
-Este evento é disparado quando o status de entrega/leitura de uma mensagem é atualizado
-(ex: 'delivered', 'read', 'played') (evento 'message-receipt.update').</a></li><li><a href="global.html#handleMessagesDeleteManipulaexclus%25C3%25A3odemensagens.Esteevento%25C3%25A9disparadoquandomensagenss%25C3%25A3odeletadas(evento'messages.delete').">handleMessagesDelete
-Manipula exclusão de mensagens.
-Este evento é disparado quando mensagens são deletadas (evento 'messages.delete').</a></li><li><a href="global.html#handleMessagesReactionManipularea%25C3%25A7%25C3%25B5esamensagens.Esteevento%25C3%25A9disparadoquandoumarea%25C3%25A7%25C3%25A3o%25C3%25A9adicionadaouremovidadeumamensagem(evento'messages.reaction').">handleMessagesReaction
-Manipula reações a mensagens.
-Este evento é disparado quando uma reação é adicionada ou removida de uma mensagem (evento 'messages.reaction').</a></li><li><a href="global.html#handleMessagesUpdateManipulaatualiza%25C3%25A7%25C3%25B5esdemensagens.Esteevento%25C3%25A9disparadoparaatualiza%25C3%25A7%25C3%25B5esemmensagensexistentes(ex:statusdeentrega,edi%25C3%25A7%25C3%25A3o-sesuportado)(evento'messages.update').">handleMessagesUpdate
-Manipula atualizações de mensagens.
-Este evento é disparado para atualizações em mensagens existentes (ex: status de entrega, edição - se suportado) (evento 'messages.update').</a></li><li><a href="global.html#handleMessagesUpsertManipulamensagensnovas/atualizadas.Estem%25C3%25A9todo%25C3%25A9chamadoquandonovasmensagenss%25C3%25A3orecebidasoumensagensexistentess%25C3%25A3oatualizadas(evento'messages.upsert').">handleMessagesUpsert
-Manipula mensagens novas/atualizadas.
-Este método é chamado quando novas mensagens são recebidas ou mensagens existentes são atualizadas (evento 'messages.upsert').</a></li><li><a href="global.html#handleMessagingHistorySetManipulaoeventodeconjuntodehist%25C3%25B3ricodemensagens.Esteevento%25C3%25A9disparadoduranteasincroniza%25C3%25A7%25C3%25A3oinicialdohist%25C3%25B3rico(evento'messaging-history.set'),fornecendoumconjuntodechats,contatosemensagens.">handleMessagingHistorySet
-Manipula o evento de conjunto de histórico de mensagens.
-Este evento é disparado durante a sincronização inicial do histórico (evento 'messaging-history.set'),
-fornecendo um conjunto de chats, contatos e mensagens.</a></li><li><a href="global.html#handlePresenceUpdateProcessaatualiza%25C3%25A7%25C3%25B5esdepresen%25C3%25A7adoscontatos.Registraemonitoraaltera%25C3%25A7%25C3%25B5esnostatusdepresen%25C3%25A7a(online,offline,digitando,gravando%25C3%25A1udio)e%25C3%25BAltimavisualiza%25C3%25A7%25C3%25A3o(evento'presence.update').">handlePresenceUpdate
-Processa atualizações de presença dos contatos.
-Registra e monitora alterações no status de presença (online, offline, digitando, gravando áudio) e última visualização (evento 'presence.update').</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#initializeInicializaaconex%25C3%25A3oprincipalcomoWhatsApp.Estem%25C3%25A9todoorquestraocarregamentodoestadodeautentica%25C3%25A7%25C3%25A3oe,emseguida,tentaestabeleceraconex%25C3%25A3ocomoWhatsApp.">initialize
-Inicializa a conexão principal com o WhatsApp.
-Este método orquestra o carregamento do estado de autenticação e, em seguida,
-tenta estabelecer a conexão com o WhatsApp.</a></li><li><a href="global.html#loadAuthStateCarregaoestadodeautentica%25C3%25A7%25C3%25A3ododiret%25C3%25B3rioespecificadoem%2560this.authStatePath%2560.Seodiret%25C3%25B3rion%25C3%25A3oexistir,eleser%25C3%25A1criado.Utiliza%2560useMultiFileAuthState%2560dabibliotecaBaileysparagerenciarascredenciais.">loadAuthState
-Carrega o estado de autenticação do diretório especificado em `this.authStatePath`.
-Se o diretório não existir, ele será criado.
-Utiliza `useMultiFileAuthState` da biblioteca Baileys para gerenciar as credenciais.</a></li><li><a href="global.html#reconnectWithBackoffReconectaaoWhatsAppcombackoffexponencial.Incrementaocontadordetentativasdereconex%25C3%25A3oecalculaopr%25C3%25B3ximoatrasodeformaexponencial,limitadopelo%2560maxBackoffDelayMs%2560.Agendaumanovatentativadeconex%25C3%25A3o(%2560this.connect()%2560)ap%25C3%25B3soatrasocalculado.Seareconex%25C3%25A3ofalhar,eaindaforpermitidotentarnovamente,chamaasimesmorecursivamente.Casocontr%25C3%25A1rio,tratacomodesconex%25C3%25A3oirrecuper%25C3%25A1vel.">reconnectWithBackoff
-Reconecta ao WhatsApp com backoff exponencial.
-Incrementa o contador de tentativas de reconexão e calcula o próximo atraso
-de forma exponencial, limitado pelo `maxBackoffDelayMs`.
-Agenda uma nova tentativa de conexão (`this.connect()`) após o atraso calculado.
-Se a reconexão falhar, e ainda for permitido tentar novamente, chama a si mesmo recursivamente. Caso contrário, trata como desconexão irrecuperável.</a></li><li><a href="global.html#resetReconnectionStateResetaoestadodereconex%25C3%25A3o.Define%2560this.reconnectionAttempts%2560para0,%2560this.currentBackoffDelayMs%2560para%2560this.initialBackoffDelayMs%2560,e%2560this.isReconnecting%2560para%2560false%2560.">resetReconnectionState
-Reseta o estado de reconexão.
-Define `this.reconnectionAttempts` para 0, `this.currentBackoffDelayMs` para `this.initialBackoffDelayMs`,
-e `this.isReconnecting` para `false`.</a></li><li><a href="global.html#setupEventHandlersConfiguraosmanipuladoresdeeventosparaoclienteWhatsApp(Baileys).Registralistenersparaumavariedadedeeventos,comoatualiza%25C3%25A7%25C3%25B5esdeconex%25C3%25A3o,recebimentodemensagens,atualiza%25C3%25A7%25C3%25B5esdegrupos,chats,contatos,etc.Cadaevento%25C3%25A9vinculadoaom%25C3%25A9todocorrespondentenestaclasse.">setupEventHandlers
-Configura os manipuladores de eventos para o cliente WhatsApp (Baileys).
-Registra listeners para uma variedade de eventos, como atualizações de conexão,
-recebimento de mensagens, atualizações de grupos, chats, contatos, etc.
-Cada evento é vinculado ao método correspondente nesta classe.</a></li><li><a href="global.html#shouldReconnectDeterminaseareconex%25C3%25A3odevesertentadacombasenomotivodadesconex%25C3%25A3o.">shouldReconnect
-Determina se a reconexão deve ser tentada com base no motivo da desconexão.</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#updateGroupParticipants">updateGroupParticipants</a></li><li><a href="global.html#upsertChat">upsertChat</a></li><li><a href="global.html#upsertGroup">upsertGroup</a></li><li><a href="global.html#upsertMessage">upsertMessage</a></li><li><a href="global.html#upsertMessageReceipt">upsertMessageReceipt</a></li></ul>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri May 30 2025 16:47:27 GMT+0000 (Coordinated Universal Time)
-</footer>
-
-<script> prettyPrint(); </script>
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
 <script src="scripts/linenumber.js"> </script>
+
+
 </body>
 </html>

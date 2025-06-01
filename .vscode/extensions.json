@@ -1,9 +1,0 @@
-{
-    "recommendations": [
-        "esbenp.prettier-vscode",
-        "ms-vscode.vscode-typescript-next",
-        "pkief.material-icon-theme",
-        "leizongmin.node-module-intellisense",
-        "christian-kohler.path-intellisense"
-    ]
-}
