@@ -6,13 +6,12 @@ Bot multifuncional para WhatsApp, desenvolvido em JavaScript como um projeto ope
 
 ## 📋 Sobre
 
-OmniZap é um bot versátil para WhatsApp que atende tanto usuários pessoais quanto administradores de grupos e pequenas automações empresariais. Desenvolvido com foco em aprendizado e colaboração da comunidade, com suporte a persistência de dados e cache.
+OmniZap é um bot versátil para WhatsApp que atende tanto usuários pessoais quanto administradores de grupos e pequenas automações empresariais. Desenvolvido com foco em aprendizado e colaboração da comunidade, com uma arquitetura robusta e performática.
 
 ## ⚙️ Funcionalidades Principais
 
 - Sistema robusto de gerenciamento de conexão com reconexão automática
 - Persistência completa de dados em MySQL
-- Sistema de cache com Redis para melhor performance
 - Gerenciamento avançado de grupos
 - Tratamento de mensagens, recibos e eventos
 - Sistema de logs detalhado
@@ -20,13 +19,13 @@ OmniZap é um bot versátil para WhatsApp que atende tanto usuários pessoais qu
 
 ## 🏗️ Arquitetura
 
-O projeto é composto por três componentes principais:
+O projeto é composto por dois componentes principais:
 
 ### ConnectionManager
 - Gerencia a conexão WebSocket com o WhatsApp
 - Implementa reconexão automática com backoff exponencial
 - Gerencia eventos do WhatsApp (mensagens, grupos, contatos)
-- Integra com Redis para cache e MySQL para persistência
+- Processa e encaminha eventos para persistência
 
 ### MySQLDBManager
 - Gerencia todas as operações com o banco de dados MySQL
@@ -37,14 +36,6 @@ O projeto é composto por três componentes principais:
   - Grupos e Participantes
   - Mensagens e Recibos
   - Contatos
-
-### Sistema de Cache (Redis)
-- Cache de metadados com TTL configurável
-- Prefixos específicos para cada tipo de dado:
-  - `chat:` - Dados de conversas
-  - `group:` - Metadados de grupos
-  - `contact:` - Informações de contatos
-  - `message:` - Mensagens e recibos
 
 ## 🗄️ Estrutura do Banco de Dados
 
@@ -130,62 +121,6 @@ CREATE TABLE MessageReceipts (
 );
 ```
 
-## ⚡ Cache Redis
-
-### TTLs Configurados
-- `REDIS_TTL_METADATA_SHORT`: 3600s (1 hora) - Metadados de curta duração
-- `REDIS_TTL_METADATA_LONG`: 86400s (24 horas) - Metadados de longa duração
-- `REDIS_TTL_MESSAGE`: 604800s (7 dias) - Mensagens
-- `REDIS_TTL_RECEIPT`: 604800s (7 dias) - Recibos
-
-### Prefixos de Cache
-- `chat:` - Dados de conversas
-- `group:` - Metadados de grupos
-- `contact:` - Informações de contatos
-- `message:` - Mensagens e recibos
-
-## 🔄 Sistema de Cache
-
-### Diagrama de Relações
-
-```ascii
-┌─────────────────────── Cache Redis ────────────────────────┐
-│                                                            │
-│  Prefixos e TTLs:                                          │
-│  ┌─────────────────────────────────────────┐               │
-│  │ REDIS_PREFIX_GROUP    (TTL: 1h)         │               │
-│  │ REDIS_PREFIX_CHAT     (TTL: 1h)         │               │
-│  │ REDIS_PREFIX_CONTACT  (TTL: 24h)        │               │
-│  │ REDIS_PREFIX_MESSAGE  (TTL: 7d)         │               │
-│  └─────────────────────────────────────────┘               │
-│                                                            │
-│  Estrutura de Dados:                                       │
-│                                                            │
-│    ┌─────────── Mensagem ──────────┐                       │
-│    │ Key: message:<remoteJid>:<id> │                       │
-│    │ - messageContentType          │    ┌── Grupo ────┐    │
-│    │ - receipts                    │────►  Key: group:<jid>│
-│    │ - groupMetadata (se grupo)    │    │ - participantes  │
-│    └───────────────────────────────┘    │ - descrição      │
-│                │                        │ - configurações  │
-│                │                        └──────────────┘   │
-│                │                                           │
-│                │         ┌────── Chat ─────┐               │
-│                └────────►│ Key: chat:<id>  │               │
-│                          │ - unreadCount   │               │
-│                          │ - lastMessage   │               │
-│                          └────────────── ──┘               │
-│                                │                           │
-│                                │                           │
-│                     ┌──── Contato ────┐                    │
-│                     │ Key:contact:<id>│                    │
-│                     │ - nome          │                    │
-│                     │ - notify        │                    │
-│                     └──────────────── ┘                    │
-│                                                            │
-└────────────────────────────────────────────────────────── ─┘
-```
-
 ## 🎯 Sistema de Eventos
 
 ### Eventos Principais
@@ -222,77 +157,14 @@ CREATE TABLE MessageReceipts (
 ### Fluxo de Dados
 1. Evento recebido do WhatsApp
 2. Processamento pelo handler específico
-3. Atualização do cache Redis (se aplicável)
-4. Persistência no MySQL (se aplicável)
-5. Emissão de eventos customizados para subscribers
-
-### Estrutura de Chaves
-
-#### Mensagens
-- **Chave**: `message:<remoteJid>:<id>`
-- **TTL**: 7 dias
-- **Dados**:
-  - Conteúdo da mensagem
-  - Tipo de conteúdo
-  - Status de entrega/leitura
-  - Metadados do grupo (se aplicável)
-
-#### Grupos
-- **Chave**: `group:<jid>`
-- **TTL**: 1 hora
-- **Dados**:
-  - Lista de participantes
-  - Configurações do grupo
-  - Descrição
-  - Imagem do grupo
-
-#### Chats
-- **Chave**: `chat:<id>`
-- **TTL**: 1 hora
-- **Dados**:
-  - Contagem de mensagens não lidas
-  - Última mensagem
-  - Status de silenciamento
-  - Configurações do chat
-
-#### Contatos
-- **Chave**: `contact:<id>`
-- **TTL**: 24 horas
-- **Dados**:
-  - Nome do contato
-  - Configurações de notificação
-  - Informações de perfil
-
-### Estratégia de Cache
-
-1. **Cache First**
-   - Todas as consultas primeiro verificam o cache
-   - Em caso de miss, busca da API e atualiza o cache
-
-2. **TTLs Diferenciados**
-   - Metadados de curta duração: 1 hora
-   - Informações de contato: 24 horas
-   - Mensagens e recibos: 7 dias
-
-3. **Invalidação Automática**
-   - TTLs automáticos para evitar dados obsoletos
-   - Atualização proativa em eventos relevantes
-
-4. **Otimização de Desempenho**
-   - Cache de metadados de grupo para operações frequentes
-   - Armazenamento de recibos de mensagem para consulta rápida
-
-5. **Persistência em Camadas**
-   - Redis: Dados frequentemente acessados
-   - MySQL: Armazenamento persistente de longo prazo
-   - Sincronização automática entre camadas
+3. Persistência no MySQL (se aplicável)
+4. Emissão de eventos customizados para subscribers
 
 ### Monitoramento e Logs
 
-- Rastreamento de hits/misses do cache
 - Logging detalhado de operações
-- Métricas de performance por tipo de dado
-- Alertas para falhas de cache
+- Métricas de performance
+- Sistema robusto de alertas
 
 ## 🚀 Começando
 
@@ -301,7 +173,6 @@ CREATE TABLE MessageReceipts (
 - Node.js v14+
 - NPM ou Yarn
 - MySQL Server 8.0+
-- Redis Server 6.0+
 
 ### Configuração do Ambiente
 
@@ -314,12 +185,6 @@ MYSQL_PORT=3306
 MYSQL_USER=seu_usuario
 MYSQL_PASSWORD=sua_senha
 MYSQL_DATABASE_NAME=omnizap_db
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-REDIS_DB=0
 
 # Reconexão
 BACKOFF_INITIAL_DELAY_MS=5000
@@ -350,10 +215,8 @@ npm start
 - JavaScript/Node.js
 - [Baileys](https://github.com/WhiskeySockets/Baileys) - Framework WhatsApp Web API
 - MySQL - Sistema de Banco de Dados
-- Redis - Sistema de Cache
 - Winston - Sistema de Logs
 - Envalid - Validação de variáveis de ambiente
-- ioredis - Cliente Redis
 - mysql2 - Cliente MySQL
 
 ## 📄 Licença
