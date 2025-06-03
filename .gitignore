@@ -3,3 +3,4 @@ src/connection/temp/
 .env
 logs/
 temp/
+omnizap_auth_successful.flag

@@ -254,6 +254,8 @@ class ConnectionManager {
   async handleConnectionUpdate(update) {
     const { connection, lastDisconnect, qr } = update;
 
+    const authFlagFile = path.join(process.cwd(), 'omnizap_auth_successful.flag');
+
     if (qr) {
       logger.info('[MÉTRICA] Código QR gerado para autenticação. Por favor, escaneie com seu WhatsApp:', {
         label: 'ConnectionManager',
@@ -261,6 +263,16 @@ class ConnectionManager {
         instanceId: this.instanceId,
       });
       qrcode.generate(qr, { small: true });
+
+      // Se o QR é exibido, remove qualquer flag antigo para garantir que um novo seja criado
+      if (fs.existsSync(authFlagFile)) {
+        try {
+          fs.unlinkSync(authFlagFile);
+          logger.info(`[ConnectionManager] Flag de sucesso de autenticação existente removido pois um novo QR foi gerado.`, { label: 'ConnectionManager', instanceId: this.instanceId });
+        } catch (err) {
+          logger.warn(`[ConnectionManager] Não foi possível remover o flag de sucesso de autenticação existente: ${err.message}`, { label: 'ConnectionManager', instanceId: this.instanceId });
+        }
+      }
     }
 
     if (connection === STATUS.CONNECTED) {
@@ -270,6 +282,22 @@ class ConnectionManager {
         instanceId: this.instanceId,
       });
       this.resetReconnectionState();
+
+      // Verifica se as credenciais existem e cria o flag de sucesso
+      const credsFilePath = path.join(this.authStatePath, 'creds.json');
+      if (fs.existsSync(credsFilePath)) {
+        try {
+          // Cria o flag apenas se ele não existir, para sinalizar a autenticação inicial bem-sucedida para o script
+          if (!fs.existsSync(authFlagFile)) {
+            fs.writeFileSync(authFlagFile, new Date().toISOString());
+            logger.info(`[ConnectionManager] Flag de sucesso de autenticação criado em ${authFlagFile}`, { label: 'ConnectionManager', instanceId: this.instanceId });
+          }
+        } catch (err) {
+          logger.error(`[ConnectionManager] Falha ao criar o flag de sucesso de autenticação: ${err.message}`, { label: 'ConnectionManager', instanceId: this.instanceId, error: err });
+        }
+      } else {
+        logger.warn(`[ConnectionManager] Conexão aberta, mas creds.json não encontrado em ${credsFilePath}. Flag de autenticação não criado.`, { label: 'ConnectionManager', instanceId: this.instanceId });
+      }
     }
 
     if (connection === STATUS.DISCONNECTED) {

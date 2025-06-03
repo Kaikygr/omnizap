@@ -22,20 +22,18 @@
   },
   "homepage": "https://github.com/Kaikygr/OmniZap#readme",
   "scripts": {
-    "start": "pm2 start ecosystem.config.js --env production",
-    "dev": "pm2 start ecosystem.config.js --env development",
+    "start": "bash start-omnizap.sh production",
+    "dev": "bash start-omnizap.sh development",
     "stop": "pm2 stop omnizap",
     "restart": "pm2 restart omnizap",
     "delete": "pm2 delete omnizap",
-    "logs": "pm2 logs omnizap",
-    "docs": "jsdoc -c jsdoc.json"
+    "logs": "pm2 logs omnizap"
   },
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "baileys": "^6.7.17",
     "dotenv": "^16.5.0",
     "envalid": "^8.0.0",
-    "ioredis": "^5.6.1",
     "mysql2": "^3.14.1",
     "path": "^0.12.7",
     "pino": "^9.7.0",
@@ -46,8 +44,6 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
-    "better-docs": "^2.7.3",
-    "jsdoc": "^4.0.4",
     "prettier": "^3.5.3"
   }
 }
