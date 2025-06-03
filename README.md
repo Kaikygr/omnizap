@@ -11,11 +11,11 @@ OmniZap é um bot versátil para WhatsApp que atende tanto usuários pessoais qu
 ## ⚙️ Funcionalidades Principais
 
 - Sistema robusto de gerenciamento de conexão com reconexão automática
-- Persistência completa de dados em MySQL
-- Gerenciamento avançado de grupos
-- Tratamento de mensagens, recibos e eventos
-- Sistema de logs detalhado
+- Persistência completa de dados em MySQL com suporte a operações em lote
+- Gerenciamento avançado de grupos e mensagens
+- Sistema de monitoramento e métricas detalhado
 - Arquitetura modular e expansível
+- Suporte a múltiplas instâncias via INSTANCE_ID
 
 ## 🏗️ Arquitetura
 
@@ -24,18 +24,18 @@ O projeto é composto por dois componentes principais:
 ### ConnectionManager
 - Gerencia a conexão WebSocket com o WhatsApp
 - Implementa reconexão automática com backoff exponencial
-- Gerencia eventos do WhatsApp (mensagens, grupos, contatos)
-- Processa e encaminha eventos para persistência
+- Sistema avançado de logging e métricas
+- Suporte a processamento em lote de mensagens e eventos
+- EventEmitter customizado para comunicação entre módulos
+- Gerenciamento automático de autenticação com QR Code
 
 ### MySQLDBManager
 - Gerencia todas as operações com o banco de dados MySQL
 - Implementa padrão Singleton para conexão
-- Gerencia pool de conexões para melhor performance
-- Fornece métodos CRUD para todas as entidades:
-  - Chats
-  - Grupos e Participantes
-  - Mensagens e Recibos
-  - Contatos
+- Suporte a operações em lote para melhor performance
+- Pool de conexões otimizado
+- Transações atômicas para operações críticas
+- Validação de dados e tratamento de erros robusto
 
 ## 🗄️ Estrutura do Banco de Dados
 
@@ -162,9 +162,12 @@ CREATE TABLE MessageReceipts (
 
 ### Monitoramento e Logs
 
-- Logging detalhado de operações
-- Métricas de performance
-- Sistema robusto de alertas
+- Sistema de métricas detalhado para todas as operações
+- Logging estruturado com níveis e contextos
+- Rastreamento de instâncias via INSTANCE_ID
+- Monitoramento de performance de operações em lote
+- Alertas para erros críticos e reconexões
+- Métricas de sucesso/falha para operações de banco de dados
 
 ## 🚀 Começando
 
@@ -179,6 +182,9 @@ CREATE TABLE MessageReceipts (
 Configure as variáveis de ambiente em um arquivo `.env`:
 
 ```env
+# Identificação da Instância
+INSTANCE_ID=omnizap-instance-01
+
 # MySQL
 MYSQL_HOST=localhost
 MYSQL_PORT=3306
@@ -209,6 +215,108 @@ npm install
 # Inicie o bot
 npm start
 ```
+
+### 🚦 Executando o Projeto
+
+O OmniZap oferece dois modos principais de execução, gerenciados pelo script `start-omnizap.sh` e PM2:
+
+#### Primeira Execução
+```bash
+# Inicia o bot e gera QR Code para autenticação
+npm start
+
+# O script irá:
+# 1. Verificar dependências (Node.js e PM2)
+# 2. Gerar e exibir o QR Code para autenticação
+# 3. Aguardar até 300 segundos pela autenticação
+# 4. Iniciar automaticamente com PM2 após autenticação
+```
+
+#### Ambiente de Desenvolvimento
+```bash
+# Inicia em modo desenvolvimento com PM2
+npm run dev
+```
+
+#### Ambiente de Produção
+```bash
+# Inicia em modo produção com PM2
+npm start
+```
+
+#### Gerenciamento com PM2
+```bash
+# Para o bot
+npm run stop
+
+# Reinicia o bot
+npm run restart
+
+# Remove o bot do PM2
+npm run delete
+
+# Visualiza logs em tempo real
+npm run logs
+```
+
+#### Processo de Autenticação
+
+1. Na primeira execução, o script verifica a existência de credenciais
+2. Se não encontrar, gera e exibe o QR Code no terminal
+3. Aguarda o escaneamento do QR Code pelo WhatsApp
+4. Após autenticação bem-sucedida, inicia automaticamente com PM2
+5. Nas próximas execuções, usa as credenciais salvas
+
+> **Nota**: O arquivo de credenciais é armazenado em `AUTH_STATE_PATH` (configurado no .env)
+
+#### Monitoramento
+```bash
+# Visualiza logs em tempo real
+npm run logs
+
+# Monitora métricas do sistema
+npm run monitor
+```
+
+### 🔄 Método de Inicialização
+
+O OmniZap utiliza um sistema robusto de inicialização que segue os seguintes passos:
+
+1. **Inicialização do Banco de Dados**
+   - Criação/verificação do banco de dados MySQL
+   - Estabelecimento do pool de conexões
+   - Inicialização das tabelas necessárias (Chats, Groups, Messages, etc.)
+   - Validação da estrutura do banco de dados
+
+2. **Configuração do Connection Manager**
+   - Configuração das opções de reconexão automática
+   - Definição dos parâmetros de backoff exponencial
+   - Inicialização do EventEmitter para eventos customizados
+   - Configuração do sistema de logs
+
+3. **Autenticação WhatsApp**
+   - Verificação do diretório de estado de autenticação
+   - Carregamento de credenciais existentes (se houver)
+   - Geração e exibição do QR Code (se necessário)
+   - Gestão de flags de autenticação bem-sucedida
+
+4. **Configuração de Handlers**
+   - Registro de handlers para eventos de conexão
+   - Configuração de handlers para mensagens
+   - Setup de handlers para eventos de grupos
+   - Inicialização de handlers para outros eventos (chamadas, presença, etc.)
+
+5. **Sistema de Métricas e Monitoramento**
+   - Inicialização do sistema de logging estruturado
+   - Configuração de métricas de performance
+   - Setup de rastreamento de operações em lote
+   - Monitoramento de reconexões e erros
+
+6. **Pós-inicialização**
+   - Sincronização inicial do histórico de mensagens
+   - Processamento de metadados de grupos
+   - Início do processamento de eventos em tempo real
+   - Ativação do sistema de reconexão automática
 
 ## 🛠️ Tecnologias
 
