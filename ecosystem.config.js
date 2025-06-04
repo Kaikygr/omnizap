@@ -1,7 +1,9 @@
+require('dotenv').config();
+
 module.exports = {
   apps: [
     {
-      name: 'omnizap',
+      name: process.env.SYSTEM_NAME || 'omnizap-default',
       script: './src/connection/index.js',
       exec_mode: 'fork',
       instances: 1,
@@ -9,11 +11,11 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'development',
-        INSTANCE_ID: 'omnizap-dev',
+        INSTANCE_ID: `${process.env.SYSTEM_NAME || 'omnizap'}-dev`,
       },
       env_production: {
         NODE_ENV: 'production',
-        INSTANCE_ID: 'omnizap-prod',
+        INSTANCE_ID: `${process.env.SYSTEM_NAME || 'omnizap'}-prod`,
       },
     },
   ],
