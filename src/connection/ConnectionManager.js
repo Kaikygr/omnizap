@@ -9,38 +9,6 @@ const EventEmitter = require('events');
 const logger = require('../utils/logs/logger');
 require('dotenv').config();
 
-/**
- * JSDoc type definitions for Baileys and other external types.
- * NOTE: The 'import(...)' type syntax is standard for JSDoc but causes errors with the current parser.
- * These types have been changed to 'Object' as a workaround to allow JSDoc to pass.
- * For more precise type information in documentation, the JSDoc parser/environment should be configured
- * to support 'import()' type expressions.
- * @typedef {Object} WASocket - Instância do cliente Baileys (socket WA).
- * @typedef {Object} RedisClient - Instância do cliente ioredis para Redis.
- * @typedef {{ state: AuthenticationState, saveCreds: function(): Promise<void> }} AuthObject - Objeto retornado por `useMultiFileAuthState`, contendo o estado e a função para salvar credenciais.
- * @typedef {Object} ConnectionState - Objeto de atualização do estado da conexão Baileys.
- * @typedef {Object} Boom - Objeto de erro Boom.
- * @typedef {{ error: Boom<any>=, date: Date }} LastDisconnectInfo - Informações sobre a última desconexão, incluindo o erro e a data.
- * @typedef {Object} MessagesUpsertEvent - Dados do evento 'messages.upsert' do Baileys.
- * @typedef {Object} WAMessage - Objeto de mensagem do WhatsApp (Baileys).
- * @typedef {Object} MessageUpsertType - Tipo do evento 'messages.upsert' (ex: 'notify', 'append').
- * @typedef {Object} GroupMetadata - Metadados de um grupo do WhatsApp (Baileys).
- * @typedef {Object} GroupParticipantsUpdateData - Dados do evento 'group-participants.update' do Baileys.
- * @typedef {Object} ParticipantAction - Ação em 'group-participants.update' (ex: 'add', 'remove', 'promote', 'demote').
- * @typedef {Object} MessagingHistorySet - Dados do evento 'messaging-history.set' do Baileys, contendo chats, contatos e mensagens.
- * @typedef {Object} Chat - Objeto de chat do WhatsApp (Baileys).
- * @typedef {Object} Contact - Objeto de contato do WhatsApp (Baileys).
- * @typedef {Object} WAMessageUpdate - Dados de atualização de mensagem do Baileys (evento 'messages.update').
- * @typedef {Object} WAMessageKey - Chave de identificação de uma mensagem Baileys.
- * @typedef {Object} MessageReaction - Dados de reação a uma mensagem (evento 'messages.reaction' do Baileys).
- * @typedef {Object} MessageReceipt - Objeto de recibo de mensagem Baileys (status de entrega/leitura).
- * @typedef {Object} MessageReceiptUpdate - Dados de atualização de recibo de mensagem (evento 'message-receipt.update' do Baileys).
- * @typedef {Object} CallEvent - Dados de um evento de chamada do Baileys (evento 'call').
- * @typedef {Object} PresenceEntry - Entrada individual no mapa de presenças, indicando `lastKnownPresence` e opcionalmente `lastSeen`.
- * @typedef {Object<string, PresenceEntry>} PresencesMap - Mapa de presenças, onde a chave é o JID do participante e o valor é um `PresenceEntry`.
- * @typedef {Object} PresenceUpdateData - Dados de atualização de presença (evento 'presence.update' do Baileys).
- */
-
 const env = cleanEnv(process.env, {
   BACKOFF_INITIAL_DELAY_MS: num({ default: 5000 }),
   BACKOFF_MAX_DELAY_MS: num({ default: 60000 }),
@@ -95,6 +63,7 @@ class ConnectionManager {
    * @param {number} [maxBackoffDelayMs=env.BACKOFF_MAX_DELAY_MS] - Atraso máximo para reconexão em milissegundos.
    * @param {string} [authStatePath=env.AUTH_STATE_PATH] - Caminho para o diretório onde o estado de autenticação será salvo.
    */
+  // eslint-disable-next-line max-len
   constructor(mysqlDbManager, initialBackoffDelayMs = env.BACKOFF_INITIAL_DELAY_MS, maxBackoffDelayMs = env.BACKOFF_MAX_DELAY_MS, authStatePath = env.AUTH_STATE_PATH) {
     this.instanceId = process.env.INSTANCE_ID || 'omnizap-instance';
     this.initialBackoffDelayMs = initialBackoffDelayMs;
@@ -102,6 +71,7 @@ class ConnectionManager {
     this.mysqlDbManager = mysqlDbManager;
     this.authStatePath = authStatePath;
     this.currentBackoffDelayMs = initialBackoffDelayMs;
+    this.authFlagPath = path.join(this.authStatePath, '.auth_success_flag');
     this.client = null;
     this.reconnectionAttempts = 0;
     this.maxReconnectionAttempts = 10;
@@ -120,7 +90,7 @@ class ConnectionManager {
   emitEvent(eventName, data, context = '') {
     try {
       this.eventEmitter.emit(eventName, data);
-      logger.info(`[MÉTRICA] Evento '${eventName}' emitido com sucesso.`, {
+      logger.info(`Evento '${eventName}' emitido com sucesso.`, {
         label: 'EventEmitter',
         metricName: 'event.emit.success',
         context,
@@ -130,7 +100,7 @@ class ConnectionManager {
         instanceId: this.instanceId,
       });
     } catch (error) {
-      logger.error(`[MÉTRICA] Erro ao emitir o evento '${eventName}': ${error.message}.`, {
+      logger.error(` Erro ao emitir o evento '${eventName}': ${error.message}.`, {
         label: 'EventEmitter',
         metricName: 'event.emit.error',
         error: error.message,
@@ -155,12 +125,20 @@ class ConnectionManager {
    * Inicializa a conexão principal com o WhatsApp.
    * Este método orquestra o carregamento do estado de autenticação e, em seguida,
    * tenta estabelecer a conexão com o WhatsApp.
+   *
+   * @returns {Promise<void>} A conexão estará ativa se não houver exceções.
    * @throws {Error} Propaga erros que podem ocorrer durante `loadAuthState` ou `connect`.
    */
   async initialize() {
-    logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager', instanceId: this.instanceId });
-    await this.loadAuthState();
-    await this.connect();
+    logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager.initialize', instanceId: this.instanceId });
+    try {
+      await this.loadAuthState();
+      await this.connect();
+      logger.info('Conexão com o WhatsApp estabelecida com sucesso.', { label: 'ConnectionManager.initialize', instanceId: this.instanceId });
+    } catch (error) {
+      logger.error('Erro ao inicializar a conexão com o WhatsApp.', { label: 'ConnectionManager.initialize', instanceId: this.instanceId, error: error });
+      throw error;
+    }
   }
 
   /**
@@ -168,38 +146,92 @@ class ConnectionManager {
    * Carrega o estado de autenticação do diretório especificado em `this.authStatePath`.
    * Se o diretório não existir, ele será criado.
    * Utiliza `useMultiFileAuthState` da biblioteca Baileys para gerenciar as credenciais.
+   *
+   * @returns {Promise<void>} Estado de autenticação carregado em `this.auth`.
    * @throws {Error} Se houver falha ao criar o diretório ou ao carregar o estado de autenticação.
    */
   async loadAuthState() {
     if (!fs.existsSync(this.authStatePath)) {
-      logger.info(`Diretório de estado de autenticação não encontrado em ${this.authStatePath}. Criando...`, { label: 'ConnectionManager', instanceId: this.instanceId });
+      logger.info(`Diretório de autenticação não encontrado em "${this.authStatePath}". Criando...`, {
+        label: 'ConnectionManager.loadAuthState',
+        instanceId: this.instanceId,
+      });
       try {
         fs.mkdirSync(this.authStatePath, { recursive: true });
-        logger.info(`Diretório ${this.authStatePath} criado com sucesso.`, { label: 'ConnectionManager', instanceId: this.instanceId });
+        logger.info(`Diretório "${this.authStatePath}" criado com sucesso.`, {
+          label: 'ConnectionManager.loadAuthState',
+          instanceId: this.instanceId,
+        });
       } catch (mkdirError) {
-        logger.error(`Falha ao criar o diretório ${this.authStatePath}: ${mkdirError.message}.`, { label: 'ConnectionManager', instanceId: this.instanceId });
+        logger.error(`Erro ao criar o diretório de autenticação "${this.authStatePath}": ${mkdirError.message}`, {
+          label: 'ConnectionManager.loadAuthState',
+          instanceId: this.instanceId,
+          error: mkdirError,
+        });
         throw mkdirError;
       }
     }
-    this.auth = await useMultiFileAuthState(this.authStatePath);
+
+    try {
+      this.auth = await useMultiFileAuthState(this.authStatePath);
+      logger.info('Estado de autenticação carregado com sucesso.', {
+        label: 'ConnectionManager.loadAuthState',
+        instanceId: this.instanceId,
+      });
+    } catch (authError) {
+      logger.error(`Erro ao carregar o estado de autenticação: ${authError.message}`, {
+        label: 'ConnectionManager.loadAuthState',
+        instanceId: this.instanceId,
+        error: authError,
+      });
+      throw authError;
+    }
   }
 
   /**
    * @method connect
    * Conecta-se ao WhatsApp usando o estado de autenticação carregado.
    * Configura o socket Baileys com as opções necessárias, incluindo logger e informações do navegador.
+   *
+   * @returns {Promise<void>} O socket será atribuído a `this.client` após conexão bem-sucedida.
+   * @throws {Error} Se o estado de autenticação não estiver carregado ou ocorrer erro na conexão.
    */
   async connect() {
-    const socketConfig = {
-      auth: this.auth.state,
-      logger: pino({ level: 'silent' }),
-      browser: Browsers.macOS('Desktop'),
-      syncFullHistory: true,
-      markOnlineOnConnect: false,
-      printQRInTerminal: false,
-    };
-    this.client = makeWASocket(socketConfig);
-    this.setupEventHandlers();
+    if (!this.auth) {
+      const errorMessage = 'Estado de autenticação não carregado. Execute loadAuthState() antes de connect().';
+      logger.error(errorMessage, {
+        label: 'ConnectionManager.connect',
+        instanceId: this.instanceId,
+      });
+      throw new Error(errorMessage);
+    }
+
+    try {
+      const socketConfig = {
+        auth: this.auth.state,
+        logger: pino({ level: 'silent' }),
+        browser: Browsers.macOS('Desktop'),
+        syncFullHistory: true,
+        markOnlineOnConnect: false,
+        printQRInTerminal: false,
+      };
+
+      this.client = makeWASocket(socketConfig);
+
+      logger.info('Socket do WhatsApp criado com sucesso.', {
+        label: 'ConnectionManager.connect',
+        instanceId: this.instanceId,
+      });
+
+      this.setupEventHandlers();
+    } catch (error) {
+      logger.error(`Erro ao criar socket do WhatsApp: ${error.message}`, {
+        label: 'ConnectionManager.connect',
+        instanceId: this.instanceId,
+        error,
+      });
+      throw error;
+    }
   }
 
   /**
@@ -208,102 +240,112 @@ class ConnectionManager {
    * Registra listeners para uma variedade de eventos, como atualizações de conexão,
    * recebimento de mensagens, atualizações de grupos, chats, contatos, etc.
    * Cada evento é vinculado ao método correspondente nesta classe.
+   *
+   * @throws {Error} Se o cliente WhatsApp (`this.client`) não estiver inicializado.
    */
   setupEventHandlers() {
-    this.client.ev.on('connection.update', this.handleConnectionUpdate.bind(this));
-    this.client.ev.on('creds.update', this.handleCredsUpdate.bind(this));
-    this.client.ev.on('messages.upsert', this.handleMessagesUpsert.bind(this));
-    this.client.ev.on('groups.update', this.handleGroupsUpdate.bind(this));
-    this.client.ev.on('group-participants.update', this.handleGroupParticipantsUpdate.bind(this));
-    this.client.ev.on('groups.upsert', this.handleGroupsUpsert.bind(this));
+    if (!this.client) {
+      const errorMessage = 'Cliente WhatsApp não inicializado. Execute connect() antes de setupEventHandlers().';
+      logger.error(errorMessage, {
+        label: 'ConnectionManager.setupEventHandlers',
+        instanceId: this.instanceId,
+      });
+      throw new Error(errorMessage);
+    }
 
-    this.client.ev.on('messaging-history.set', this.handleMessagingHistorySet.bind(this));
-    this.client.ev.on('messages.update', this.handleMessagesUpdate.bind(this));
-    this.client.ev.on('messages.delete', this.handleMessagesDelete.bind(this));
-    this.client.ev.on('messages.reaction', this.handleMessagesReaction.bind(this));
-    this.client.ev.on('message-receipt.update', this.handleMessageReceiptUpdate.bind(this));
+    const eventHandlers = {
+      // Conexão
+      'connection.update': this.handleConnectionUpdate,
+      'creds.update': this.handleCredsUpdate,
 
-    this.client.ev.on('chats.upsert', this.handleChatsUpsert.bind(this));
-    this.client.ev.on('chats.update', this.handleChatsUpdate.bind(this));
-    this.client.ev.on('chats.delete', this.handleChatsDelete.bind(this));
+      // Mensagens
+      'messages.upsert': this.handleMessagesUpsert,
+      'messages.update': this.handleMessagesUpdate,
+      'messages.delete': this.handleMessagesDelete,
+      'messages.reaction': this.handleMessagesReaction,
+      'message-receipt.update': this.handleMessageReceiptUpdate,
+      'messaging-history.set': this.handleMessagingHistorySet,
 
-    this.client.ev.on('contacts.upsert', this.handleContactsUpsert.bind(this));
-    this.client.ev.on('contacts.update', this.handleContactsUpdate.bind(this));
+      // Grupos
+      'groups.update': this.handleGroupsUpdate,
+      'groups.upsert': this.handleGroupsUpsert,
+      'group-participants.update': this.handleGroupParticipantsUpdate,
 
-    this.client.ev.on('blocklist.set', this.handleBlocklistSet.bind(this));
-    this.client.ev.on('blocklist.update', this.handleBlocklistUpdate.bind(this));
-    this.client.ev.on('call', this.handleCall.bind(this));
-    this.client.ev.on('presence.update', this.handlePresenceUpdate.bind(this));
-    logger.debug('Todos os manipuladores de eventos foram registrados.', { label: 'ConnectionManager', instanceId: this.instanceId });
+      // Chats
+      'chats.upsert': this.handleChatsUpsert,
+      'chats.update': this.handleChatsUpdate,
+      'chats.delete': this.handleChatsDelete,
+
+      // Contatos
+      'contacts.upsert': this.handleContactsUpsert,
+      'contacts.update': this.handleContactsUpdate,
+
+      // Outros
+      'blocklist.set': this.handleBlocklistSet,
+      'blocklist.update': this.handleBlocklistUpdate,
+      call: this.handleCall,
+      'presence.update': this.handlePresenceUpdate,
+    };
+
+    for (const [event, handler] of Object.entries(eventHandlers)) {
+      this.client.ev.on(event, handler.bind(this));
+    }
+
+    logger.debug('Todos os manipuladores de eventos foram registrados.', {
+      label: 'ConnectionManager.setupEventHandlers',
+      instanceId: this.instanceId,
+    });
   }
 
   /**
    * @method handleConnectionUpdate
    * Manipula atualizações de conexão do cliente WhatsApp.
-   * Este método é chamado quando o estado da conexão com o WhatsApp muda (evento `connection.update`).
-   * @param {Partial<ConnectionState>} update - O objeto de atualização da conexão fornecido por Baileys.
-   * @param {string} [update.connection] - O estado atual da conexão ('open', 'close', 'connecting').
-   * @param {LastDisconnectInfo} [update.lastDisconnect] - Informações sobre a última desconexão, contendo o erro (do tipo Boom) e a data.
-   * @param {string} [update.qr] - O código QR para autenticação, se aplicável.
-   *
-   * @description
-   * - Se um código QR for recebido, ele é exibido no terminal.
-   * - Se a conexão for 'open', o estado de reconexão é resetado.
-   * - Se a conexão for 'close', analisa o motivo da desconexão. Se for uma desconexão recuperável e não estiver já em processo de reconexão, inicia `reconnectWithBackoff`. Caso contrário, trata como desconexão irrecuperável.
    */
   async handleConnectionUpdate(update) {
     const { connection, lastDisconnect, qr } = update;
 
-    const authFlagFile = path.join(process.cwd(), 'omnizap_auth_successful.flag');
-
     if (qr) {
-      logger.info('[MÉTRICA] Código QR gerado para autenticação. Por favor, escaneie com seu WhatsApp:', {
-        label: 'ConnectionManager',
-        metricName: 'connection.qr.generated',
-        instanceId: this.instanceId,
-      });
-      qrcode.generate(qr, { small: true });
-
-      // Se o QR é exibido, remove qualquer flag antigo para garantir que um novo seja criado
-      if (fs.existsSync(authFlagFile)) {
-        try {
-          fs.unlinkSync(authFlagFile);
-          logger.info(`[ConnectionManager] Flag de sucesso de autenticação existente removido pois um novo QR foi gerado.`, { label: 'ConnectionManager', instanceId: this.instanceId });
-        } catch (err) {
-          logger.warn(`[ConnectionManager] Não foi possível remover o flag de sucesso de autenticação existente: ${err.message}`, { label: 'ConnectionManager', instanceId: this.instanceId });
-        }
-      }
+      this.handleQRCode(qr);
     }
 
     if (connection === STATUS.CONNECTED) {
-      logger.info('[MÉTRICA] Conexão com o WhatsApp estabelecida com sucesso!', {
+      logger.info('Conexão com o WhatsApp estabelecida com sucesso!', {
         label: 'ConnectionManager',
         metricName: 'connection.established',
         instanceId: this.instanceId,
       });
       this.resetReconnectionState();
 
-      // Verifica se as credenciais existem e cria o flag de sucesso
       const credsFilePath = path.join(this.authStatePath, 'creds.json');
       if (fs.existsSync(credsFilePath)) {
-        try {
-          // Cria o flag apenas se ele não existir, para sinalizar a autenticação inicial bem-sucedida para o script
-          if (!fs.existsSync(authFlagFile)) {
-            fs.writeFileSync(authFlagFile, new Date().toISOString());
-            logger.info(`[ConnectionManager] Flag de sucesso de autenticação criado em ${authFlagFile}`, { label: 'ConnectionManager', instanceId: this.instanceId });
+        if (!this.authFlagExists()) {
+          try {
+            this.createAuthFlag();
+            logger.info(`Flag de autenticação criado em ${this.authFlagPath}`, {
+              label: 'ConnectionManager.createAuthFlag',
+              instanceId: this.instanceId,
+            });
+          } catch (err) {
+            logger.error(`Falha ao criar o flag de autenticação: ${err.message}`, {
+              label: 'ConnectionManager.createAuthFlag',
+              instanceId: this.instanceId,
+              error: err,
+            });
           }
-        } catch (err) {
-          logger.error(`[ConnectionManager] Falha ao criar o flag de sucesso de autenticação: ${err.message}`, { label: 'ConnectionManager', instanceId: this.instanceId, error: err });
         }
       } else {
-        logger.warn(`[ConnectionManager] Conexão aberta, mas creds.json não encontrado em ${credsFilePath}. Flag de autenticação não criado.`, { label: 'ConnectionManager', instanceId: this.instanceId });
+        logger.warn(`Conexão aberta, mas creds.json não encontrado em ${credsFilePath}. Flag não criado.`, {
+          label: 'ConnectionManager.handleConnectionUpdate',
+          instanceId: this.instanceId,
+        });
       }
     }
 
     if (connection === STATUS.DISCONNECTED) {
-      const statusCode = lastDisconnect?.error?.output?.statusCode;
-      const reason = DisconnectReason[statusCode] || 'Desconhecida';
-      logger.warn(`[MÉTRICA] Conexão com o WhatsApp fechada. Motivo: ${reason} (Código: ${statusCode})`, {
+      const statusCode = lastDisconnect?.error?.output?.statusCode ?? 'unknown';
+      const reason = DisconnectReason[statusCode] || lastDisconnect?.error?.message || 'Desconhecido';
+
+      logger.warn(`Conexão com o WhatsApp fechada. Motivo: ${reason} (Código: ${statusCode})`, {
         label: 'ConnectionManager',
         metricName: 'connection.closed',
         statusCode,
@@ -322,32 +364,55 @@ class ConnectionManager {
   }
 
   /**
-   * @method shouldReconnect
-   * Determina se a reconexão deve ser tentada com base no motivo da desconexão.
-   * @param {number|undefined} statusCode - O código de status da desconexão, obtido de `lastDisconnect.error.output.statusCode`.
-   * @returns {boolean} Retorna `true` se o `statusCode` não for `DisconnectReason.loggedOut`
-   * e o número de tentativas de reconexão (`this.reconnectionAttempts`) for menor que
-   * `this.maxReconnectionAttempts`. Caso contrário, retorna `false`.
+   * @method authFlagExists
+   * @private
+   * Verifica se o arquivo de flag de autenticação bem-sucedida existe.
+   * @returns {boolean} True se o arquivo de flag existir, false caso contrário.
    */
+  authFlagExists() {
+    try {
+      return fs.existsSync(this.authFlagPath);
+    } catch (error) {
+      logger.error(`Erro ao verificar a existência do flag de autenticação em ${this.authFlagPath}: ${error.message}`, {
+        label: 'ConnectionManager.authFlagExists',
+        instanceId: this.instanceId,
+        error,
+      });
+      return false; // Em caso de erro, assume que não existe para evitar bloqueios.
+    }
+  }
+
+  /**
+   * @method createAuthFlag
+   * @private
+   * Cria um arquivo de flag para indicar que a autenticação foi bem-sucedida
+   * e as credenciais (`creds.json`) foram salvas.
+   * @throws {Error} Se houver falha ao criar o arquivo de flag.
+   */
+  createAuthFlag() {
+    // Cria um arquivo vazio como flag. O conteúdo não importa, apenas a existência.
+    fs.writeFileSync(this.authFlagPath, '');
+    // Não há necessidade de log aqui, pois é chamado por handleConnectionUpdate que já loga.
+  }
+
   shouldReconnect(statusCode) {
     return statusCode !== DisconnectReason.loggedOut && this.reconnectionAttempts < this.maxReconnectionAttempts;
   }
 
-  /**
-   * @method reconnectWithBackoff
-   * Reconecta ao WhatsApp com backoff exponencial.
-   * Incrementa o contador de tentativas de reconexão e calcula o próximo atraso
-   * de forma exponencial, limitado pelo `maxBackoffDelayMs`.
-   * Agenda uma nova tentativa de conexão (`this.connect()`) após o atraso calculado.
-   * Se a reconexão falhar, e ainda for permitido tentar novamente, chama a si mesmo recursivamente. Caso contrário, trata como desconexão irrecuperável.
-   * @param {number|undefined} statusCode - O código de status da desconexão, usado para verificar se a reconexão ainda é válida.
-   */
+  calculateNextBackoffDelay() {
+    return Math.min(this.initialBackoffDelayMs * Math.pow(2, this.reconnectionAttempts - 1), this.maxBackoffDelayMs);
+  }
+
   async reconnectWithBackoff(statusCode) {
     this.isReconnecting = true;
     this.reconnectionAttempts++;
-    this.currentBackoffDelayMs = Math.min(this.initialBackoffDelayMs * Math.pow(2, this.reconnectionAttempts - 1), this.maxBackoffDelayMs);
+    this.currentBackoffDelayMs = this.calculateNextBackoffDelay();
 
-    logger.info(`[MÉTRICA] Tentando reconexão (Tentativa ${this.reconnectionAttempts}/${this.maxReconnectionAttempts}) em ${this.currentBackoffDelayMs}ms...`, {
+    if (this.backoffTimer) {
+      clearTimeout(this.backoffTimer);
+    }
+
+    logger.info(`Tentando reconexão (Tentativa ${this.reconnectionAttempts}/${this.maxReconnectionAttempts}) em ${this.currentBackoffDelayMs}ms...`, {
       label: 'ConnectionManager',
       metricName: 'connection.reconnect.attempt',
       attempt: this.reconnectionAttempts,
@@ -357,13 +422,14 @@ class ConnectionManager {
       instanceId: this.instanceId,
     });
 
-    setTimeout(async () => {
+    this.backoffTimer = setTimeout(async () => {
       try {
         await this.connect();
         this.isReconnecting = false;
+        this.backoffTimer = null;
       } catch (err) {
-        logger.error(`[MÉTRICA] Tentativa de reconexão falhou: ${err.message}.`, {
-          label: 'ConnectionManager',
+        logger.error(`Tentativa de reconexão falhou: ${err.message}`, {
+          label: 'ConnectionManager.reconnectWithBackoff',
           metricName: 'connection.reconnect.failed_attempt',
           attempt: this.reconnectionAttempts,
           error: err.message,
@@ -371,6 +437,8 @@ class ConnectionManager {
           instanceId: this.instanceId,
         });
         this.isReconnecting = false;
+        this.backoffTimer = null;
+
         if (this.shouldReconnect(statusCode)) {
           this.reconnectWithBackoff(statusCode);
         } else {
@@ -380,31 +448,26 @@ class ConnectionManager {
     }, this.currentBackoffDelayMs);
   }
 
-  /**
-   * @method handleIrrecoverableDisconnect
-   * Manipula desconexão irrecuperável (ex: logout ou máximo de tentativas atingido).
-   * Registra um erro informando o usuário sobre a situação e a necessidade de
-   * remover os dados de autenticação e reiniciar para gerar um novo QR code.
-   * Reseta o estado de reconexão.
-   * @param {number|undefined} statusCode - O código de status da desconexão (pode ser `undefined`).
-   */
   handleIrrecoverableDisconnect(statusCode) {
-    logger.error(`[MÉTRICA] Desconexão irrecuperável. Código de Status: ${statusCode}. Por favor, remova o diretório de autenticação e reinicie para gerar um novo código QR.`, {
-      label: 'ConnectionManager',
-      metricName: 'connection.disconnected.irrecoverable',
-      statusCode,
-      instanceId: this.instanceId,
-    });
+    logger.error(
+      `Desconexão irrecuperável. Código de Status: ${statusCode}.
+  ⚠️ A sessão foi encerrada permanentemente (ex.: logout manual ou excesso de falhas).
+  ✅ Solução: exclua a pasta de autenticação "${this.authStatePath}" e reinicie para gerar um novo QR Code.`,
+      {
+        label: 'ConnectionManager.handleIrrecoverableDisconnect',
+        metricName: 'connection.disconnected.irrecoverable',
+        statusCode,
+        instanceId: this.instanceId,
+      },
+    );
     this.resetReconnectionState();
   }
 
-  /**
-   * @method resetReconnectionState
-   * Reseta o estado de reconexão.
-   * Define `this.reconnectionAttempts` para 0, `this.currentBackoffDelayMs` para `this.initialBackoffDelayMs`,
-   * e `this.isReconnecting` para `false`.
-   */
   resetReconnectionState() {
+    if (this.backoffTimer) {
+      clearTimeout(this.backoffTimer);
+      this.backoffTimer = null;
+    }
     this.reconnectionAttempts = 0;
     this.currentBackoffDelayMs = this.initialBackoffDelayMs;
     this.isReconnecting = false;
@@ -413,38 +476,37 @@ class ConnectionManager {
   /**
    * @method handleCredsUpdate
    * Manipula a atualização de credenciais.
-   * Este método é chamado por Baileys quando as credenciais de autenticação são atualizadas (por exemplo, após escanear o QR code ou durante a reconexão).
    * Salva as novas credenciais usando `this.auth.saveCreds()`.
+   * Faz log de sucesso e captura falhas no processo.
    */
   async handleCredsUpdate() {
-    await this.auth.saveCreds();
-    logger.info('[MÉTRICA] Credenciais de autenticação salvas/atualizadas.', {
-      label: 'ConnectionManager',
-      metricName: 'auth.credentials.updated',
-      instanceId: this.instanceId,
-    });
+    try {
+      await this.auth.saveCreds();
+      logger.info('Credenciais de autenticação salvas/atualizadas.', {
+        label: 'ConnectionManager.handleCredsUpdate',
+        metricName: 'auth.credentials.updated',
+        instanceId: this.instanceId,
+      });
+    } catch (err) {
+      logger.error(`❌ Falha ao salvar as credenciais de autenticação: ${err.message}`, {
+        label: 'ConnectionManager.handleCredsUpdate',
+        metricName: 'auth.credentials.save_failed',
+        instanceId: this.instanceId,
+        error: err,
+        stack: err.stack,
+      });
+    }
   }
 
   /**
    * @method handleMessagesUpsert
-   * Manipula mensagens novas/atualizadas.
-   * Este método é chamado quando novas mensagens são recebidas ou mensagens existentes são atualizadas (evento 'messages.upsert').
-   * @param {MessagesUpsertEvent} data - Os dados do evento 'messages.upsert' de Baileys.
-   * @param {WAMessage[]} data.messages - Array de mensagens recebidas/atualizadas.
-   * @param {MessageUpsertType} data.type - O tipo de "upsert" (ex: 'notify', 'append').
-   *
-   * @description
-   * Para cada mensagem:
-   * 1. Determina o tipo de conteúdo da mensagem usando `getContentType`.
-   * 2. Se a mensagem tiver uma chave válida (`remoteJid` e `id`), ela é processada.
-   * 3. A mensagem, junto com seu tipo de conteúdo e um objeto `receipts` inicializado, é preparada.
-   * 4. Se `this.mysqlDbManager` estiver configurado, a mensagem também é salva (upsert) no banco de dados MySQL.
-   * 5. Erros durante o salvamento no Redis ou MySQL são registrados.
+   * Manipula mensagens novas/atualizadas recebidas do evento 'messages.upsert'.
    */
   async handleMessagesUpsert(data) {
     const { messages, type } = data;
-    logger.info(`[MÉTRICA] Recebido(s) ${messages.length} mensagem(ns) no evento 'messages.upsert'. Tipo: ${type}. Preparando para processamento em lote.`, {
-      label: 'ConnectionManager',
+
+    logger.info(`Recebido(s) ${messages.length} mensagem(ns) no evento 'messages.upsert'. Tipo: ${type}.`, {
+      label: 'ConnectionManager.handleMessagesUpsert',
       metricName: 'messages.upsert.recebidas',
       count: messages.length,
       type,
@@ -452,69 +514,86 @@ class ConnectionManager {
     });
 
     const messagesToProcess = [];
-    const originalMessagesForEvent = [];
+    const messagesForEventEmission = [];
 
     for (const msg of messages) {
       const messageContentType = msg.message ? getContentType(msg.message) : null;
       const { key: messageKey } = msg;
 
       if (messageContentType) {
-        logger.debug(`Tipo de conteúdo da mensagem ${messageKey?.id}: ${messageContentType}.`, { label: 'ConnectionManager', messageKey, contentType: messageContentType, instanceId: this.instanceId });
+        logger.debug(`Tipo de conteúdo da mensagem ${messageKey?.id}: ${messageContentType}.`, {
+          label: 'ConnectionManager.handleMessagesUpsert',
+          messageKey,
+          contentType: messageContentType,
+          instanceId: this.instanceId,
+        });
       } else {
-        logger.warn(`Não foi possível determinar o tipo de conteúdo para a mensagem ${messageKey?.id}. Pode ser um evento como exclusão de mensagem.`, { label: 'ConnectionManager', messageKey, instanceId: this.instanceId, messageDetails: msg });
+        logger.warn(`Não foi possível determinar o tipo de conteúdo para a mensagem ${messageKey?.id}. Pode ser um evento de sistema.`, {
+          label: 'ConnectionManager.handleMessagesUpsert',
+          messageKey,
+          instanceId: this.instanceId,
+          messageDetails: msg,
+        });
       }
 
-      if (messageKey && messageKey.remoteJid && messageKey.id) {
-        const messageToStore = {
+      if (messageKey?.remoteJid && messageKey?.id) {
+        const enrichedMessage = {
           ...msg,
           messageContentType,
           instanceId: this.instanceId,
         };
-        messagesToProcess.push(messageToStore);
-        originalMessagesForEvent.push(messageToStore); // Keep a reference for event emission
+        messagesToProcess.push(enrichedMessage);
+        messagesForEventEmission.push(enrichedMessage);
       } else {
-        logger.warn('Mensagem recebida sem chave completa ou ID, não foi possível processar para o BD.', { label: 'ConnectionManager', messageKey: msg.key, instanceId: this.instanceId });
+        logger.warn('Mensagem recebida sem chave completa. Ignorada para persistência.', {
+          label: 'ConnectionManager.handleMessagesUpsert',
+          messageKey,
+          instanceId: this.instanceId,
+        });
       }
-      logger.debug(`Conteúdo da mensagem original: ${msg.key?.id}.`, { label: 'ConnectionManager', messageKey: msg.key, messageDetails: msg, instanceId: this.instanceId });
+
+      logger.debug(`Conteúdo bruto da mensagem ${messageKey?.id}:`, {
+        label: 'ConnectionManager.handleMessagesUpsert',
+        messageKey,
+        messageDetails: msg,
+        instanceId: this.instanceId,
+      });
     }
 
     if (this.mysqlDbManager && messagesToProcess.length > 0) {
       try {
-        // Assume upsertMessagesBatch handles both message and related chat updates
-        // and returns an array of results (e.g., dbPersistedMessage objects) or modifies messages in place.
-        // For this example, let's assume it returns an array of objects that can augment the original messages.
         const batchResults = await this.mysqlDbManager.upsertMessagesBatch(messagesToProcess);
 
-        logger.info(`[MÉTRICA] ${messagesToProcess.length} mensagens processadas em lote pelo MySQL.`, {
-          label: 'MySQLSync',
+        logger.info(`Processadas ${messagesToProcess.length} mensagens no MySQL.`, {
+          label: 'MySQLSync.handleMessagesUpsert',
           metricName: 'messages.mysql.batch_upsert.success',
           count: messagesToProcess.length,
           instanceId: this.instanceId,
         });
 
-        // Emit events for each message, potentially augmented with batch results
-        originalMessagesForEvent.forEach((originalMsg, index) => {
-          let dataForEvent = { ...originalMsg };
-          if (batchResults && batchResults[index] && typeof batchResults[index] === 'object') {
-            dataForEvent = { ...dataForEvent, ...batchResults[index] }; // Augment with DB specific info if returned
-          }
-          this.emitEvent('message:upsert:received', dataForEvent, 'messages.upsert');
+        messagesForEventEmission.forEach((msg, index) => {
+          const enrichedMsg = {
+            ...msg,
+            ...(batchResults?.[index] || {}),
+          };
+          this.emitEvent('message:upsert:received', enrichedMsg, 'messages.upsert');
         });
       } catch (dbError) {
-        logger.error(`[MÉTRICA] Erro no MySQL durante o upsert em lote de ${messagesToProcess.length} mensagens: ${dbError.message}.`, {
-          label: 'SyncError',
+        logger.error(`Erro no MySQL durante o batch upsert de ${messagesToProcess.length} mensagens: ${dbError.message}`, {
+          label: 'SyncError.handleMessagesUpsert.MySQL',
           metricName: 'messages.mysql.batch_upsert.error',
           count: messagesToProcess.length,
           error: dbError.message,
           stack: dbError.stack,
           instanceId: this.instanceId,
         });
-        // Fallback: emit events with original data if DB batch fails
-        originalMessagesForEvent.forEach((msg) => this.emitEvent('message:upsert:received', msg, 'messages.upsert'));
+
+        messagesForEventEmission.forEach((msg) => {
+          this.emitEvent('message:upsert:received', msg, 'messages.upsert');
+        });
       }
-    } else if (originalMessagesForEvent.length > 0) {
-      // No mysqlDbManager, but still emit events for messages that were valid for event emission
-      originalMessagesForEvent.forEach((msg) => {
+    } else if (messagesForEventEmission.length > 0) {
+      messagesForEventEmission.forEach((msg) => {
         this.emitEvent('message:upsert:received', msg, 'messages.upsert');
       });
     }
@@ -570,7 +649,7 @@ class ConnectionManager {
         if (this.mysqlDbManager) {
           try {
             await this.mysqlDbManager.upsertGroup(finalMetadata);
-            logger.info(`[MÉTRICA] Metadados do grupo ${jid} atualizados no MySQL. Contexto: ${context}.`, {
+            logger.info(` Metadados do grupo ${jid} atualizados no MySQL. Contexto: ${context}.`, {
               label: 'MySQLSync',
               metricName: 'group.metadata.mysql.updated',
               jid,
@@ -578,7 +657,7 @@ class ConnectionManager {
               instanceId: this.instanceId,
             });
           } catch (dbError) {
-            logger.error(`[MÉTRICA] Erro ao atualizar metadados do grupo ${jid} no MySQL. Contexto: ${context}. Erro: ${dbError.message}.`, {
+            logger.error(` Erro ao atualizar metadados do grupo ${jid} no MySQL. Contexto: ${context}. Erro: ${dbError.message}.`, {
               label: 'MySQLSyncError',
               metricName: 'group.metadata.mysql.error',
               jid,
@@ -703,7 +782,7 @@ class ConnectionManager {
     if (this.mysqlDbManager && validGroupsToUpsert.length > 0) {
       try {
         await this.mysqlDbManager.upsertGroupsBatch(validGroupsToUpsert); // Assumed batch method
-        logger.info(`[MÉTRICA] ${validGroupsToUpsert.length} grupos atualizados/inseridos em lote a partir de 'groups.upsert'.`, {
+        logger.info(` ${validGroupsToUpsert.length} grupos atualizados/inseridos em lote a partir de 'groups.upsert'.`, {
           label: 'MySQLSync',
           metricName: 'group.mysql.batch_upsert.success',
           count: validGroupsToUpsert.length,
@@ -713,7 +792,7 @@ class ConnectionManager {
           this.emitEvent('group:metadata:updated', { jid: metadata.id, metadata, context: 'groups.upsert' }, 'groups.upsert');
         });
       } catch (dbError) {
-        logger.error(`[MÉTRICA] Erro ao atualizar/inserir em lote ${validGroupsToUpsert.length} grupos a partir de 'groups.upsert': ${dbError.message}.`, {
+        logger.error(` Erro ao atualizar/inserir em lote ${validGroupsToUpsert.length} grupos a partir de 'groups.upsert': ${dbError.message}.`, {
           label: 'MySQLSyncError',
           metricName: 'group.mysql.batch_upsert.error',
           count: validGroupsToUpsert.length,
@@ -747,7 +826,7 @@ class ConnectionManager {
    */
   async handleMessagingHistorySet(data) {
     const { chats, contacts, messages } = data;
-    logger.info(`[MÉTRICA] Evento 'messaging-history.set' recebido. Chats: ${chats.length}, Contatos: ${contacts.length}, Mensagens: ${messages.length}.`, {
+    logger.info(` Evento 'messaging-history.set' recebido. Chats: ${chats.length}, Contatos: ${contacts.length}, Mensagens: ${messages.length}.`, {
       label: 'ConnectionManager',
       metricName: 'messaging_history.set.recebido',
       counts: { chats: chats.length, contacts: contacts.length, messages: messages.length },
@@ -760,14 +839,14 @@ class ConnectionManager {
           if (this.mysqlDbManager) {
             try {
               await this.mysqlDbManager.upsertChat(chat);
-              logger.info(`[MÉTRICA] Chat ${chat.id} do histórico salvo no MySQL.`, {
+              logger.info(` Chat ${chat.id} do histórico salvo no MySQL.`, {
                 label: 'MySQLSync',
                 metricName: 'history.chat.mysql.success',
                 jid: chat.id,
                 instanceId: this.instanceId,
               });
             } catch (dbError) {
-              logger.error(`[MÉTRICA] Erro ao salvar chat ${chat.id} do histórico no MySQL: ${dbError.message}.`, {
+              logger.error(` Erro ao salvar chat ${chat.id} do histórico no MySQL: ${dbError.message}.`, {
                 label: 'MySQLSyncError',
                 metricName: 'history.chat.mysql.error',
                 jid: chat.id,
@@ -778,7 +857,7 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[MÉTRICA] Erro ao processar chat ${chat.id} do histórico (BD ou outro): ${error.message}.`, {
+          logger.error(` Erro ao processar chat ${chat.id} do histórico (BD ou outro): ${error.message}.`, {
             label: 'SyncError',
             metricName: 'history.chat.processing.error',
             jid: chat.id,
@@ -808,14 +887,14 @@ class ConnectionManager {
           if (this.mysqlDbManager) {
             try {
               await this.mysqlDbManager.upsertMessage(messageToStore);
-              logger.info(`[MÉTRICA] Mensagem do histórico ${msg.key.id} salva no MySQL.`, {
+              logger.info(` Mensagem do histórico ${msg.key.id} salva no MySQL.`, {
                 label: 'MySQLSync',
                 metricName: 'history.message.mysql.success',
                 messageKey: msg.key,
                 instanceId: this.instanceId,
               });
             } catch (dbError) {
-              logger.error(`[MÉTRICA] Erro ao salvar mensagem do histórico ${msg.key.id} no MySQL: ${dbError.message}.`, {
+              logger.error(` Erro ao salvar mensagem do histórico ${msg.key.id} no MySQL: ${dbError.message}.`, {
                 label: 'MySQLSyncError',
                 metricName: 'history.message.mysql.error',
                 messageKey: msg.key,
@@ -826,7 +905,7 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[MÉTRICA] Erro ao processar mensagem do histórico ${msg.key.id} (BD ou outro): ${error.message}.`, {
+          logger.error(` Erro ao processar mensagem do histórico ${msg.key.id} (BD ou outro): ${error.message}.`, {
             label: 'SyncError',
             metricName: 'history.message.processing.error',
             messageKey: msg.key,
@@ -849,7 +928,7 @@ class ConnectionManager {
    * @description Atualmente, este método apenas registra as atualizações recebidas. Nenhuma ação de persistência ou cache é realizada aqui.
    */
   handleMessagesUpdate(updates) {
-    logger.info(`[MÉTRICA] Evento 'messages.update' recebido. Número de atualizações: ${updates.length}.`, {
+    logger.info(` Evento 'messages.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
       metricName: 'messages.update.recebido',
       count: updates.length,
@@ -874,7 +953,7 @@ class ConnectionManager {
    * @description Atualmente, este método apenas registra o evento de exclusão. Nenhuma ação de remoção do cache ou banco de dados é realizada aqui.
    */
   handleMessagesDelete(deletion) {
-    logger.info(`[MÉTRICA] Evento 'messages.delete' recebido.`, {
+    logger.info(` Evento 'messages.delete' recebido.`, {
       label: 'ConnectionManager',
       metricName: 'messages.delete.recebido',
       deletionDetails: deletion,
@@ -891,7 +970,7 @@ class ConnectionManager {
    * @description Atualmente, este método apenas registra as reações recebidas. Nenhuma ação de persistência ou cache é realizada aqui.
    */
   handleMessagesReaction(reactions) {
-    logger.info(`[MÉTRICA] Evento 'messages.reaction' recebido. Número de reações: ${reactions.length}.`, {
+    logger.info(` Evento 'messages.reaction' recebido. Número de reações: ${reactions.length}.`, {
       label: 'ConnectionManager',
       metricName: 'messages.reaction.recebido',
       count: reactions.length,
@@ -928,7 +1007,7 @@ class ConnectionManager {
    * 5. Erros durante o processo são registrados.
    */
   async handleMessageReceiptUpdate(receipts) {
-    logger.info(`[MÉTRICA] Evento 'message-receipt.update' recebido. Número de recibos: ${receipts.length}.`, {
+    logger.info(` Evento 'message-receipt.update' recebido. Número de recibos: ${receipts.length}.`, {
       label: 'ConnectionManager',
       metricName: 'message_receipt.update.recebido',
       count: receipts.length,
@@ -954,14 +1033,14 @@ class ConnectionManager {
       try {
         // Assumed batch method: upsertMessageReceiptsBatch(receiptsToUpsert)
         await this.mysqlDbManager.upsertMessageReceiptsBatch(receiptsToUpsert);
-        logger.info(`[MÉTRICA] ${receiptsToUpsert.length} recibos de mensagem atualizados/inseridos em lote no MySQL.`, {
+        logger.info(` ${receiptsToUpsert.length} recibos de mensagem atualizados/inseridos em lote no MySQL.`, {
           label: 'MySQLSync',
           metricName: 'message.receipt.mysql.batch_upserted',
           count: receiptsToUpsert.length,
           instanceId: this.instanceId,
         });
       } catch (dbError) {
-        logger.error(`[MÉTRICA] Erro ao atualizar/inserir em lote ${receiptsToUpsert.length} recibos de mensagem no MySQL: ${dbError.message}.`, {
+        logger.error(` Erro ao atualizar/inserir em lote ${receiptsToUpsert.length} recibos de mensagem no MySQL: ${dbError.message}.`, {
           label: 'MySQLSyncError',
           metricName: 'message.receipt.mysql.batch_error',
           count: receiptsToUpsert.length,
@@ -995,7 +1074,7 @@ class ConnectionManager {
    */
   /* // Original handleMessageReceiptUpdate method content for reference
   async handleMessageReceiptUpdate(receipts) {
-    logger.info(`[MÉTRICA] Evento 'message-receipt.update' recebido. Número de recibos: ${receipts.length}.`, {
+    logger.info(` Evento 'message-receipt.update' recebido. Número de recibos: ${receipts.length}.`, {
       label: 'ConnectionManager',
       metricName: 'message_receipt.update.recebido',
       count: receipts.length,
@@ -1010,7 +1089,7 @@ class ConnectionManager {
             try {
               const timestamp = receipt.receiptTimestamp || receipt.readTimestamp || receipt.playedTimestamp;
               await this.mysqlDbManager.upsertMessageReceipt(key, receipt.userJid, receipt.type, timestamp);
-              logger.info(`[MÉTRICA] Recibo de mensagem para ${key.id} (usuário ${receipt.userJid}) atualizado/inserido no MySQL.`, {
+              logger.info(` Recibo de mensagem para ${key.id} (usuário ${receipt.userJid}) atualizado/inserido no MySQL.`, {
                 label: 'MySQLSync',
                 metricName: 'message.receipt.mysql.upserted',
                 messageId: key.id,
@@ -1020,7 +1099,7 @@ class ConnectionManager {
                 instanceId: this.instanceId,
               });
             } catch (dbError) {
-              logger.error(`[MÉTRICA] Erro ao atualizar/inserir recibo de mensagem para ${key.id} no MySQL: ${dbError.message}.`, {
+              logger.error(` Erro ao atualizar/inserir recibo de mensagem para ${key.id} no MySQL: ${dbError.message}.`, {
                 label: 'MySQLSyncError',
                 metricName: 'message.receipt.mysql.error',
                 messageKey: key,
@@ -1032,7 +1111,7 @@ class ConnectionManager {
             }
           }
         } catch (error) {
-          logger.error(`[MÉTRICA] Erro ao processar recibo de mensagem para ${key.id} (BD/outro): ${error.message}.`, {
+          logger.error(` Erro ao processar recibo de mensagem para ${key.id} (BD/outro): ${error.message}.`, {
             label: 'SyncError',
             metricName: 'message.receipt.db.error', // Mais específico para erro de DB
             messageKey: key,
@@ -1059,7 +1138,7 @@ class ConnectionManager {
    * 3. Erros durante o processo são registrados.
    */
   async handleChatsUpsert(chats) {
-    logger.info(`[MÉTRICA] Evento 'chats.upsert' recebido. Número de chats: ${chats.length}.`, {
+    logger.info(` Evento 'chats.upsert' recebido. Número de chats: ${chats.length}.`, {
       label: 'ConnectionManager',
       metricName: 'chats.upsert.recebido',
       count: chats.length,
@@ -1071,14 +1150,14 @@ class ConnectionManager {
     if (this.mysqlDbManager && validChats.length > 0) {
       try {
         await this.mysqlDbManager.upsertChatsBatch(validChats); // Assumed batch method
-        logger.info(`[MÉTRICA] ${validChats.length} chats atualizados/inseridos em lote no MySQL.`, {
+        logger.info(` ${validChats.length} chats atualizados/inseridos em lote no MySQL.`, {
           label: 'MySQLSync',
           metricName: 'chat.mysql.batch_upsert.success',
           count: validChats.length,
           instanceId: this.instanceId,
         });
       } catch (dbError) {
-        logger.error(`[MÉTRICA] Erro ao atualizar/inserir em lote ${validChats.length} chats no MySQL: ${dbError.message}.`, {
+        logger.error(` Erro ao atualizar/inserir em lote ${validChats.length} chats no MySQL: ${dbError.message}.`, {
           label: 'MySQLSyncError',
           metricName: 'chat.mysql.batch_upsert.error',
           count: validChats.length,
@@ -1111,7 +1190,7 @@ class ConnectionManager {
    * 3. Erros durante o processo são registrados.
    */
   async handleChatsUpdate(updates) {
-    logger.info(`[MÉTRICA] Evento 'chats.update' recebido. Número de atualizações: ${updates.length}.`, {
+    logger.info(` Evento 'chats.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
       metricName: 'chats.update.recebido',
       count: updates.length,
@@ -1158,7 +1237,7 @@ class ConnectionManager {
    * 3. Erros durante o processo são registrados.
    */
   async handleChatsDelete(jids) {
-    logger.info(`[MÉTRICA] Evento 'chats.delete' recebido. Número de JIDs: ${jids.length}.`, {
+    logger.info(` Evento 'chats.delete' recebido. Número de JIDs: ${jids.length}.`, {
       label: 'ConnectionManager',
       metricName: 'chats.delete.recebido',
       count: jids.length,
@@ -1169,14 +1248,14 @@ class ConnectionManager {
         if (this.mysqlDbManager) {
           try {
             await this.mysqlDbManager.deleteChatData(jid);
-            logger.info(`[MÉTRICA] Dados do chat para ${jid} removidos do MySQL.`, {
+            logger.info(` Dados do chat para ${jid} removidos do MySQL.`, {
               label: 'MySQLSync',
               metricName: 'chat.mysql.delete.success',
               jid,
               instanceId: this.instanceId,
             });
           } catch (dbError) {
-            logger.error(`[MÉTRICA] Erro ao remover dados do chat para ${jid} do MySQL: ${dbError.message}.`, {
+            logger.error(` Erro ao remover dados do chat para ${jid} do MySQL: ${dbError.message}.`, {
               label: 'MySQLSyncError',
               metricName: 'chat.mysql.delete.error',
               jid,
@@ -1187,7 +1266,7 @@ class ConnectionManager {
           }
         }
       } catch (error) {
-        logger.error(`[MÉTRICA] Erro ao processar exclusão de chat para ${jid} (BD ou outro): ${error.message}.`, {
+        logger.error(` Erro ao processar exclusão de chat para ${jid} (BD ou outro): ${error.message}.`, {
           label: 'SyncError',
           metricName: 'chat.processing.delete.error',
           jid,
@@ -1211,7 +1290,7 @@ class ConnectionManager {
    * 2. (Atualmente, não há persistência de contatos no MySQL neste handler, apenas log).
    */
   async handleContactsUpsert(contacts) {
-    logger.info(`[MÉTRICA] Evento 'contacts.upsert' recebido. Número de contatos: ${contacts.length}.`, {
+    logger.info(` Evento 'contacts.upsert' recebido. Número de contatos: ${contacts.length}.`, {
       label: 'ConnectionManager',
       metricName: 'contacts.upsert.recebido',
       count: contacts.length,
@@ -1245,7 +1324,7 @@ class ConnectionManager {
    * }]);
    */
   async handleContactsUpdate(updates) {
-    logger.info(`[MÉTRICA] Evento 'contacts.update' recebido. Número de atualizações: ${updates.length}.`, {
+    logger.info(` Evento 'contacts.update' recebido. Número de atualizações: ${updates.length}.`, {
       label: 'ConnectionManager',
       metricName: 'contacts.update.recebido',
       count: updates.length,
@@ -1274,7 +1353,7 @@ class ConnectionManager {
    * });
    */
   handleBlocklistSet(data) {
-    logger.info(`[MÉTRICA] Evento 'blocklist.set' recebido. Contagem: ${data.blocklist?.length || 0}.`, {
+    logger.info(` Evento 'blocklist.set' recebido. Contagem: ${data.blocklist?.length || 0}.`, {
       label: 'ConnectionManager',
       metricName: 'blocklist.set.recebido',
       blocklist: data.blocklist, // Log the actual list for debugging if needed, or just count
@@ -1298,7 +1377,7 @@ class ConnectionManager {
    * });
    */
   handleBlocklistUpdate(data) {
-    logger.info(`[MÉTRICA] Evento 'blocklist.update' recebido. Ação: ${data.action}, Contagem de JIDs: ${data.jids?.length || 0}.`, {
+    logger.info(` Evento 'blocklist.update' recebido. Ação: ${data.action}, Contagem de JIDs: ${data.jids?.length || 0}.`, {
       label: 'ConnectionManager',
       metricName: 'blocklist.update.recebido',
       action: data.action,
@@ -1331,7 +1410,7 @@ class ConnectionManager {
   handleCall(callEvents) {
     // Baileys usually emits an array with a single event.
     const callEvent = callEvents && callEvents.length > 0 ? callEvents[0] : null;
-    logger.info(`[MÉTRICA] Evento 'call' recebido. Status: ${callEvent?.status}, De: ${callEvent?.from}.`, {
+    logger.info(` Evento 'call' recebido. Status: ${callEvent?.status}, De: ${callEvent?.from}.`, {
       label: 'ConnectionManager',
       metricName: 'call.event.recebido',
       callData: callEvent, // Log the first event, or all if structure changes

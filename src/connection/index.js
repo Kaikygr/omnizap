@@ -15,10 +15,10 @@ const messageController = require('../controllers/MessageController');
  */
 async function start() {
   try {
-    logger.info('Iniciando aplicação Omnizap...', { label: 'Application' });
+    logger.info('Iniciando aplicação Omnizap...', { label: 'Application.start' });
 
     const mysqlDbManager = await getMySQLDBManagerInstance();
-    logger.info('MySQLDBManager inicializado.', { label: 'Application' });
+    logger.info('MySQLDBManager inicializado.', { label: 'Application.start' });
 
     const connectionManager = new ConnectionManager(mysqlDbManager);
 
@@ -26,20 +26,20 @@ async function start() {
 
     const messageEmitter = connectionManager.getEventEmitter();
     messageEmitter.on('message:upsert:received', (message) => {
-      logger.info(`[Application] Nova mensagem (ID: ${message.key?.id}) encaminhada para MessageController.`, { label: 'Application', messageId: message.key?.id, instanceId: message.instanceId });
+      logger.info(`[Application] Nova mensagem (ID: ${message.key?.id}) encaminhada para MessageController.`, { label: 'Application.messageEmitter', messageId: message.key?.id, instanceId: message.instanceId });
       messageController
         .processIncomingMessage(message, connectionManager.client)
         .then((result) => {
-          logger.debug(`[Application] MessageController processou a mensagem ID: ${message.key?.id}. Resultado: ${result?.status || 'N/A'}`, { label: 'Application', messageId: message.key?.id, controllerResult: result });
+          logger.debug(`[ Application.messageEmitter ] MessageController processou a mensagem ID: ${message.key?.id}. Resultado: ${result?.status || 'N/A'}`, { label: 'Application.messageEmitter', messageId: message.key?.id, controllerResult: result });
         })
         .catch((error) => {
-          logger.error(`[Application] Erro ao processar mensagem ID: ${message.key?.id} pelo MessageController: ${error.message}`, { label: 'Application', messageId: message.key?.id, error: error.message, stack: error.stack });
+          logger.error(`[ Application.messageEmitter ] Erro ao processar mensagem ID: ${message.key?.id} pelo MessageController: ${error.message}`, { label: 'Application.messageEmitter', messageId: message.key?.id, error: error.message, stack: error.stack });
         });
     });
 
-    logger.info('Aplicação Omnizap iniciada e pronta.', { label: 'Application' });
+    logger.info('Aplicação Omnizap iniciada e pronta.', { label: 'Application.start' });
   } catch (error) {
-    logger.error('Falha ao iniciar a aplicação Omnizap:', { label: 'Application', message: error.message, stack: error.stack });
+    logger.error('Falha ao iniciar a aplicação Omnizap:', { label: 'Application.start', message: error.message, stack: error.stack });
     process.exit(1);
   }
 }
