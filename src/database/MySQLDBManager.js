@@ -14,37 +14,6 @@ const env = cleanEnv(process.env, {
   MYSQL_DATABASE_NAME: str({ default: 'omnizap' }),
 });
 
-/**
- * JSDoc type definitions for external types used within MySQLDBManager.
- * NOTE: The 'import(...)' type syntax is standard for JSDoc but may cause errors with some parsers.
- * These types are often simplified to 'Object' or a more generic JSDoc type as a workaround.
- * For more precise type information in documentation, the JSDoc parser/environment should be configured
- * to support 'import()' type expressions or TypeScript definition files.
- *
- * @typedef {Object} MySQLPool - Represents the mysql2/promise Pool object.
- * @typedef {Object} BaileysWAMessage - Represents the WAMessage object from Baileys.
- * @typedef {Object} BaileysWAMessageKey - Represents the WAMessageKey object from Baileys.
- * @typedef {Object} BaileysWAMessageContent - Represents the WAMessageContent object from Baileys.
- * @typedef {Object} LongJsObject - Represents a Long.js object, often used for timestamps.
- * @typedef {{id: string, admin: (('admin'|'superadmin')|null)=}} GroupParticipant
- * @class MySQLDBManager
- * @description
- * Gerencia todas as interações com o banco de dados MySQL. É responsável por
- * estabelecer a conexão, criar/verificar o banco de dados e tabelas,
- * executar queries SQL e fornecer métodos para operações CRUD (Create, Read, Update, Delete)
- * específicas para as entidades da aplicação (Chats, Grupos, Mensagens, Recibos).
- * Utiliza um pool de conexões para otimizar o desempenho e o gerenciamento de recursos.
- *
- * As configurações de conexão com o MySQL (host, porta, usuário, senha, nome do banco)
- * são obtidas a partir de variáveis de ambiente, validadas por `envalid`.
- *
- * @property {(MySQLPool | null)} pool - O pool de conexões MySQL. Inicializado como `null` e
- * populado após a conexão bem-sucedida no método `initialize`.
- * @property {{host: string, port: number, user: string, password: string}} dbConfig - Objeto contendo as configurações de conexão com o MySQL
- * (host, porta, usuário, senha), excluindo o nome do banco de dados.
- * @property {string} dbName - O nome do banco de dados MySQL a ser utilizado.
- */
-
 class MySQLDBManager {
   /**
    * @constructor
