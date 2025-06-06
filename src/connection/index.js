@@ -1,4 +1,4 @@
-const ConnectionManager = require('./ConnectionManager');
+const connectionManager = require('./ConnectionManager'); // Import the module directly
 const { getInstance: getMySQLDBManagerInstance } = require('./../database/MySQLDBManager');
 const logger = require('./../utils/logs/logger');
 const messageController = require('../controllers/MessageController');
@@ -20,15 +20,17 @@ async function start() {
     const mysqlDbManager = await getMySQLDBManagerInstance();
     logger.info('MySQLDBManager inicializado.', { label: 'Application.start' });
 
-    const connectionManager = new ConnectionManager(mysqlDbManager);
-
+    // Initialize the connection using the exported function
+    // The mysqlDbManager is no longer passed to ConnectionManager
     await connectionManager.initialize();
 
     const messageEmitter = connectionManager.getEventEmitter();
+    const waClient = connectionManager.getClient(); // Get the Baileys client instance
+
     messageEmitter.on('message:upsert:received', (message) => {
       logger.info(`[Application] Nova mensagem (ID: ${message.key?.id}) encaminhada para MessageController.`, { label: 'Application.messageEmitter', messageId: message.key?.id, instanceId: message.instanceId });
       messageController
-        .processIncomingMessage(message, connectionManager.client)
+        .processIncomingMessage(message, waClient) // Pass the client instance
         .then((result) => {
           logger.debug(`[ Application.messageEmitter ] MessageController processou a mensagem ID: ${message.key?.id}. Resultado: ${result?.status || 'N/A'}`, { label: 'Application.messageEmitter', messageId: message.key?.id, controllerResult: result });
         })
