@@ -8,6 +8,9 @@ const { cleanEnv, num, str } = require('envalid');
 const EventEmitter = require('events');
 
 const logger = require('../utils/logs/logger');
+const DataManager = require('../services/DataManager');
+const BatchManager = require('../services/BatchManager');
+const batchConfig = require('../config/batchConfig');
 require('dotenv').config();
 
 const env = cleanEnv(process.env, {
@@ -36,6 +39,9 @@ const authStatePath = env.AUTH_STATE_PATH;
 const initialBackoffDelayMs = env.BACKOFF_INITIAL_DELAY_MS;
 const maxBackoffDelayMs = env.BACKOFF_MAX_DELAY_MS;
 const authFlagPath = path.join(authStatePath, '.auth_success_flag');
+
+let dataManager = null;
+let batchManager = null;
 
 function emitEvent(eventName, data, context = '') {
   try {
@@ -186,6 +192,56 @@ async function connect() {
 async function initialize() {
   logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager.initialize', instanceId });
   try {
+    // Inicializa o gerenciador de lotes com configurações otimizadas
+    batchManager = new BatchManager({
+      instanceId,
+      batchSize: batchConfig.batchManager.batchSize,
+      flushInterval: batchConfig.batchManager.flushInterval,
+    });
+
+    // Inicializa o gerenciador de dados com configurações otimizadas
+    dataManager = new DataManager({
+      instanceId,
+      batchSize: batchConfig.dataManager.batchSize,
+      flushInterval: batchConfig.dataManager.flushInterval,
+      cacheTTL: batchConfig.dataManager.cacheTTL,
+      cacheMaxSize: batchConfig.dataManager.cacheMaxSize,
+    });
+
+    // Conecta BatchManager com DataManager
+    batchManager.registerProcessor('messages', async (messages) => {
+      logger.info(`Processando lote de ${messages.length} mensagens via DataManager`, {
+        label: 'ConnectionManager.batchProcessor',
+        count: messages.length,
+        instanceId,
+      });
+
+      for (const message of messages) {
+        dataManager.addMessage(message);
+      }
+    });
+
+    batchManager.registerProcessor('chats', async (chats) => {
+      for (const chat of chats) {
+        dataManager.addChat(chat);
+      }
+    });
+
+    batchManager.registerProcessor('groups', async (groups) => {
+      for (const group of groups) {
+        dataManager.addGroup(group);
+      }
+    });
+
+    batchManager.start();
+
+    logger.info('DataManager e BatchManager inicializados com processamento em lote otimizado', {
+      label: 'ConnectionManager.initialize',
+      batchSize: batchConfig.batchManager.batchSize,
+      flushInterval: batchConfig.batchManager.flushInterval,
+      instanceId,
+    });
+
     authState = await loadAuthState();
     await connect();
     logger.info('Conexão com o WhatsApp estabelecida com sucesso.', { label: 'ConnectionManager.initialize', instanceId });
@@ -288,7 +344,6 @@ function handleIrrecoverableDisconnect(statusCode) {
     },
   );
   resetReconnectionState();
-  const statusCode = lastDisconnect?.error?.output?.statusCode ?? 'unknown';
   emitEvent('connection:irrecoverable_disconnect', { statusCode, instanceId }, 'connection.update');
 }
 
@@ -395,6 +450,9 @@ async function handleMessagesUpsert(data) {
     instanceId,
   });
 
+  // Processa mensagens em lote
+  const validMessages = [];
+
   for (const msg of messages) {
     const messageContentType = msg.message ? getContentType(msg.message) : null;
     const { key: messageKey } = msg;
@@ -421,6 +479,15 @@ async function handleMessagesUpsert(data) {
         messageContentType,
         instanceId,
       };
+
+      // Adiciona ao BatchManager para processamento otimizado
+      if (batchManager) {
+        batchManager.addToBuffer('messages', enrichedMessage);
+      }
+
+      validMessages.push(enrichedMessage);
+
+      // Emite evento individual para processamento imediato se necessário
       emitEvent('message:upsert:received', enrichedMessage, 'messages.upsert');
     } else {
       logger.warn('Mensagem recebida sem chave completa. Ignorada para emissão.', {
@@ -429,10 +496,24 @@ async function handleMessagesUpsert(data) {
         instanceId,
       });
     }
-    logger.debug(`Conteúdo bruto da mensagem ${messageKey?.id}:`, {
+  }
+
+  // Emite evento em lote para otimizações
+  if (validMessages.length > 0) {
+    emitEvent(
+      'messages:batch:received',
+      {
+        messages: validMessages,
+        count: validMessages.length,
+        type,
+        instanceId,
+      },
+      'messages.upsert.batch',
+    );
+
+    logger.info(`Lote de ${validMessages.length} mensagens adicionado ao processamento`, {
       label: 'ConnectionManager.handleMessagesUpsert',
-      messageKey,
-      messageDetails: msg,
+      count: validMessages.length,
       instanceId,
     });
   }
@@ -517,13 +598,32 @@ async function handleGroupsUpsert(groupsMetadata) {
     count: groupsMetadata.length,
     instanceId,
   });
+
   const validGroupsToUpsert = groupsMetadata.filter(validateGroupMetadata);
 
   if (validGroupsToUpsert.length > 0) {
+    // Processamento em lote via BatchManager
+    if (batchManager) {
+      validGroupsToUpsert.forEach((metadata) => batchManager.addToBuffer('groups', metadata));
+    }
+
+    // Emite eventos individuais para compatibilidade
     validGroupsToUpsert.forEach((metadata) => {
       emitEvent('group:metadata:updated', { jid: metadata.id, metadata, instanceId, context: 'groups.upsert' }, 'groups.upsert');
     });
-    logger.info(` ${validGroupsToUpsert.length} metadados de grupo de 'groups.upsert' emitidos via evento.`, {
+
+    // Emite evento em lote
+    emitEvent(
+      'groups:batch:upserted',
+      {
+        groups: validGroupsToUpsert,
+        count: validGroupsToUpsert.length,
+        instanceId,
+      },
+      'groups.upsert.batch',
+    );
+
+    logger.info(` ${validGroupsToUpsert.length} grupos adicionados ao processamento em lote.`, {
       label: 'ConnectionManager.handleGroupsUpsert',
       metricName: 'group.event.emitted_batch',
       count: validGroupsToUpsert.length,
@@ -639,12 +739,32 @@ async function handleChatsUpsert(chats) {
     count: chats.length,
     instanceId,
   });
+
   const validChats = chats.filter((chat) => chat.id);
+
   if (validChats.length > 0) {
+    // Processamento em lote via BatchManager
+    if (batchManager) {
+      validChats.forEach((chat) => batchManager.addToBuffer('chats', chat));
+    }
+
+    // Emite eventos individuais para compatibilidade
     validChats.forEach((chat) => {
       emitEvent('chat:upserted', { ...chat, instanceId }, 'chats.upsert');
     });
-    logger.info(` ${validChats.length} chats de 'chats.upsert' emitidos via evento.`, {
+
+    // Emite evento em lote
+    emitEvent(
+      'chats:batch:upserted',
+      {
+        chats: validChats,
+        count: validChats.length,
+        instanceId,
+      },
+      'chats.upsert.batch',
+    );
+
+    logger.info(` ${validChats.length} chats adicionados ao processamento em lote.`, {
       label: 'ConnectionManager.handleChatsUpsert',
       count: validChats.length,
       instanceId,
