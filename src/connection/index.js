@@ -17,11 +17,6 @@ async function start() {
   try {
     logger.info('Iniciando aplicação Omnizap...', { label: 'Application.start' });
 
-    const mysqlDbManager = await getMySQLDBManagerInstance();
-    logger.info('MySQLDBManager inicializado.', { label: 'Application.start' });
-
-    // Initialize the connection using the exported function
-    // The mysqlDbManager is no longer passed to ConnectionManager
     await connectionManager.initialize();
 
     const messageEmitter = connectionManager.getEventEmitter();

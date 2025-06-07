@@ -5,7 +5,7 @@ const SYSTEM_NAME = process.env.SYSTEM_NAME || 'omnizap';
 module.exports = {
   apps: [
     {
-      name: `${SYSTEM_NAME}-default`,
+      name: SYSTEM_NAME,
       script: './src/connection/index.js',
 
       // Execution settings

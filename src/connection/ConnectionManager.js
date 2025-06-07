@@ -2,8 +2,8 @@ const { default: makeWASocket, Browsers, useMultiFileAuthState, DisconnectReason
 const pino = require('pino');
 const path = require('path');
 const qrcode = require('qrcode-terminal');
-const fsPromises = require('fs').promises; // Renomeado para fsPromises para clareza
-const { existsSync, writeFileSync } = require('fs'); // Importa as funções síncronas necessárias
+const fsPromises = require('fs').promises;
+const { existsSync, writeFileSync } = require('fs');
 const { cleanEnv, num, str } = require('envalid');
 const EventEmitter = require('events');
 
@@ -74,11 +74,11 @@ async function loadAuthState() {
   const logMeta = { label: 'ConnectionManager.loadAuthState', instanceId };
 
   try {
-    await fsPromises.access(authStatePath); // Usa fsPromises para operações assíncronas
+    await fsPromises.access(authStatePath);
   } catch {
     logger.info(`Diretório de autenticação não encontrado em "${authStatePath}". Criando...`, logMeta);
     try {
-      await fsPromises.mkdir(authStatePath, { recursive: true }); // Usa fsPromises para operações assíncronas
+      await fsPromises.mkdir(authStatePath, { recursive: true });
       logger.info(`Diretório "${authStatePath}" criado com sucesso.`, logMeta);
     } catch (mkdirError) {
       logger.error(`Erro ao criar o diretório "${authStatePath}": ${mkdirError.message}`, {
@@ -186,10 +186,7 @@ async function connect() {
 async function initialize() {
   logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager.initialize', instanceId });
   try {
-    // Carrega o estado de autenticação e o atribui à variável authState no escopo do módulo.
     authState = await loadAuthState();
-    // A função connect() verificará se authState foi carregado corretamente.
-    // Se loadAuthState() falhar e lançar um erro, ele será capturado pelo bloco catch abaixo.
     await connect();
     logger.info('Conexão com o WhatsApp estabelecida com sucesso.', { label: 'ConnectionManager.initialize', instanceId });
   } catch (error) {
@@ -200,7 +197,7 @@ async function initialize() {
 
 function authFlagExists() {
   try {
-    return existsSync(authFlagPath); // Usa a função existsSync importada diretamente
+    return existsSync(authFlagPath);
   } catch (error) {
     logger.error(`Erro ao verificar a existência do flag de autenticação em ${authFlagPath}: ${error.message}`, {
       label: 'ConnectionManager.authFlagExists',
@@ -212,7 +209,7 @@ function authFlagExists() {
 }
 
 function createAuthFlag() {
-  writeFileSync(authFlagPath, ''); // Usa a função writeFileSync importada diretamente
+  writeFileSync(authFlagPath, '');
 }
 
 function shouldReconnect(statusCode) {
@@ -291,6 +288,7 @@ function handleIrrecoverableDisconnect(statusCode) {
     },
   );
   resetReconnectionState();
+  const statusCode = lastDisconnect?.error?.output?.statusCode ?? 'unknown';
   emitEvent('connection:irrecoverable_disconnect', { statusCode, instanceId }, 'connection.update');
 }
 
@@ -313,7 +311,6 @@ async function handleConnectionUpdate(update) {
 
     const credsFilePath = path.join(authStatePath, 'creds.json');
     if (existsSync(credsFilePath)) {
-      // Usa a função existsSync importada diretamente
       if (!authFlagExists()) {
         try {
           createAuthFlag();
