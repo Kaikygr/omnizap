@@ -1,19 +1,23 @@
 require('dotenv').config();
 
+const SYSTEM_NAME = process.env.SYSTEM_NAME || 'omnizap';
+
 module.exports = {
   apps: [
     {
-      name: process.env.SYSTEM_NAME || 'omnizap-default',
+      name: `${SYSTEM_NAME}-default`,
       script: './src/connection/index.js',
 
-      // === modo fork (1 instância apenas) ===
+      // Execution settings
       exec_mode: 'fork',
       instances: 1,
+      exec_interpreter: 'node',
+      node_args: '--max-old-space-size=2048',
 
-      // == diretório de trabalho ==
+      // Working directory
       cwd: '/home/omnizap',
 
-      // == logs e arquivos de PID ==
+      // Logging configuration
       error_file: './logs/connection-error.log',
       out_file: './logs/connection-out.log',
       log_file: './logs/connection-combined.log',
@@ -21,36 +25,30 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
       pid_file: './pids/connection.pid',
 
-      // == memória / reinícios ==
-      max_memory_restart: '1G', // se usar >1GB, reinicia
+      // Memory and restart settings
+      max_memory_restart: '1G',
       autorestart: true,
       min_uptime: '60s',
       max_restarts: 5,
-      restart_delay: 5000, // espera 5s antes de reiniciar
+      restart_delay: 5000,
+      kill_timeout: 3000,
 
-      // == tempo para kill gracioso ==
-      kill_timeout: 3000, // 3s antes de forçar kill
-
-      // == passar flags para o Node ==
-      exec_interpreter: 'node',
-      node_args: '--max-old-space-size=2048',
-
-      // == ambientes ==
+      // Environment configurations
       env: {
         NODE_ENV: 'development',
-        INSTANCE_ID: `${process.env.SYSTEM_NAME || 'omnizap'}-dev`,
+        INSTANCE_ID: `${SYSTEM_NAME}-dev`,
       },
       env_test: {
         NODE_ENV: 'test',
-        INSTANCE_ID: `${process.env.SYSTEM_NAME || 'omnizap'}-test`,
+        INSTANCE_ID: `${SYSTEM_NAME}-test`,
       },
       env_staging: {
         NODE_ENV: 'staging',
-        INSTANCE_ID: `${process.env.SYSTEM_NAME || 'omnizap'}-staging`,
+        INSTANCE_ID: `${SYSTEM_NAME}-staging`,
       },
       env_production: {
         NODE_ENV: 'production',
-        INSTANCE_ID: `${process.env.SYSTEM_NAME || 'omnizap'}-prod`,
+        INSTANCE_ID: `${SYSTEM_NAME}-prod`,
       },
     },
   ],
