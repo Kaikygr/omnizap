@@ -4,4 +4,4 @@ src/connection/temp/
 logs/
 temp/
 omnizap_auth_successful.flag
-pids/connection-0.pid
+pids/
