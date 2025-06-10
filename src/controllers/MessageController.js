@@ -78,6 +78,7 @@ async function processBatchMessages(messages, baileysClient) {
         command: result.command,
         from: result.from,
         messageId: result.messageId,
+        originalMessage: message, // Adicionar a mensagem original aqui
       });
     }
   }
@@ -175,9 +176,13 @@ async function executeBatchCommands(commandQueue, baileysClient) {
     switch (item.command) {
       case 'ola':
         try {
-          await baileysClient.sendMessage(item.from, {
-            text: 'Olá',
-          });
+          await baileysClient.sendMessage(
+            item.from,
+            {
+              text: 'Olá',
+            },
+            { quoted: item.originalMessage },
+          ); // Modificado para usar a mensagem original
           logger.info(`[MessageController] Comando '${COMMAND_PREFIX}ola' respondido com "Olá" para ${item.from}`, {
             label: 'MessageController.executeBatchCommands.ola',
             messageId: item.messageId,
