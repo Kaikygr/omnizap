@@ -1,119 +1,246 @@
 const logger = require('../utils/logs/logger');
 
-/**
- * Extrai texto de um objeto de mensagem usando uma lista priorizada de caminhos.
- * @param {object | null | undefined} msgObj O objeto (ou parte do objeto) da mensagem para pesquisar.
- * @param {string[]} paths Um array de strings representando os caminhos para o texto (ex: 'conversation', 'extendedTextMessage.text').
- * @returns {string} O texto encontrado e trimado, ou uma string vazia se nada for encontrado.
- */
-function _extractTextFromMessageObject(msgObj, paths) {
+require('dotenv').config();
+
+const COMMAND_PREFIX = process.env.COMMAND_PREFIX || '/';
+
+const TEXT_EXTRACTION_PATHS = ['conversation', 'viewOnceMessageV2.message.imageMessage.caption', 'viewOnceMessageV2.message.videoMessage.caption', 'imageMessage.caption', 'videoMessage.caption', 'extendedTextMessage.text', 'viewOnceMessage.message.videoMessage.caption', 'viewOnceMessage.message.imageMessage.caption', 'documentWithCaptionMessage.message.documentMessage.caption', 'buttonsMessage.imageMessage.caption', 'buttonsResponseMessage.selectedButtonId', 'listResponseMessage.singleSelectReply.selectedRowId', 'templateButtonReplyMessage.selectedId', 'editedMessage.message.protocolMessage.editedMessage.extendedTextMessage.text', 'editedMessage.message.protocolMessage.editedMessage.imageMessage.caption', 'interactiveResponseMessage.nativeFlowResponseMessage.paramsJson', 'documentMessage.caption'];
+
+function _extractTextFromMessageObject(msgObj) {
   if (!msgObj || typeof msgObj !== 'object') {
     return '';
   }
-  for (const path of paths) {
+
+  for (const path of TEXT_EXTRACTION_PATHS) {
     const keys = path.split('.');
     let current = msgObj;
     let pathIsValid = true;
 
     for (const key of keys) {
-      if (current && typeof current === 'object' && Object.prototype.hasOwnProperty.call(current, key)) {
+      if (current && typeof current === 'object' && Object.prototype.hasOwnProperty.call(current, key) && current[key] !== null && current[key] !== undefined) {
         current = current[key];
       } else {
         pathIsValid = false;
         break;
       }
     }
-    if (pathIsValid && typeof current === 'string') {
-      const trimmedText = current.trim();
-      if (trimmedText !== '') {
-        return trimmedText;
+
+    if (pathIsValid) {
+      let textToReturn = '';
+      if (path === 'interactiveResponseMessage.nativeFlowResponseMessage.paramsJson') {
+        if (typeof current === 'string' && current.length > 0) {
+          try {
+            const parsedJson = JSON.parse(current);
+            if (parsedJson && typeof parsedJson.id === 'string') {
+              textToReturn = parsedJson.id;
+            } else if (parsedJson && typeof parsedJson.id === 'number') {
+              textToReturn = String(parsedJson.id);
+            }
+          } catch (e) {
+            logger.warn(`[MessageController._extractTextFromMessageObject] Erro ao parsear paramsJson: ${e.message}`, { label: 'MessageController._extractTextFromMessageObject', path, value: typeof current });
+          }
+        }
+      } else if (typeof current === 'string') {
+        textToReturn = current;
+      } else if (typeof current === 'number') {
+        textToReturn = String(current);
+      }
+
+      if (textToReturn.trim() !== '') {
+        return textToReturn.trim();
       }
     }
   }
   return '';
 }
 
+async function processBatchMessages(messages, baileysClient) {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return {
+      processed: false,
+      count: 0,
+      status: 'Nenhuma mensagem para processar',
+    };
+  }
+
+  logger.info(`[MessageController] Processando lote de ${messages.length} mensagens (prefixo: '${COMMAND_PREFIX}')`, {
+    label: 'MessageController.processBatchMessages.processBatchMessages',
+    count: messages.length,
+    prefix: COMMAND_PREFIX,
+  });
+
+  const commandQueue = [];
+
+  for (const message of messages) {
+    const result = await processMessageCore(message);
+    if (result.isCommand && !result.isFromMe && baileysClient) {
+      commandQueue.push({
+        command: result.command,
+        from: result.from,
+        messageId: result.messageId,
+        originalMessage: message, // Adicionar a mensagem original aqui
+      });
+    }
+  }
+
+  if (commandQueue.length > 0) {
+    await executeBatchCommands(commandQueue, baileysClient);
+  }
+
+  logger.info(`[MessageController] Lote de ${messages.length} mensagens processado com ${commandQueue.length} comandos 'ola'`, {
+    label: 'MessageController.processBatchMessages',
+    messagesProcessed: messages.length,
+    commandsExecuted: commandQueue.length,
+  });
+
+  return {
+    processed: true,
+    count: messages.length,
+    commandsExecuted: commandQueue.length,
+    status: 'Lote processado com sucesso',
+  };
+}
+
+/**
+ * Processa o núcleo de uma mensagem individual
+ * @param {object} message Mensagem a ser processada
+ * @returns {object} Resultado do processamento
+ */
+async function processMessageCore(message) {
+  const from = message.key?.remoteJid;
+  const messageId = message.key?.id;
+  const isFromMe = message.key?.fromMe || false;
+  const mainMessagePart = message.message;
+
+  let commandInputText = _extractTextFromMessageObject(mainMessagePart);
+
+  if (!commandInputText && typeof message.text === 'string' && message.text.trim() !== '') {
+    commandInputText = message.text.trim();
+    logger.debug('[MessageController.processMessageCore] Texto extraído de message.text (nível raiz)', { label: 'MessageController.processMessageCore' });
+  }
+
+  if (!commandInputText) {
+    const quotedMessagePart = mainMessagePart?.extendedTextMessage?.contextInfo?.quotedMessage;
+    if (quotedMessagePart) {
+      commandInputText = _extractTextFromMessageObject(quotedMessagePart);
+    }
+  }
+
+  const fullCommand = commandInputText.trim();
+  let command = '';
+  let isValidCommand = false;
+
+  if (fullCommand.startsWith(COMMAND_PREFIX)) {
+    const potentialCommand = fullCommand.substring(COMMAND_PREFIX.length).toLowerCase();
+    if (potentialCommand.length > 0) {
+      command = potentialCommand;
+      isValidCommand = !isFromMe;
+      logger.debug(`[MessageController] Comando potencial detectado: '${COMMAND_PREFIX}${command}'`, {
+        label: 'MessageController.processMessageCore',
+        fullCommand,
+        command,
+        prefix: COMMAND_PREFIX,
+        from,
+      });
+    } else {
+      logger.debug(`[MessageController] Prefixo detectado sem comando: '${fullCommand}'`, {
+        label: 'MessageController.processMessageCore',
+        fullCommand,
+        prefix: COMMAND_PREFIX,
+        from,
+      });
+    }
+  } else if (fullCommand) {
+    logger.debug(`[MessageController] Texto não é comando (sem prefixo '${COMMAND_PREFIX}'): '${fullCommand}'`, {
+      label: 'MessageController.processMessageCore',
+      fullCommand,
+      prefix: COMMAND_PREFIX,
+      from,
+    });
+  }
+
+  return {
+    messageId,
+    from,
+    isFromMe,
+    command,
+    fullCommand,
+    isCommand: isValidCommand,
+    hasPrefix: fullCommand.startsWith(COMMAND_PREFIX),
+    prefix: COMMAND_PREFIX,
+  };
+}
+
+async function executeBatchCommands(commandQueue, baileysClient) {
+  for (const item of commandQueue) {
+    switch (item.command) {
+      case 'ola':
+        try {
+          await baileysClient.sendMessage(
+            item.from,
+            {
+              text: 'Olá',
+            },
+            { quoted: item.originalMessage },
+          ); // Modificado para usar a mensagem original
+          logger.info(`[MessageController] Comando '${COMMAND_PREFIX}ola' respondido com "Olá" para ${item.from}`, {
+            label: 'MessageController.executeBatchCommands.ola',
+            messageId: item.messageId,
+            from: item.from,
+          });
+        } catch (error) {
+          logger.error(`[MessageController] Erro ao enviar resposta "Olá" para ${item.from}: ${error.message}`, {
+            label: 'MessageController.executeBatchCommands.ola',
+            messageId: item.messageId,
+            from: item.from,
+            error: error.stack,
+          });
+        }
+        break;
+
+      default:
+        logger.warn(`[MessageController] Comando desconhecido ou não manipulado na fila: '${item.command}' de ${item.from}`, {
+          label: 'MessageController.executeBatchCommands',
+          command: item.command,
+          from: item.from,
+          messageId: item.messageId,
+        });
+        break;
+    }
+  }
+}
+
 async function processIncomingMessage(message, baileysClient) {
-  logger.info(`[MessageController] Processando mensagem ID: ${message.key?.id} de ${message.key?.remoteJid}`, {
-    label: 'MessageController',
+  logger.info(`[MessageController] Processando mensagem individual ID: ${message.key?.id} de ${message.key?.remoteJid}`, {
+    label: 'MessageController.processIncomingMessage',
     messageId: message.key?.id,
     remoteJid: message.key?.remoteJid,
     instanceId: message.instanceId,
   });
 
-  const from = message.key?.remoteJid;
-  const messageId = message.key?.id;
-  const instanceId = message.instanceId;
-  const isFromMe = message.key?.fromMe || false;
+  const result = await processBatchMessages([message], baileysClient);
 
-  const mainMessagePart = message.message;
-
-  let commandInputText = '';
-
-  const textExtractionPaths = ['conversation', 'extendedTextMessage.text', 'imageMessage.caption', 'videoMessage.caption', 'documentMessage.caption'];
-
-  commandInputText = _extractTextFromMessageObject(mainMessagePart, textExtractionPaths);
-
-  if (!commandInputText) {
-    const quotedMessagePart = mainMessagePart?.extendedTextMessage?.contextInfo?.quotedMessage;
-    if (quotedMessagePart) {
-      commandInputText = _extractTextFromMessageObject(quotedMessagePart, textExtractionPaths);
-    }
-  }
-
-  let descriptiveMessageText = message.message?.conversation || message.message?.extendedTextMessage?.text || (message.message?.imageMessage?.caption ? `Imagem: ${message.message.imageMessage.caption}` : message.message?.imageMessage ? 'Imagem (sem legenda)' : message.message?.videoMessage?.caption ? `Vídeo: ${message.message.videoMessage.caption}` : message.message?.videoMessage ? 'Vídeo (sem legenda)' : message.message?.documentMessage?.caption ? `Documento: ${message.message.documentMessage.caption}` : message.message?.documentMessage?.fileName ? `Documento: ${message.message.documentMessage.fileName}` : message.message?.documentMessage ? 'Documento (sem legenda/nome)' : commandInputText ? `(Conteúdo para comando: "${commandInputText}")` : '(Conteúdo não textual ou não identificado)');
-
-  logger.debug(`[MessageController] Conteúdo da mensagem de ${from}: "${descriptiveMessageText}"`, {
-    label: 'MessageController',
-    messageId,
-    from,
-    content: descriptiveMessageText,
-    instanceId,
+  logger.info(`[MessageController] Mensagem ID: ${message.key?.id} processada via lote. Comandos 'ola' executados: ${result.commandsExecuted}`, {
+    label: 'MessageController.processIncomingMessage',
+    messageId: message.key?.id,
+    instanceId: message.instanceId,
+    batchResultStatus: result.status,
+    commandsExecuted: result.commandsExecuted,
   });
-
-  if (isFromMe) {
-    logger.debug(`[MessageController] Mensagem ID: ${messageId} é de mim mesmo, ignorando para respostas automáticas.`, { label: 'MessageController', messageId, instanceId });
-  } else {
-    const command = commandInputText.trim().toLowerCase();
-
-    switch (command) {
-      case 'ping':
-        if (baileysClient && from) {
-          try {
-            await baileysClient.sendMessage(from, { text: JSON.stringify(message, null, 2) });
-            logger.info(`[MessageController] 'pong' enviado com sucesso para ${from}.`, { label: 'MessageController', messageId, from, instanceId });
-          } catch (error) {
-            logger.error(`[MessageController] Erro ao enviar 'pong' para ${from}: ${error.message}`, { label: 'MessageController', messageId, from, instanceId, error: error.stack });
-          }
-        } else {
-          logger.warn(`[MessageController] Não foi possível enviar 'pong' para ${from}: cliente Baileys indisponível ou 'from' (remoteJid) ausente.`, { label: 'MessageController', messageId, from, instanceId, clientAvailable: !!baileysClient });
-        }
-        break;
-      default:
-        if (command) {
-          logger.debug(`[MessageController] Texto "${command}" de ${from} não corresponde a um comando conhecido.`, {
-            label: 'MessageController',
-            messageId,
-            from,
-            commandReceived: command,
-            sourceTextForCommand: commandInputText,
-            fullDescriptiveText: descriptiveMessageText,
-            instanceId,
-          });
-        }
-        break;
-    }
-  }
-
-  logger.info(`[MessageController] Mensagem ID: ${messageId} processada.`, { label: 'MessageController', messageId, instanceId });
 
   return {
     processed: true,
-    messageId,
+    messageId: message.key?.id,
     status: 'Mensagem processada com sucesso pelo controller.',
+    batchResult: {
+      count: result.count,
+      commandsExecuted: result.commandsExecuted,
+      status: result.status,
+    },
   };
 }
 
 module.exports = {
   processIncomingMessage,
+  processBatchMessages,
 };

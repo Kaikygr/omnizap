@@ -2,18 +2,21 @@ const { default: makeWASocket, Browsers, useMultiFileAuthState, DisconnectReason
 const pino = require('pino');
 const path = require('path');
 const qrcode = require('qrcode-terminal');
-const fsPromises = require('fs').promises; // Renomeado para fsPromises para clareza
-const { existsSync, writeFileSync } = require('fs'); // Importa as funções síncronas necessárias
+const fsPromises = require('fs').promises;
+const { existsSync, writeFileSync } = require('fs');
 const { cleanEnv, num, str } = require('envalid');
 const EventEmitter = require('events');
 
 const logger = require('../utils/logs/logger');
+const DataManager = require('../services/DataManager');
+const BatchManager = require('../services/BatchManager');
+const batchConfig = require('../config/batchConfig');
 require('dotenv').config();
 
 const env = cleanEnv(process.env, {
   BACKOFF_INITIAL_DELAY_MS: num({ default: 5000 }),
   BACKOFF_MAX_DELAY_MS: num({ default: 60000 }),
-  AUTH_STATE_PATH: str({ default: path.join(__dirname, 'temp', 'auth_state_minimal') }),
+  AUTH_STATE_PATH: str({ default: path.join(__dirname, 'temp', 'auth') }),
 });
 
 const STATUS = {
@@ -37,11 +40,14 @@ const initialBackoffDelayMs = env.BACKOFF_INITIAL_DELAY_MS;
 const maxBackoffDelayMs = env.BACKOFF_MAX_DELAY_MS;
 const authFlagPath = path.join(authStatePath, '.auth_success_flag');
 
+let dataManager = null;
+let batchManager = null;
+
 function emitEvent(eventName, data, context = '') {
   try {
     eventEmitter.emit(eventName, data);
     logger.info(`Evento '${eventName}' emitido com sucesso.`, {
-      label: 'EventEmitter',
+      label: 'EventEmitter.emit.success',
       metricName: 'event.emit.success',
       context,
       eventName,
@@ -51,7 +57,7 @@ function emitEvent(eventName, data, context = '') {
     });
   } catch (error) {
     logger.error(` Erro ao emitir o evento '${eventName}': ${error.message}.`, {
-      label: 'EventEmitter',
+      label: 'EventEmitter.emit.error',
       metricName: 'event.emit.error',
       error: error.message,
       stack: error.stack,
@@ -74,11 +80,11 @@ async function loadAuthState() {
   const logMeta = { label: 'ConnectionManager.loadAuthState', instanceId };
 
   try {
-    await fsPromises.access(authStatePath); // Usa fsPromises para operações assíncronas
+    await fsPromises.access(authStatePath);
   } catch {
     logger.info(`Diretório de autenticação não encontrado em "${authStatePath}". Criando...`, logMeta);
     try {
-      await fsPromises.mkdir(authStatePath, { recursive: true }); // Usa fsPromises para operações assíncronas
+      await fsPromises.mkdir(authStatePath, { recursive: true });
       logger.info(`Diretório "${authStatePath}" criado com sucesso.`, logMeta);
     } catch (mkdirError) {
       logger.error(`Erro ao criar o diretório "${authStatePath}": ${mkdirError.message}`, {
@@ -186,10 +192,54 @@ async function connect() {
 async function initialize() {
   logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager.initialize', instanceId });
   try {
-    // Carrega o estado de autenticação e o atribui à variável authState no escopo do módulo.
+    batchManager = new BatchManager({
+      instanceId,
+      batchSize: batchConfig.batchManager.batchSize,
+      flushInterval: batchConfig.batchManager.flushInterval,
+    });
+
+    dataManager = new DataManager({
+      instanceId,
+      batchSize: batchConfig.dataManager.batchSize,
+      flushInterval: batchConfig.dataManager.flushInterval,
+      cacheTTL: batchConfig.dataManager.cacheTTL,
+      cacheMaxSize: batchConfig.dataManager.cacheMaxSize,
+    });
+
+    batchManager.registerProcessor('messages', async (messages) => {
+      logger.info(`Processando lote de ${messages.length} mensagens via DataManager`, {
+        label: 'ConnectionManager.batchProcessor',
+        count: messages.length,
+        instanceId,
+      });
+
+      for (const message of messages) {
+        dataManager.addMessage(message);
+      }
+    });
+
+    batchManager.registerProcessor('chats', async (chats) => {
+      for (const chat of chats) {
+        dataManager.addChat(chat);
+      }
+    });
+
+    batchManager.registerProcessor('groups', async (groups) => {
+      for (const group of groups) {
+        dataManager.addGroup(group);
+      }
+    });
+
+    batchManager.start();
+
+    logger.info('DataManager e BatchManager inicializados com processamento em lote otimizado', {
+      label: 'ConnectionManager.initialize',
+      batchSize: batchConfig.batchManager.batchSize,
+      flushInterval: batchConfig.batchManager.flushInterval,
+      instanceId,
+    });
+
     authState = await loadAuthState();
-    // A função connect() verificará se authState foi carregado corretamente.
-    // Se loadAuthState() falhar e lançar um erro, ele será capturado pelo bloco catch abaixo.
     await connect();
     logger.info('Conexão com o WhatsApp estabelecida com sucesso.', { label: 'ConnectionManager.initialize', instanceId });
   } catch (error) {
@@ -200,7 +250,7 @@ async function initialize() {
 
 function authFlagExists() {
   try {
-    return existsSync(authFlagPath); // Usa a função existsSync importada diretamente
+    return existsSync(authFlagPath);
   } catch (error) {
     logger.error(`Erro ao verificar a existência do flag de autenticação em ${authFlagPath}: ${error.message}`, {
       label: 'ConnectionManager.authFlagExists',
@@ -212,7 +262,7 @@ function authFlagExists() {
 }
 
 function createAuthFlag() {
-  writeFileSync(authFlagPath, ''); // Usa a função writeFileSync importada diretamente
+  writeFileSync(authFlagPath, '');
 }
 
 function shouldReconnect(statusCode) {
@@ -313,7 +363,6 @@ async function handleConnectionUpdate(update) {
 
     const credsFilePath = path.join(authStatePath, 'creds.json');
     if (existsSync(credsFilePath)) {
-      // Usa a função existsSync importada diretamente
       if (!authFlagExists()) {
         try {
           createAuthFlag();
@@ -398,6 +447,8 @@ async function handleMessagesUpsert(data) {
     instanceId,
   });
 
+  const validMessages = [];
+
   for (const msg of messages) {
     const messageContentType = msg.message ? getContentType(msg.message) : null;
     const { key: messageKey } = msg;
@@ -424,6 +475,13 @@ async function handleMessagesUpsert(data) {
         messageContentType,
         instanceId,
       };
+
+      if (batchManager) {
+        batchManager.addToBuffer('messages', enrichedMessage);
+      }
+
+      validMessages.push(enrichedMessage);
+
       emitEvent('message:upsert:received', enrichedMessage, 'messages.upsert');
     } else {
       logger.warn('Mensagem recebida sem chave completa. Ignorada para emissão.', {
@@ -432,10 +490,23 @@ async function handleMessagesUpsert(data) {
         instanceId,
       });
     }
-    logger.debug(`Conteúdo bruto da mensagem ${messageKey?.id}:`, {
+  }
+
+  if (validMessages.length > 0) {
+    emitEvent(
+      'messages:batch:received',
+      {
+        messages: validMessages,
+        count: validMessages.length,
+        type,
+        instanceId,
+      },
+      'messages.upsert.batch',
+    );
+
+    logger.info(`Lote de ${validMessages.length} mensagens adicionado ao processamento`, {
       label: 'ConnectionManager.handleMessagesUpsert',
-      messageKey,
-      messageDetails: msg,
+      count: validMessages.length,
       instanceId,
     });
   }
@@ -520,13 +591,29 @@ async function handleGroupsUpsert(groupsMetadata) {
     count: groupsMetadata.length,
     instanceId,
   });
+
   const validGroupsToUpsert = groupsMetadata.filter(validateGroupMetadata);
 
   if (validGroupsToUpsert.length > 0) {
+    if (batchManager) {
+      validGroupsToUpsert.forEach((metadata) => batchManager.addToBuffer('groups', metadata));
+    }
+
     validGroupsToUpsert.forEach((metadata) => {
       emitEvent('group:metadata:updated', { jid: metadata.id, metadata, instanceId, context: 'groups.upsert' }, 'groups.upsert');
     });
-    logger.info(` ${validGroupsToUpsert.length} metadados de grupo de 'groups.upsert' emitidos via evento.`, {
+
+    emitEvent(
+      'groups:batch:upserted',
+      {
+        groups: validGroupsToUpsert,
+        count: validGroupsToUpsert.length,
+        instanceId,
+      },
+      'groups.upsert.batch',
+    );
+
+    logger.info(` ${validGroupsToUpsert.length} grupos adicionados ao processamento em lote.`, {
       label: 'ConnectionManager.handleGroupsUpsert',
       metricName: 'group.event.emitted_batch',
       count: validGroupsToUpsert.length,
@@ -642,12 +729,29 @@ async function handleChatsUpsert(chats) {
     count: chats.length,
     instanceId,
   });
+
   const validChats = chats.filter((chat) => chat.id);
+
   if (validChats.length > 0) {
+    if (batchManager) {
+      validChats.forEach((chat) => batchManager.addToBuffer('chats', chat));
+    }
+
     validChats.forEach((chat) => {
       emitEvent('chat:upserted', { ...chat, instanceId }, 'chats.upsert');
     });
-    logger.info(` ${validChats.length} chats de 'chats.upsert' emitidos via evento.`, {
+
+    emitEvent(
+      'chats:batch:upserted',
+      {
+        chats: validChats,
+        count: validChats.length,
+        instanceId,
+      },
+      'chats.upsert.batch',
+    );
+
+    logger.info(` ${validChats.length} chats adicionados ao processamento em lote.`, {
       label: 'ConnectionManager.handleChatsUpsert',
       count: validChats.length,
       instanceId,

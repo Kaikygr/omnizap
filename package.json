@@ -1,6 +1,6 @@
 {
   "name": "omnizap",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "OmniZap — Bot de WhatsApp open-source e educacional, desenvolvido em JavaScript para automações, gerenciamento de grupos, downloads de mídias e mais.",
   "main": "src",
   "private": true,
@@ -24,17 +24,18 @@
   "scripts": {
     "start": "bash start-omnizap.sh production",
     "dev": "bash start-omnizap.sh development",
-    "stop": "pm2 stop omnizap",
-    "restart": "pm2 restart omnizap",
-    "delete": "pm2 delete omnizap",
-    "logs": "pm2 logs omnizap"
+    "stop": "pm2 stop ${SYSTEM_NAME:-omnizap}",
+    "restart": "pm2 restart ${SYSTEM_NAME:-omnizap}",
+    "delete": "pm2 delete ${SYSTEM_NAME:-omnizap}",
+    "logs": "pm2 logs ${SYSTEM_NAME:-omnizap}",
+    "status": "pm2 status",
+    "monit": "pm2 monit"
   },
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "baileys": "^6.7.17",
     "dotenv": "^16.5.0",
     "envalid": "^8.0.0",
-    "mysql2": "^3.14.1",
     "path": "^0.12.7",
     "pino": "^9.7.0",
     "pm2": "^6.0.6",
