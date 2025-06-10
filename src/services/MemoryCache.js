@@ -6,8 +6,8 @@ const logger = require('../utils/logs/logger');
  */
 class MemoryCache {
   constructor(options = {}) {
-    this.defaultTTL = options.defaultTTL || 300000; // 5 minutos
-    this.maxSize = options.maxSize || 10000; // Máximo de 10k entries
+    this.defaultTTL = options.defaultTTL || 300000;
+    this.maxSize = options.maxSize || 10000;
     this.instanceId = options.instanceId || 'default';
 
     this.cache = new Map();
@@ -25,12 +25,10 @@ class MemoryCache {
    * Define um valor no cache
    */
   set(key, value, ttl = this.defaultTTL) {
-    // Remove entrada existente se houver
     if (this.cache.has(key)) {
       this.delete(key);
     }
 
-    // Verifica se precisa fazer eviction por tamanho
     if (this.cache.size >= this.maxSize) {
       this.evictOldest();
     }
@@ -45,7 +43,6 @@ class MemoryCache {
     this.cache.set(key, entry);
     this.stats.sets++;
 
-    // Agenda remoção automática
     if (ttl > 0) {
       const timer = setTimeout(() => {
         this.delete(key);
@@ -80,7 +77,6 @@ class MemoryCache {
       return null;
     }
 
-    // Verifica se expirou
     const now = Date.now();
     if (entry.ttl > 0 && now - entry.timestamp > entry.ttl) {
       this.delete(key);
@@ -110,7 +106,6 @@ class MemoryCache {
     const entry = this.cache.get(key);
     if (!entry) return false;
 
-    // Verifica se expirou
     const now = Date.now();
     if (entry.ttl > 0 && now - entry.timestamp > entry.ttl) {
       this.delete(key);
@@ -203,7 +198,6 @@ class MemoryCache {
     let value = this.get(key);
 
     if (value === null) {
-      // Cache miss, obtém o valor
       try {
         if (typeof valueFactory === 'function') {
           value = await valueFactory();
@@ -258,7 +252,6 @@ class MemoryCache {
    * Limpa todo o cache
    */
   clear() {
-    // Limpa todos os timers
     for (const timer of this.timers.values()) {
       clearTimeout(timer);
     }
@@ -276,7 +269,6 @@ class MemoryCache {
    * Agenda limpeza automática
    */
   startAutoCleanup(interval = 60000) {
-    // 1 minuto
     setInterval(() => {
       this.cleanup();
     }, interval);

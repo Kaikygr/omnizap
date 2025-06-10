@@ -7,7 +7,7 @@ const logger = require('../utils/logs/logger');
 class PerformanceMonitor {
   constructor(options = {}) {
     this.instanceId = options.instanceId || 'omnizap-instance';
-    this.reportInterval = options.reportInterval || 60000; // 1 minuto
+    this.reportInterval = options.reportInterval || 60000;
 
     this.metrics = {
       messagesProcessed: 0,
@@ -71,7 +71,6 @@ class PerformanceMonitor {
       this.reportTimer = null;
     }
 
-    // Gera relatório final
     this.generateReport(true);
 
     logger.info('Monitor de performance parado', {
@@ -87,14 +86,11 @@ class PerformanceMonitor {
     this.metrics.batchesProcessed++;
     this.metrics.messagesProcessed += batchSize;
 
-    // Atualiza tempo de processamento
     this.metrics.processingTime.min = Math.min(this.metrics.processingTime.min, processingTimeMs);
     this.metrics.processingTime.max = Math.max(this.metrics.processingTime.max, processingTimeMs);
     this.metrics.processingTime.total += processingTimeMs;
     this.metrics.processingTime.count++;
     this.metrics.processingTime.avg = this.metrics.processingTime.total / this.metrics.processingTime.count;
-
-    // Atualiza tamanho médio do lote
     this.metrics.averageBatchSize = this.metrics.messagesProcessed / this.metrics.batchesProcessed;
   }
 
@@ -111,10 +107,10 @@ class PerformanceMonitor {
   updateMemoryUsage() {
     const memUsage = process.memoryUsage();
     this.metrics.memoryUsage = {
-      heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024), // MB
-      heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024), // MB
-      rss: Math.round(memUsage.rss / 1024 / 1024), // MB
-      external: Math.round(memUsage.external / 1024 / 1024), // MB
+      heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024),
+      heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024),
+      rss: Math.round(memUsage.rss / 1024 / 1024),
+      external: Math.round(memUsage.external / 1024 / 1024),
     };
   }
 

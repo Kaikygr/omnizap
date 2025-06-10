@@ -10,22 +10,18 @@ const { getContentType } = require('baileys');
 class DataManager {
   constructor(options = {}) {
     this.instanceId = options.instanceId || 'omnizap-instance';
-
-    // Inicializa o processador em lote
     this.batchProcessor = new BatchProcessor({
       batchSize: options.batchSize || 50,
       flushInterval: options.flushInterval || 5000,
       instanceId: this.instanceId,
     });
 
-    // Inicializa o cache em memória
     this.cache = new MemoryCache({
-      defaultTTL: options.cacheTTL || 300000, // 5 minutos
+      defaultTTL: options.cacheTTL || 300000,
       maxSize: options.cacheMaxSize || 10000,
       instanceId: this.instanceId,
     });
 
-    // Estados dos dados em memória
     this.data = {
       messages: new Map(),
       chats: new Map(),
@@ -53,32 +49,26 @@ class DataManager {
    * Configura os processadores para cada tipo de dados
    */
   setupProcessors() {
-    // Processador de mensagens
     this.batchProcessor.registerProcessor('messages', async (messages) => {
       await this.processMessagesBatch(messages);
     });
 
-    // Processador de chats
     this.batchProcessor.registerProcessor('chats', async (chats) => {
       await this.processChatsBatch(chats);
     });
 
-    // Processador de grupos
     this.batchProcessor.registerProcessor('groups', async (groups) => {
       await this.processGroupsBatch(groups);
     });
 
-    // Processador de contatos
     this.batchProcessor.registerProcessor('contacts', async (contacts) => {
       await this.processContactsBatch(contacts);
     });
 
-    // Processador de recibos
     this.batchProcessor.registerProcessor('receipts', async (receipts) => {
       await this.processReceiptsBatch(receipts);
     });
 
-    // Processador de reações
     this.batchProcessor.registerProcessor('reactions', async (reactions) => {
       await this.processReactionsBatch(reactions);
     });
@@ -115,13 +105,10 @@ class DataManager {
           instanceId: this.instanceId,
         };
 
-        // Armazena em memória
         this.data.messages.set(messageKey, messageData);
 
-        // Cache para acesso rápido
-        this.cache.set(`msg:${messageKey}`, messageData, 600000); // 10 minutos
+        this.cache.set(`msg:${messageKey}`, messageData, 600000);
 
-        // Atualiza estatísticas do chat
         await this.updateChatFromMessage(msg);
 
         this.stats.messagesProcessed++;
@@ -169,7 +156,7 @@ class DataManager {
         };
 
         this.data.chats.set(chat.id, chatData);
-        this.cache.set(`chat:${chat.id}`, chatData, 300000); // 5 minutos
+        this.cache.set(`chat:${chat.id}`, chatData, 300000);
 
         this.stats.chatsProcessed++;
       } catch (error) {
@@ -211,9 +198,8 @@ class DataManager {
         };
 
         this.data.groups.set(group.id, groupData);
-        this.cache.set(`group:${group.id}`, groupData, 600000); // 10 minutos
+        this.cache.set(`group:${group.id}`, groupData, 600000);
 
-        // Também atualiza como chat
         await this.updateChatFromGroup(group);
 
         this.stats.groupsProcessed++;
@@ -251,7 +237,7 @@ class DataManager {
         };
 
         this.data.contacts.set(contact.id, contactData);
-        this.cache.set(`contact:${contact.id}`, contactData, 600000); // 10 minutos
+        this.cache.set(`contact:${contact.id}`, contactData, 600000);
 
         this.stats.contactsProcessed++;
       } catch (error) {
@@ -288,7 +274,7 @@ class DataManager {
         };
 
         this.data.receipts.set(receiptKey, receiptData);
-        this.cache.set(`receipt:${receiptKey}`, receiptData, 300000); // 5 minutos
+        this.cache.set(`receipt:${receiptKey}`, receiptData, 300000);
 
         this.stats.receiptsProcessed++;
       } catch (error) {
@@ -322,7 +308,7 @@ class DataManager {
         };
 
         this.data.reactions.set(reactionKey, reactionData);
-        this.cache.set(`reaction:${reactionKey}`, reactionData, 300000); // 5 minutos
+        this.cache.set(`reaction:${reactionKey}`, reactionData, 300000);
 
         this.stats.reactionsProcessed++;
       } catch (error) {
@@ -451,18 +437,15 @@ class DataManager {
    * Inicia tarefas periódicas
    */
   startPeriodicTasks() {
-    // Limpeza automática do cache
     this.cache.startAutoCleanup();
 
-    // Flush periódico dos buffers
     setInterval(() => {
       this.batchProcessor.flushAll();
-    }, 30000); // 30 segundos
+    }, 30000);
 
-    // Limpeza periódica de dados antigos
     setInterval(() => {
       this.cleanupOldData();
-    }, 300000); // 5 minutos
+    }, 300000);
 
     logger.info('Tarefas periódicas iniciadas', {
       label: 'DataManager.startPeriodicTasks',
@@ -475,11 +458,10 @@ class DataManager {
    */
   cleanupOldData() {
     const now = Date.now();
-    const maxAge = 24 * 60 * 60 * 1000; // 24 horas
+    const maxAge = 24 * 60 * 60 * 1000;
 
     let cleaned = 0;
 
-    // Limpa mensagens antigas
     for (const [key, message] of this.data.messages.entries()) {
       if (now - message.processedAt > maxAge) {
         this.data.messages.delete(key);
@@ -487,7 +469,6 @@ class DataManager {
       }
     }
 
-    // Limpa recibos antigos
     for (const [key, receipt] of this.data.receipts.entries()) {
       if (now - receipt.receivedAt > maxAge) {
         this.data.receipts.delete(key);
@@ -495,7 +476,6 @@ class DataManager {
       }
     }
 
-    // Limpa reações antigas
     for (const [key, reaction] of this.data.reactions.entries()) {
       if (now - reaction.receivedAt > maxAge) {
         this.data.reactions.delete(key);

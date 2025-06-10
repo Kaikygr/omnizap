@@ -7,10 +7,9 @@ const logger = require('../utils/logs/logger');
 class BatchProcessor {
   constructor(options = {}) {
     this.batchSize = options.batchSize || 50;
-    this.flushInterval = options.flushInterval || 5000; // 5 segundos
+    this.flushInterval = options.flushInterval || 5000;
     this.instanceId = options.instanceId || 'default';
 
-    // Buffers para diferentes tipos de dados
     this.buffers = {
       messages: [],
       receipts: [],
@@ -20,10 +19,8 @@ class BatchProcessor {
       reactions: [],
     };
 
-    // Timers para flush automático
     this.flushTimers = {};
 
-    // Callbacks para processamento
     this.processors = {};
 
     this.isProcessing = false;
@@ -62,7 +59,6 @@ class BatchProcessor {
       return;
     }
 
-    // Adiciona timestamp para tracking
     const enrichedItem = {
       ...item,
       _batchTimestamp: Date.now(),
@@ -78,11 +74,9 @@ class BatchProcessor {
       instanceId: this.instanceId,
     });
 
-    // Flush automático se o buffer atingir o tamanho máximo
     if (this.buffers[type].length >= this.batchSize) {
       this.flush(type);
     } else {
-      // Agenda flush automático se não existe
       this.scheduleFlush(type);
     }
   }
@@ -92,7 +86,7 @@ class BatchProcessor {
    */
   scheduleFlush(type) {
     if (this.flushTimers[type]) {
-      return; // Já agendado
+      return;
     }
 
     this.flushTimers[type] = setTimeout(() => {
@@ -108,14 +102,13 @@ class BatchProcessor {
       return;
     }
 
-    // Limpa o timer de flush
     if (this.flushTimers[type]) {
       clearTimeout(this.flushTimers[type]);
       delete this.flushTimers[type];
     }
 
     const itemsToProcess = [...this.buffers[type]];
-    this.buffers[type] = []; // Limpa o buffer
+    this.buffers[type] = [];
 
     logger.info(`Iniciando processamento em lote para ${type}. Items: ${itemsToProcess.length}`, {
       label: 'BatchProcessor.flush',
@@ -149,7 +142,6 @@ class BatchProcessor {
           instanceId: this.instanceId,
         });
 
-        // Rejeita os itens de volta para o buffer para retry
         this.buffers[type].unshift(...itemsToProcess);
       }
     } else {

@@ -9,9 +9,7 @@ class BatchManager {
   constructor(options = {}) {
     this.instanceId = options.instanceId || 'omnizap-instance';
     this.batchSize = options.batchSize || 50;
-    this.flushInterval = options.flushInterval || 5000; // 5 segundos
-
-    // Buffers para diferentes tipos de dados
+    this.flushInterval = options.flushInterval || 5000;
     this.buffers = {
       messages: [],
       chats: [],
@@ -21,16 +19,13 @@ class BatchManager {
       reactions: [],
     };
 
-    // Timers para flush automático
     this.flushTimers = {};
 
-    // Processors registrados
     this.processors = {};
 
-    // Monitor de performance
     this.performanceMonitor = new PerformanceMonitor({
       instanceId: this.instanceId,
-      reportInterval: 60000, // 1 minuto
+      reportInterval: 60000,
     });
 
     this.stats = {
@@ -71,14 +66,11 @@ class BatchManager {
 
     this.buffers[type].push(item);
 
-    // Atualiza estatísticas
     this.stats.bufferSizes[type] = this.buffers[type].length;
 
-    // Flush automático por tamanho
     if (this.buffers[type].length >= this.batchSize) {
       this.flushBuffer(type);
     } else {
-      // Agenda flush por tempo
       this.scheduleFlush(type);
     }
   }
@@ -88,7 +80,7 @@ class BatchManager {
    */
   scheduleFlush(type) {
     if (this.flushTimers[type]) {
-      return; // Timer já agendado
+      return;
     }
 
     this.flushTimers[type] = setTimeout(() => {
@@ -105,7 +97,7 @@ class BatchManager {
       delete this.flushTimers[type];
     }
 
-    const items = this.buffers[type].splice(0); // Remove todos os itens
+    const items = this.buffers[type].splice(0);
 
     if (items.length === 0) {
       return;
@@ -204,14 +196,11 @@ class BatchManager {
       instanceId: this.instanceId,
     });
 
-    // Cancela todos os timers
     Object.values(this.flushTimers).forEach((timer) => clearTimeout(timer));
     this.flushTimers = {};
 
-    // Faz flush final
     await this.flushAll();
 
-    // Para o monitor de performance
     this.performanceMonitor.stop();
 
     logger.info('BatchManager parado', {
