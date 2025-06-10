@@ -16,7 +16,7 @@ require('dotenv').config();
 const env = cleanEnv(process.env, {
   BACKOFF_INITIAL_DELAY_MS: num({ default: 5000 }),
   BACKOFF_MAX_DELAY_MS: num({ default: 60000 }),
-  AUTH_STATE_PATH: str({ default: path.join(__dirname, 'temp', 'auth_state_minimal') }),
+  AUTH_STATE_PATH: str({ default: path.join(__dirname, 'temp', 'auth') }),
 });
 
 const STATUS = {
@@ -47,7 +47,7 @@ function emitEvent(eventName, data, context = '') {
   try {
     eventEmitter.emit(eventName, data);
     logger.info(`Evento '${eventName}' emitido com sucesso.`, {
-      label: 'EventEmitter',
+      label: 'EventEmitter.emit.success',
       metricName: 'event.emit.success',
       context,
       eventName,
@@ -57,7 +57,7 @@ function emitEvent(eventName, data, context = '') {
     });
   } catch (error) {
     logger.error(` Erro ao emitir o evento '${eventName}': ${error.message}.`, {
-      label: 'EventEmitter',
+      label: 'EventEmitter.emit.error',
       metricName: 'event.emit.error',
       error: error.message,
       stack: error.stack,
@@ -192,14 +192,12 @@ async function connect() {
 async function initialize() {
   logger.info('Iniciando conexão com o WhatsApp...', { label: 'ConnectionManager.initialize', instanceId });
   try {
-    // Inicializa o gerenciador de lotes com configurações otimizadas
     batchManager = new BatchManager({
       instanceId,
       batchSize: batchConfig.batchManager.batchSize,
       flushInterval: batchConfig.batchManager.flushInterval,
     });
 
-    // Inicializa o gerenciador de dados com configurações otimizadas
     dataManager = new DataManager({
       instanceId,
       batchSize: batchConfig.dataManager.batchSize,
@@ -208,7 +206,6 @@ async function initialize() {
       cacheMaxSize: batchConfig.dataManager.cacheMaxSize,
     });
 
-    // Conecta BatchManager com DataManager
     batchManager.registerProcessor('messages', async (messages) => {
       logger.info(`Processando lote de ${messages.length} mensagens via DataManager`, {
         label: 'ConnectionManager.batchProcessor',
@@ -450,7 +447,6 @@ async function handleMessagesUpsert(data) {
     instanceId,
   });
 
-  // Processa mensagens em lote
   const validMessages = [];
 
   for (const msg of messages) {
@@ -480,14 +476,12 @@ async function handleMessagesUpsert(data) {
         instanceId,
       };
 
-      // Adiciona ao BatchManager para processamento otimizado
       if (batchManager) {
         batchManager.addToBuffer('messages', enrichedMessage);
       }
 
       validMessages.push(enrichedMessage);
 
-      // Emite evento individual para processamento imediato se necessário
       emitEvent('message:upsert:received', enrichedMessage, 'messages.upsert');
     } else {
       logger.warn('Mensagem recebida sem chave completa. Ignorada para emissão.', {
@@ -498,7 +492,6 @@ async function handleMessagesUpsert(data) {
     }
   }
 
-  // Emite evento em lote para otimizações
   if (validMessages.length > 0) {
     emitEvent(
       'messages:batch:received',
@@ -602,17 +595,14 @@ async function handleGroupsUpsert(groupsMetadata) {
   const validGroupsToUpsert = groupsMetadata.filter(validateGroupMetadata);
 
   if (validGroupsToUpsert.length > 0) {
-    // Processamento em lote via BatchManager
     if (batchManager) {
       validGroupsToUpsert.forEach((metadata) => batchManager.addToBuffer('groups', metadata));
     }
 
-    // Emite eventos individuais para compatibilidade
     validGroupsToUpsert.forEach((metadata) => {
       emitEvent('group:metadata:updated', { jid: metadata.id, metadata, instanceId, context: 'groups.upsert' }, 'groups.upsert');
     });
 
-    // Emite evento em lote
     emitEvent(
       'groups:batch:upserted',
       {
@@ -743,17 +733,14 @@ async function handleChatsUpsert(chats) {
   const validChats = chats.filter((chat) => chat.id);
 
   if (validChats.length > 0) {
-    // Processamento em lote via BatchManager
     if (batchManager) {
       validChats.forEach((chat) => batchManager.addToBuffer('chats', chat));
     }
 
-    // Emite eventos individuais para compatibilidade
     validChats.forEach((chat) => {
       emitEvent('chat:upserted', { ...chat, instanceId }, 'chats.upsert');
     });
 
-    // Emite evento em lote
     emitEvent(
       'chats:batch:upserted',
       {
