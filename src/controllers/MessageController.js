@@ -78,7 +78,7 @@ async function processBatchMessages(messages, baileysClient) {
         command: result.command,
         from: result.from,
         messageId: result.messageId,
-        originalMessage: message, // Adicionar a mensagem original aqui
+        originalMessage: message,
       });
     }
   }
@@ -174,23 +174,31 @@ async function processMessageCore(message) {
 async function executeBatchCommands(commandQueue, baileysClient) {
   for (const item of commandQueue) {
     switch (item.command) {
-      case 'ola':
+      case 'ping':
         try {
           await baileysClient.sendMessage(
             item.from,
             {
-              text: 'Olá',
+              text: JSON.stringify({
+                message: 'Pong!',
+                command: item.command,
+                from: item.from,
+                messageId: item.messageId,
+                originalMessage: item.originalMessage,
+                timestamp: new Date().toISOString(),
+                prefix: COMMAND_PREFIX,
+              }),
             },
             { quoted: item.originalMessage },
-          ); // Modificado para usar a mensagem original
-          logger.info(`[MessageController] Comando '${COMMAND_PREFIX}ola' respondido com "Olá" para ${item.from}`, {
-            label: 'MessageController.executeBatchCommands.ola',
+          );
+          logger.info(`[MessageController] Comando '${COMMAND_PREFIX}ping' respondido com "Pong!" para ${item.from}`, {
+            label: 'MessageController.executeBatchCommands.ping',
             messageId: item.messageId,
             from: item.from,
           });
         } catch (error) {
-          logger.error(`[MessageController] Erro ao enviar resposta "Olá" para ${item.from}: ${error.message}`, {
-            label: 'MessageController.executeBatchCommands.ola',
+          logger.error(`[MessageController] Erro ao enviar resposta "Pong!" para ${item.from}: ${error.message}`, {
+            label: 'MessageController.executeBatchCommands.ping',
             messageId: item.messageId,
             from: item.from,
             error: error.stack,
