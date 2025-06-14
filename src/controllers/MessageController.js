@@ -179,15 +179,19 @@ async function executeBatchCommands(commandQueue, baileysClient) {
           await baileysClient.sendMessage(
             item.from,
             {
-              text: JSON.stringify({
-                message: 'Pong!',
-                command: item.command,
-                from: item.from,
-                messageId: item.messageId,
-                originalMessage: item.originalMessage,
-                timestamp: new Date().toISOString(),
-                prefix: COMMAND_PREFIX,
-              }),
+              text: `${JSON.stringify(
+                {
+                  message: 'Pong!',
+                  command: item.command,
+                  from: item.from,
+                  messageId: item.messageId,
+                  originalMessage: item.originalMessage,
+                  timestamp: new Date().toISOString(),
+                  prefix: COMMAND_PREFIX,
+                },
+                null,
+                2,
+              )}`,
             },
             { quoted: item.originalMessage },
           );
