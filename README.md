@@ -11,15 +11,61 @@ OmniZap é um bot versátil para WhatsApp que atende tanto usuários pessoais qu
 ## ⚙️ Funcionalidades Principais
 
 - Sistema robusto de gerenciamento de conexão com reconexão automática
+- Processamento de dados em lote para alta performance
+- Cache em memória para acesso rápido a dados frequentes
 - Persistência completa de dados com suporte a operações em lote
 - Gerenciamento avançado de grupos e mensagens
 - Sistema de monitoramento e métricas detalhado
 - Arquitetura modular e expansível
 - Suporte a múltiplas instâncias via INSTANCE_ID
+- Gerenciamento automatizado de processos zumbis
+- Monitoramento de recursos do sistema (CPU, memória, disco)
+
+## 🏗️ Componentes Principais
+
+### ConnectionManager
+Gerencia toda a comunicação com a API do WhatsApp Web:
+- Conexão WebSocket robusta com reconexão automática
+- Autenticação via QR Code com monitoramento de estado
+- Tratamento centralizado de eventos do WhatsApp
+- Backoff exponencial para tentativas de reconexão
+- Emissão de eventos para outros componentes do sistema
+
+### BatchProcessor
+Motor de processamento em lote altamente otimizado:
+- Agrupamento de operações semelhantes para processamento eficiente
+- Flush automático baseado em tamanho ou intervalo de tempo
+- Priorização de tipos de dados para processamento
+- Estatísticas detalhadas de performance
+- Mecanismo de retry com delay exponencial
+
+### DataManager
+Gerenciamento de dados em memória com alta performance:
+- Cache em memória para acesso rápido a dados frequentes
+- Estruturas de dados otimizadas para diferentes entidades
+- Processamento em lote de atualizações
+- Minimiza necessidade de banco de dados para operações frequentes
+- Rastreamento de estatísticas de processamento
+
+### MessageController
+Processamento inteligente de mensagens e comandos:
+- Extração de texto de diferentes tipos de mensagem
+- Detecção de comandos via prefixo configurável
+- Processamento em lote para maior eficiência
+- Suporte a diferentes tipos de mensagem (texto, mídia, botões, etc.)
+- Gerenciamento de filas de comandos
+
+### PerformanceMonitor
+Monitoramento detalhado de performance do sistema:
+- Métricas de tempo de processamento
+- Contadores de operações por tipo
+- Taxas de sucesso/falha
+- Alertas para gargalos de performance
+- Relatórios periódicos de estatísticas
 
 ## 🏗️ Arquitetura
 
-O projeto é composto por dois componentes principais:
+O projeto é composto por vários componentes principais:
 
 ### ConnectionManager
 - Gerencia a conexão WebSocket com o WhatsApp
@@ -28,6 +74,27 @@ O projeto é composto por dois componentes principais:
 - Suporte a processamento em lote de mensagens e eventos
 - EventEmitter customizado para comunicação entre módulos
 - Gerenciamento automático de autenticação com QR Code
+
+### DataManager
+- Gerencia operações de dados com processamento otimizado em memória
+- Implementa cache eficiente para dados frequentemente acessados
+- Suporte a operações em lote para melhor performance
+- Mantém estado em memória minimizando necessidade de banco de dados
+- Gerencia entidades como mensagens, chats, grupos e contatos
+
+### BatchProcessor e BatchManager
+- Sistema centralizado de processamento em lote
+- Buffers otimizados para diferentes tipos de dados
+- Configurações personalizáveis por tipo de dado
+- Mecanismo de flush automático por intervalo ou tamanho do lote
+- Estatísticas detalhadas de performance
+
+### MessageController
+- Processa e gerencia mensagens recebidas
+- Filtra e identifica comandos com prefixo configurável
+- Processamento em lote para maior eficiência
+- Extrai texto de diferentes tipos de mensagem
+- Implementa handlers para diferentes comandos
 
 ### DatabaseManager
 - Gerencia todas as operações com o banco de dados
@@ -169,7 +236,9 @@ CREATE TABLE MessageReceipts (
 - Rastreamento de instâncias via INSTANCE_ID
 - Monitoramento de performance de operações em lote
 - Alertas para erros críticos e reconexões
-- Métricas de sucesso/falha para operações de banco de dados
+- Métricas de sucesso/falha para operações de processamento
+- Rotação e compressão automática de logs antigos
+- Verificação proativa de recursos do sistema
 
 ## 🚀 Começando
 
@@ -206,6 +275,21 @@ AUTH_STATE_PATH=./temp/auth_state_minimal   # Diretório para credenciais
 # === Configurações Opcionais ===
 NODE_ENV=production                    # Ambiente de execução
 LOG_LEVEL=info                        # Nível de log (debug, info, warn, error)
+
+# === Sistema de Processamento em Lote ===
+BATCH_SIZE=30                           # Tamanho do lote para processamento
+BATCH_FLUSH_INTERVAL=3000               # Intervalo de flush automático (ms)
+BATCH_MAX_RETRIES=3                     # Máximo de tentativas em caso de erro
+BATCH_RETRY_DELAY=1000                  # Delay entre tentativas (ms)
+
+# === Sistema de Cache ===
+CACHE_TTL=300000                        # Tempo de vida do cache (5 min)
+CACHE_MAX_SIZE=10000                    # Máximo de entradas no cache
+CACHE_CLEANUP_INTERVAL=60000            # Intervalo de limpeza (1 min)
+
+# === Sistema de Gerenciamento de Zumbis ===
+ZOMBIE_CLEANUP_RETRIES=3                # Tentativas de limpeza de processos zumbis
+ZOMBIE_CLEANUP_WAIT=2                   # Espera entre tentativas (segundos)
 ```
 
 #### Estrutura dos Ambientes PM2
@@ -260,9 +344,13 @@ npm start
 # O script automaticamente:
 # 1. Verifica dependências (Node.js e PM2)
 # 2. Carrega variáveis do arquivo .env
-# 3. Gera e exibe o QR Code para autenticação
-# 4. Aguarda até 300 segundos pela autenticação
-# 5. Inicia automaticamente com PM2 após autenticação bem-sucedida
+# 3. Limpa processos zumbis relacionados
+# 4. Verifica conectividade com internet
+# 5. Gerencia arquivos de log (rotação e compressão)
+# 6. Monitora recursos do sistema (CPU, memória, disco)
+# 7. Gera e exibe o QR Code para autenticação
+# 8. Aguarda até 300 segundos pela autenticação
+# 9. Inicia automaticamente com PM2 após autenticação bem-sucedida
 ```
 
 #### Ambientes de Execução
@@ -381,15 +469,66 @@ O OmniZap utiliza um processo robusto e automatizado de inicialização:
 - **Falhas de Sistema**: Restart automático via PM2
 - **Logging Completo**: Rastreamento detalhado para diagnóstico
 
+### Script de Inicialização
+
+O script `start-omnizap.sh` gerencia todo o processo de inicialização:
+
+```bash
+# Verificar e limpar processos zumbis relacionados ao OmniZap
+cleanup_zombie_processes() {
+    # ...identifica e limpa processos zumbis de execuções anteriores
+}
+
+# Função para verificar o uso de recursos e desempenho do sistema
+check_system_resources() {
+    # ...monitora CPU, memória e disco antes da inicialização
+}
+
+# Função para verificar conectividade com internet
+check_internet_connectivity() {
+    # ...testa conectividade com servidores essenciais
+}
+
+# Função para limpeza e rotação de logs antigos
+manage_log_files() {
+    # ...gerencia rotação e compressão de logs
+}
+```
+
+Este script fornece:
+- Verificação de dependências e ambiente
+- Limpeza de processos zumbis anteriores
+- Monitoramento de recursos do sistema
+- Verificação de conectividade com internet
+- Gerenciamento de arquivos de log
+- Processo de autenticação automatizado
+- Integração com PM2 para produção
+
+## 📊 Status do Projeto
+
+- ✅ **Conexão robusta** com WhatsApp Web API
+- ✅ **Processamento em lote** de alta performance
+- ✅ **Cache em memória** para dados frequentes
+- ✅ **Sistema de logs** estruturado com rotação
+- ✅ **Reconexão automática** com backoff exponencial
+- ✅ **Gerenciamento PM2** completo
+- ✅ **Suporte a múltiplas instâncias**
+- ✅ **Limpeza de processos zumbis**
+- ✅ **Monitoramento de recursos do sistema**
+- 🔄 **Comandos de bot** (em desenvolvimento)
+- 🔄 **Interface web** (planejado)
+- 🔄 **API REST** (planejado)
+
 ## 🛠️ Tecnologias
 
 - **JavaScript/Node.js** - Runtime e linguagem principal
 - **[Baileys](https://github.com/WhiskeySockets/Baileys)** - Framework WhatsApp Web API
-- **Banco de Dados** - Sistema de persistência relacional (MySQL, PostgreSQL, SQLite)
+- **Estruturas em Memória** - Armazenamento otimizado para dados frequentemente acessados
+- **BatchProcessor** - Sistema customizado de processamento em lote
 - **Winston** - Sistema de logs estruturado com rotação diária
 - **PM2** - Gerenciador de processos para produção
 - **Envalid** - Validação robusta de variáveis de ambiente
-- **Cliente DB** - Driver otimizado com pool de conexões
+- **MemoryCache** - Implementação de cache em memória com TTL
 - **Pino** - Logger de alta performance para debugging
 - **QRCode Terminal** - Geração de QR codes no terminal
 
@@ -424,6 +563,41 @@ module.exports = {
     env_development: { NODE_ENV: 'development' },
     env_production: { NODE_ENV: 'production' }
   }]
+};
+```
+
+### Sistema de Processamento em Lote
+
+O arquivo `batchConfig.js` oferece configurações detalhadas para o processamento em lote:
+
+```javascript
+const batchConfig = {
+  // Configurações do BatchManager principal
+  batchManager: {
+    batchSize: 30,               // Tamanho do lote para processamento
+    flushInterval: 3000,         // Intervalo em ms para flush automático
+    maxRetries: 3,               // Máximo de tentativas em caso de erro
+    retryDelay: 1000,            // Delay entre tentativas (ms)
+  },
+  
+  // Configurações do DataManager
+  dataManager: {
+    batchSize: 50,               // Tamanho do lote para operações de dados
+    flushInterval: 5000,         // Intervalo em ms para flush automático
+    cacheTTL: 300000,            // TTL do cache (5 minutos)
+    cacheMaxSize: 10000,         // Máximo de entradas no cache
+    cleanupInterval: 60000,      // Intervalo de limpeza do cache (1 minuto)
+  },
+  
+  // Tipos de dados para processamento
+  dataTypes: {
+    messages: {
+      priority: 1,               // Alta prioridade
+      batchSize: 30,
+      flushInterval: 2000,
+    },
+    // ...outros tipos de dados...
+  },
 };
 ```
 
@@ -484,79 +658,57 @@ npm start
 LOG_LEVEL=warn  # ou error para menos verbosidade
 ```
 
-### Diagnósticos
-
+#### 5. Processos Zumbis Persistentes
 ```bash
-# Verificar status completo
-pm2 monit
-
-# Logs em tempo real com filtro
-pm2 logs --lines 100 | grep ERROR
-
-# Verificar uso de memória
-pm2 describe omnizap
-
-# Restart com limpeza de logs
-pm2 flush && pm2 restart omnizap
+# Execute limpeza manual de processos zumbis
+ps axo pid,ppid,state,cmd | grep -i "node.*omni" | grep -E "Z|defunct"
+# Para cada PID de processo zumbi encontrado:
+kill -SIGCHLD <PID_DO_PROCESSO_PAI>
+# Em casos extremos:
+kill -9 <PID_DO_ZUMBI>
 ```
 
-## 📄 Licença
+#### 6. Problema de Desempenho
+```bash
+# Ajuste as configurações de batch no .env
+BATCH_SIZE=20  # Diminua para menor uso de memória
+CACHE_TTL=180000  # Reduza o tempo de vida do cache (3 min)
+CACHE_MAX_SIZE=5000  # Limite o tamanho máximo do cache
+```
 
-Este projeto está sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+### Comandos Úteis
+```bash
+# Verificar e limpar processos zumbis
+ps axo pid,ppid,state,cmd | grep -i "node.*omni" | grep -E "Z|defunct"
 
-## 🤝 Contribuindo
+# Verificar uso de recursos
+top -b -n 1 | head -20
 
-Contribuições são bem-vindas! Para contribuir:
+# Verificar espaço em disco
+df -h
 
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
+# Verificar tamanho dos logs
+du -sh ./logs
 
-### Diretrizes de Contribuição
+# Compactar logs antigos manualmente
+find ./logs -type f -name "*.log" -mtime +7 -exec gzip {} \;
 
-- Siga os padrões de código existentes
-- Adicione testes para novas funcionalidades
-- Mantenha a documentação atualizada
-- Use commits semânticos
+# Limpar logs mais antigos que 30 dias
+find ./logs -type f -name "*.log*" -mtime +30 -delete
+
+# Monitorar performance do sistema em tempo real
+pm2 monit
+
+# Analisar logs de erro rapidamente
+grep -n "ERROR" ./logs/connection-error.log | tail -50
+```
 
 ## 🔐 Segurança
 
 - **Credenciais**: Nunca commite arquivos `.env` ou credenciais
 - **Auth State**: O diretório de autenticação deve ser ignorado no git
 - **Logs**: Logs podem conter informações sensíveis - configure rotação adequada
-- **Database**: Use usuários com privilégios mínimos necessários
-
-## 📊 Status do Projeto
-
-- ✅ **Conexão robusta** com WhatsApp Web API
-- ✅ **Persistência completa** em banco de dados
-- ✅ **Sistema de logs** estruturado
-- ✅ **Reconexão automática** com backoff exponencial
-- ✅ **Gerenciamento PM2** completo
-- ✅ **Suporte a múltiplas instâncias**
-- 🔄 **Comandos de bot** (em desenvolvimento)
-- 🔄 **Interface web** (planejado)
-- 🔄 **API REST** (planejado)
-
-## 💰 Apoie o Projeto
-
-Se você gostou do projeto e quer apoiar seu desenvolvimento: [Apoiar](https://bit.ly/m/Kaally)
-
----
-
-🚀 **OmniZap** — Sistema robusto e escalável para automação do WhatsApp
-
-⚠️ **Aviso Legal**: Este é um projeto educacional e open-source. Use com responsabilidade e respeite os termos de serviço do WhatsApp. Não se destina a fins comerciais, spam ou atividades maliciosas.
-
-## 📞 Suporte
-
-- 🐛 **Issues**: [GitHub Issues](https://github.com/Kaikygr/OmniZap/issues)
-- 📧 **Contato**: Através do perfil no GitHub
-- 💬 **Discussões**: [GitHub Discussions](https://github.com/Kaikygr/OmniZap/discussions)
-
----
-
-Feito com ❤️ por [Kaikygr](https://github.com/Kaikygr)
+- **Processos Zumbis**: Limpeza automática de processos zumbis para evitar exposição de memória
+- **Validação de Dados**: Sanitização robusta para prevenir injeção
+- **Monitoramento de Recursos**: Alertas para condições de alto uso de recursos
 

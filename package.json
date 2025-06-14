@@ -1,6 +1,6 @@
 {
   "name": "omnizap",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "OmniZap — Bot de WhatsApp open-source e educacional, desenvolvido em JavaScript para automações, gerenciamento de grupos, downloads de mídias e mais.",
   "main": "src",
   "private": true,
