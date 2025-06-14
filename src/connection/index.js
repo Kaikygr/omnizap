@@ -2,11 +2,10 @@ const connectionManager = require('./ConnectionManager');
 const logger = require('./../utils/logs/logger');
 const messageController = require('../controllers/MessageController');
 
-// Buffer para acumular mensagens para processamento em lote
 let batchBuffer = [];
 let batchTimer = null;
 const BATCH_SIZE = 10;
-const BATCH_TIMEOUT = 2000; // 2 segundos
+const BATCH_TIMEOUT = 2000;
 
 async function start() {
   try {
@@ -17,7 +16,6 @@ async function start() {
     const messageEmitter = connectionManager.getEventEmitter();
     const waClient = connectionManager.getClient();
 
-    // Processamento individual para compatibilidade
     messageEmitter.on('message:upsert:received', (message) => {
       logger.info(`[Application] Nova mensagem (ID: ${message.key?.id}) encaminhada para MessageController.`, {
         label: 'Application.messageEmitter',
@@ -44,7 +42,6 @@ async function start() {
         });
     });
 
-    // Processamento em lote otimizado
     messageEmitter.on('messages:batch:received', async (batchData) => {
       logger.info(`[Application] Lote de ${batchData.count} mensagens recebido para processamento`, {
         label: 'Application.batchProcessor',
@@ -71,7 +68,6 @@ async function start() {
       }
     });
 
-    // Outros eventos em lote
     messageEmitter.on('chats:batch:upserted', (batchData) => {
       logger.info(`[Application] Lote de ${batchData.count} chats processados`, {
         label: 'Application.chatsBatch',
