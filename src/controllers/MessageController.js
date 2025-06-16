@@ -5,6 +5,22 @@ require('dotenv').config();
 
 const COMMAND_PREFIX = process.env.COMMAND_PREFIX || '/';
 
+const processedMessageIds = new Set();
+const MAX_PROCESSED_IDS = 1000;
+
+function cleanupProcessedIds() {
+  if (processedMessageIds.size > MAX_PROCESSED_IDS) {
+    const idsArray = Array.from(processedMessageIds);
+    const toRemove = idsArray.slice(0, Math.floor(MAX_PROCESSED_IDS * 0.3));
+    toRemove.forEach((id) => processedMessageIds.delete(id));
+    logger.debug(`[MessageController] Limpeza de cache: ${toRemove.length} IDs de mensagens removidos`, {
+      label: 'MessageController.cleanupProcessedIds',
+      beforeCount: idsArray.length,
+      afterCount: processedMessageIds.size,
+    });
+  }
+}
+
 async function processBatchMessages(messages, baileysClient) {
   if (!Array.isArray(messages) || messages.length === 0) {
     return {
@@ -20,9 +36,36 @@ async function processBatchMessages(messages, baileysClient) {
     prefix: COMMAND_PREFIX,
   });
 
+  const uniqueMessages = messages.filter((message) => {
+    const messageId = message.key?.id;
+    if (!messageId) return true;
+
+    if (processedMessageIds.has(messageId)) {
+      logger.debug(`[MessageController] Ignorando mensagem duplicada ID: ${messageId}`, {
+        label: 'MessageController.processBatchMessages.filterDuplicates',
+        messageId,
+      });
+      return false;
+    }
+
+    processedMessageIds.add(messageId);
+    return true;
+  });
+
+  cleanupProcessedIds();
+
+  if (uniqueMessages.length === 0) {
+    return {
+      processed: true,
+      count: 0,
+      status: 'Todas as mensagens já foram processadas anteriormente',
+      duplicatesSkipped: messages.length,
+    };
+  }
+
   const commandQueue = [];
 
-  for (const message of messages) {
+  for (const message of uniqueMessages) {
     const result = await processMessageCore(message);
     if (result.isCommand && !result.isFromMe && baileysClient) {
       commandQueue.push({
@@ -38,16 +81,18 @@ async function processBatchMessages(messages, baileysClient) {
     await executeBatchCommands(commandQueue, baileysClient);
   }
 
-  logger.info(`[MessageController] Lote de ${messages.length} mensagens processado com ${commandQueue.length} comandos 'ola'`, {
+  logger.info(`[MessageController] Lote de ${uniqueMessages.length} mensagens processado com ${commandQueue.length} comandos`, {
     label: 'MessageController.processBatchMessages',
-    messagesProcessed: messages.length,
+    messagesProcessed: uniqueMessages.length,
     commandsExecuted: commandQueue.length,
+    duplicatesSkipped: messages.length - uniqueMessages.length,
   });
 
   return {
     processed: true,
-    count: messages.length,
+    count: uniqueMessages.length,
     commandsExecuted: commandQueue.length,
+    duplicatesSkipped: messages.length - uniqueMessages.length,
     status: 'Lote processado com sucesso',
   };
 }
@@ -134,7 +179,7 @@ async function executeBatchCommands(commandQueue, baileysClient) {
             },
             { quoted: item.originalMessage },
           );
-          logger.info(`[MessageController] Comando '${COMMAND_PREFIX}ping' respondido com "Pong!" para ${item.from}`, {
+          logger.info(`[MessageController] Comando '${COMMAND_PREFIX}ping' respondido para ${item.from}`, {
             label: 'MessageController.executeBatchCommands.ping',
             messageId: item.messageId,
             from: item.from,
@@ -162,18 +207,36 @@ async function executeBatchCommands(commandQueue, baileysClient) {
 }
 
 async function processIncomingMessage(message, baileysClient) {
-  logger.info(`[MessageController] Processando mensagem individual ID: ${message.key?.id} de ${message.key?.remoteJid}`, {
+  const messageId = message.key?.id;
+
+  // Verifica se a mensagem já foi processada
+  if (messageId && processedMessageIds.has(messageId)) {
+    logger.debug(`[MessageController] Ignorando mensagem duplicada ID: ${messageId} em processamento individual`, {
+      label: 'MessageController.processIncomingMessage.duplicate',
+      messageId,
+      remoteJid: message.key?.remoteJid,
+    });
+
+    return {
+      processed: false,
+      messageId,
+      status: 'Mensagem já processada anteriormente (duplicada)',
+      isDuplicate: true,
+    };
+  }
+
+  logger.info(`[MessageController] Processando mensagem individual ID: ${messageId} de ${message.key?.remoteJid}`, {
     label: 'MessageController.processIncomingMessage',
-    messageId: message.key?.id,
+    messageId,
     remoteJid: message.key?.remoteJid,
     instanceId: message.instanceId,
   });
 
   const result = await processBatchMessages([message], baileysClient);
 
-  logger.info(`[MessageController] Mensagem ID: ${message.key?.id} processada via lote. Comandos 'ola' executados: ${result.commandsExecuted}`, {
+  logger.info(`[MessageController] Mensagem ID: ${messageId} processada via lote. Comandos executados: ${result.commandsExecuted}`, {
     label: 'MessageController.processIncomingMessage',
-    messageId: message.key?.id,
+    messageId,
     instanceId: message.instanceId,
     batchResultStatus: result.status,
     commandsExecuted: result.commandsExecuted,
@@ -181,7 +244,7 @@ async function processIncomingMessage(message, baileysClient) {
 
   return {
     processed: true,
-    messageId: message.key?.id,
+    messageId,
     status: 'Mensagem processada com sucesso pelo controller.',
     batchResult: {
       count: result.count,
@@ -194,4 +257,9 @@ async function processIncomingMessage(message, baileysClient) {
 module.exports = {
   processIncomingMessage,
   processBatchMessages,
+  clearProcessedMessagesCache: () => {
+    const count = processedMessageIds.size;
+    processedMessageIds.clear();
+    return { clearedCount: count };
+  },
 };
