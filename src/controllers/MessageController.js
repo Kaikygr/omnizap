@@ -209,7 +209,6 @@ async function executeBatchCommands(commandQueue, baileysClient) {
 async function processIncomingMessage(message, baileysClient) {
   const messageId = message.key?.id;
 
-  // Verifica se a mensagem já foi processada
   if (messageId && processedMessageIds.has(messageId)) {
     logger.debug(`[MessageController] Ignorando mensagem duplicada ID: ${messageId} em processamento individual`, {
       label: 'MessageController.processIncomingMessage.duplicate',
