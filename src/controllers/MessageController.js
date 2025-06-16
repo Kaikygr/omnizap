@@ -1,58 +1,9 @@
 const logger = require('../utils/logs/logger');
+const { extractTextFromMessageObject } = require('../services/MessageExtractor');
 
 require('dotenv').config();
 
 const COMMAND_PREFIX = process.env.COMMAND_PREFIX || '/';
-
-const TEXT_EXTRACTION_PATHS = ['conversation', 'viewOnceMessageV2.message.imageMessage.caption', 'viewOnceMessageV2.message.videoMessage.caption', 'imageMessage.caption', 'videoMessage.caption', 'extendedTextMessage.text', 'viewOnceMessage.message.videoMessage.caption', 'viewOnceMessage.message.imageMessage.caption', 'documentWithCaptionMessage.message.documentMessage.caption', 'buttonsMessage.imageMessage.caption', 'buttonsResponseMessage.selectedButtonId', 'listResponseMessage.singleSelectReply.selectedRowId', 'templateButtonReplyMessage.selectedId', 'editedMessage.message.protocolMessage.editedMessage.extendedTextMessage.text', 'editedMessage.message.protocolMessage.editedMessage.imageMessage.caption', 'interactiveResponseMessage.nativeFlowResponseMessage.paramsJson', 'documentMessage.caption'];
-
-function _extractTextFromMessageObject(msgObj) {
-  if (!msgObj || typeof msgObj !== 'object') {
-    return '';
-  }
-
-  for (const path of TEXT_EXTRACTION_PATHS) {
-    const keys = path.split('.');
-    let current = msgObj;
-    let pathIsValid = true;
-
-    for (const key of keys) {
-      if (current && typeof current === 'object' && Object.prototype.hasOwnProperty.call(current, key) && current[key] !== null && current[key] !== undefined) {
-        current = current[key];
-      } else {
-        pathIsValid = false;
-        break;
-      }
-    }
-
-    if (pathIsValid) {
-      let textToReturn = '';
-      if (path === 'interactiveResponseMessage.nativeFlowResponseMessage.paramsJson') {
-        if (typeof current === 'string' && current.length > 0) {
-          try {
-            const parsedJson = JSON.parse(current);
-            if (parsedJson && typeof parsedJson.id === 'string') {
-              textToReturn = parsedJson.id;
-            } else if (parsedJson && typeof parsedJson.id === 'number') {
-              textToReturn = String(parsedJson.id);
-            }
-          } catch (e) {
-            logger.warn(`[MessageController._extractTextFromMessageObject] Erro ao parsear paramsJson: ${e.message}`, { label: 'MessageController._extractTextFromMessageObject', path, value: typeof current });
-          }
-        }
-      } else if (typeof current === 'string') {
-        textToReturn = current;
-      } else if (typeof current === 'number') {
-        textToReturn = String(current);
-      }
-
-      if (textToReturn.trim() !== '') {
-        return textToReturn.trim();
-      }
-    }
-  }
-  return '';
-}
 
 async function processBatchMessages(messages, baileysClient) {
   if (!Array.isArray(messages) || messages.length === 0) {
@@ -112,7 +63,7 @@ async function processMessageCore(message) {
   const isFromMe = message.key?.fromMe || false;
   const mainMessagePart = message.message;
 
-  let commandInputText = _extractTextFromMessageObject(mainMessagePart);
+  let commandInputText = extractTextFromMessageObject(mainMessagePart);
 
   if (!commandInputText && typeof message.text === 'string' && message.text.trim() !== '') {
     commandInputText = message.text.trim();
@@ -122,7 +73,7 @@ async function processMessageCore(message) {
   if (!commandInputText) {
     const quotedMessagePart = mainMessagePart?.extendedTextMessage?.contextInfo?.quotedMessage;
     if (quotedMessagePart) {
-      commandInputText = _extractTextFromMessageObject(quotedMessagePart);
+      commandInputText = extractTextFromMessageObject(quotedMessagePart);
     }
   }
 
@@ -179,19 +130,7 @@ async function executeBatchCommands(commandQueue, baileysClient) {
           await baileysClient.sendMessage(
             item.from,
             {
-              text: `${JSON.stringify(
-                {
-                  message: 'Pong!',
-                  command: item.command,
-                  from: item.from,
-                  messageId: item.messageId,
-                  originalMessage: item.originalMessage,
-                  timestamp: new Date().toISOString(),
-                  prefix: COMMAND_PREFIX,
-                },
-                null,
-                2,
-              )}`,
+              text: 'a',
             },
             { quoted: item.originalMessage },
           );
