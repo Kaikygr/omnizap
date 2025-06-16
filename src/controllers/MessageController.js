@@ -1,5 +1,5 @@
 const logger = require('../utils/logs/logger');
-const { extractTextFromMessageObject } = require('../services/MessageExtractor');
+const { getTextSimple } = require('../services/MessageExtractor');
 
 require('dotenv').config();
 
@@ -63,7 +63,7 @@ async function processMessageCore(message) {
   const isFromMe = message.key?.fromMe || false;
   const mainMessagePart = message.message;
 
-  let commandInputText = extractTextFromMessageObject(mainMessagePart);
+  let commandInputText = getTextSimple(mainMessagePart);
 
   if (!commandInputText && typeof message.text === 'string' && message.text.trim() !== '') {
     commandInputText = message.text.trim();
@@ -73,7 +73,7 @@ async function processMessageCore(message) {
   if (!commandInputText) {
     const quotedMessagePart = mainMessagePart?.extendedTextMessage?.contextInfo?.quotedMessage;
     if (quotedMessagePart) {
-      commandInputText = extractTextFromMessageObject(quotedMessagePart);
+      commandInputText = getTextSimple(quotedMessagePart);
     }
   }
 
@@ -130,7 +130,7 @@ async function executeBatchCommands(commandQueue, baileysClient) {
           await baileysClient.sendMessage(
             item.from,
             {
-              text: 'a',
+              text: JSON.stringify({ status: item }, null, 2),
             },
             { quoted: item.originalMessage },
           );
