@@ -5,4 +5,4 @@ logs/
 temp/
 omnizap_auth_successful.flag
 pids/
-
+saved_media/
